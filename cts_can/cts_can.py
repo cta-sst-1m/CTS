@@ -1,9 +1,9 @@
 import time
-import copy
+
 import Protocol as p
 
-
 alladd = [((0b1101 << 7) | x + 1) for x in range(1, 108)]
+
 
 class DictDiffer(object):
     """
@@ -29,11 +29,11 @@ class DictDiffer(object):
 
     def changed(self):
         return set(o for o in self.intersect if self.past_dict[
-                   o] != self.current_dict[o])
+            o] != self.current_dict[o])
 
     def unchanged(self):
         return set(o for o in self.intersect if self.past_dict[
-                   o] == self.current_dict[o])
+            o] == self.current_dict[o])
 
 
 def w2rAdd(w):
@@ -101,7 +101,7 @@ def canID(
         canid |= (0b1 << 7)
 
     if verbose:
-        print( bin(canid), hex(canid))
+        print(bin(canid), hex(canid))
 
     return canid
 
@@ -169,7 +169,7 @@ def command(
     for sendID in sendIDs:
         # if msgID==0x02: print 'In command...', sendIDs,msgID,canmsg
         s = None
-        if 1==0 : #isinstance(bus, 'CANBus'):
+        if 1 == 0:  # isinstance(bus, 'CANBus'):
             if len(canmsg) == 0:
                 s = bus.send(0, sendID, msgID, verbose=4 if verbose else 0)
             elif len(canmsg) == 1:
@@ -207,7 +207,7 @@ def command(
                     canmsg[3],
                     verbose=4 if verbose else 0)
             else:
-                print ('Too much commands!!!!!!')
+                print('Too much commands!!!!!!')
                 raise Exception('Too much commands')
         else:
             if len(canmsg) == 0:
@@ -218,15 +218,15 @@ def command(
                     1, sendID, msgID, canmsg[0], verbose=4 if verbose else 0)
             elif len(canmsg) == 2:
                 s = bus.query_request(1, sendID, msgID, canmsg[0], canmsg[
-                                      1], verbose=4 if verbose else 0)
+                    1], verbose=4 if verbose else 0)
             elif len(canmsg) == 3:
                 s = bus.query_request(1, sendID, msgID, canmsg[0], canmsg[
-                                      1], canmsg[2], verbose=4 if verbose else 0)
+                    1], canmsg[2], verbose=4 if verbose else 0)
             elif len(canmsg) == 4:
                 s = bus.query_request(1, sendID, msgID, canmsg[0], canmsg[1], canmsg[
-                                      2], canmsg[3], verbose=4 if verbose else 0)
+                    2], canmsg[3], verbose=4 if verbose else 0)
             else:
-                print ('Too much commands!!!!!!')
+                print('Too much commands!!!!!!')
                 raise Exception('Too much commands')
         if s != 0:
             raise Exception('Could not send', sendID, msgID, msg)
@@ -234,7 +234,7 @@ def command(
         # print '================= Answer expected'
         for recieveID in recieveIDs:
             resp = None
-            if 1==0:#isinstance(bus, 'CANBus'):
+            if 1 == 0:  # isinstance(bus, 'CANBus'):
                 resp = bus.receive(
                     0,
                     recieveID,
@@ -246,7 +246,7 @@ def command(
                     1, recieveID, verbose=4 if verbose else 0)
             r.append(resp)
             if verbose:
-                print (r[-1])
+                print(r[-1])
     return r
 
 
@@ -256,7 +256,7 @@ def setAddress(bus, origAdd, modnum):
     time.sleep(1)
     r = bus.bus.receive(0, alladd, verbose=False, only_data=True)
     if len(r.keys()) == 0:
-        print ('Failed to change the address')
+        print('Failed to change the address')
         r = bus.bus.receive(0, [w2rAdd(origAdd)],
                             verbose=False, only_data=True)
         if len(r.keys()) == 0:
@@ -269,7 +269,7 @@ def setBoardAddresses(bus, boardnum):
     time.sleep(1.)
     theadd = bus.bus.receive(0, alladd, only_data=True)
     theadd = sorted(theadd.keys())
-    print ('Original adresses:', theadd)
+    print('Original adresses:', theadd)
     # Then set new addresses
     for add in theadd:
         setAddress(bus, r2wAdd(add), boardnum * 4 + 1)
@@ -278,11 +278,11 @@ def setBoardAddresses(bus, boardnum):
     time.sleep(2)
     theadd = bus.bus.receive(0, alladd, only_data=True)
     theadd = theadd.keys()
-    print ('New adresses:', theadd)
-    print ('Module:',)
+    print('New adresses:', theadd)
+    print('Module:', )
     for a in theadd:
-        print (toMod(a),)
-    print ('')
+        print(toMod(a), )
+    print('')
 
 
 def updateStatus(bus, statusdict):
@@ -294,7 +294,7 @@ def updateStatus(bus, statusdict):
 
 def checkModules(bus):
     # Send a broadcast to get the version and see who is responding
-    print ('Get the modules list...')
+    print('Get the modules list...')
     res = command(
         bus,
         range(
@@ -313,7 +313,7 @@ def checkModules(bus):
 
 
 def checkLEDStatus(bus, module=None, verbose=False):
-    print ('Get AC and DC Status...')
+    print('Get AC and DC Status...')
     res = None
     if not module:
         res = command(
@@ -355,15 +355,16 @@ def checkLEDStatus(bus, module=None, verbose=False):
             else:
                 resdict['M_' + str(toMod(k)) + '_ACLED_Status'].append('OFF')
     if verbose:
-        print ('=================== LED STATUS =======================')
+        print('=================== LED STATUS =======================')
         for k in res.keys():
-            print ('| Module: ', toMod(k), 'DCDC convertor', resdict['M_' + str(toMod(k)) + '_DCDC_Status'], '| AC LED (0-23)', resdict['M_' + str(toMod(k)) + '_ACLED_Status'])
-        print ('')
+            print('| Module: ', toMod(k), 'DCDC convertor', resdict['M_' + str(toMod(k)) + '_DCDC_Status'],
+                  '| AC LED (0-23)', resdict['M_' + str(toMod(k)) + '_ACLED_Status'])
+        print('')
     return resdict
 
 
 def checkLEDLevel(bus, module=None, verbose=False):
-    print ('Get the AC led level...')
+    print('Get the AC led level...')
     res = None
     if not module:
         res = command(
@@ -388,7 +389,7 @@ def checkLEDLevel(bus, module=None, verbose=False):
                 goodcode = True
         if not goodcode:
             raise Exception('Answer code not aligned with request...')
-    print ('Get AC and DC levels')
+    print('Get AC and DC levels')
     modules = sorted(res.keys())
     resdict = {}
     # Get the information per modules
@@ -406,12 +407,12 @@ def checkLEDLevel(bus, module=None, verbose=False):
         for i, ch in enumerate(channels):
             resdict['M_' + str(toMod(k)) + '_ACLED_Ch_' + str(i)] = ch
     if verbose:
-        print ('=================== LED STATUS =======================')
+        print('=================== LED STATUS =======================')
         for k in res.keys():
-            print ('|-----> Module:', str(toMod(k)),)
+            print('|-----> Module:', str(toMod(k)), )
             for ch in range(8):
-                print ('| Ch:', ch, '-', resdict['M_' + str(toMod(k)) + '_ACLED_Ch_' + str(ch)],)
-            print ('')
+                print('| Ch:', ch, '-', resdict['M_' + str(toMod(k)) + '_ACLED_Ch_' + str(ch)], )
+            print('')
     return resdict
 
 
@@ -433,7 +434,7 @@ def setDACLevel(
               a channel will set the level to this channel (note that for DC only channel 0x0 is available)
     '''
     if verbose:
-        print ('Set the DAC led level...')
+        print('Set the DAC led level...')
     res = None
     tmp_cmd = 0x8
     # print level
@@ -450,28 +451,28 @@ def setDACLevel(
         if tmp_cmd == 8:
             # First broadcast on channel 0 such that the module for DC gets set
             res = command(bus, range(1, 45), 'SetDACLevel', [
-                          0x0, level_MSB, level_LSB], broadcast=True, verbose=verbose)
-            #res = command( bus, range(1,45) , 'SetDACLevel', [0x0,level], broadcast=True, verbose= verbose)
+                0x0, level_MSB, level_LSB], broadcast=True, verbose=verbose)
+            # res = command( bus, range(1,45) , 'SetDACLevel', [0x0,level], broadcast=True, verbose= verbose)
             # Then broadcast on channel 8 such that all the module for AC gets
             # set
             res = command(
                 bus, range(
                     1, 45), 'SetDACLevel', [
                     tmp_cmd, level_MSB, level_LSB], broadcast=True, verbose=verbose)
-            #res = command( bus, range(1,45) , 'SetDACLevel', [tmp_cmd,level], broadcast=True, verbose= verbose)
+            # res = command( bus, range(1,45) , 'SetDACLevel', [tmp_cmd,level], broadcast=True, verbose= verbose)
         else:
             res = command(
                 bus, range(
                     1, 45), 'SetDACLevel', [
                     tmp_cmd, level_MSB, level_LSB], broadcast=True, verbose=verbose)
-            #res = command( bus, range(1,45) , 'SetDACLevel', [tmp_cmd,level], broadcast=True, verbose= verbose)
+            # res = command( bus, range(1,45) , 'SetDACLevel', [tmp_cmd,level], broadcast=True, verbose= verbose)
     else:
         # print 'module',module,'channel',tmp_cmd,'level',(level_MSB << 8) |
         # level_LSB,level_MSB,level_LSB
         res = command(
             bus, [module], 'SetDACLevel', [
                 tmp_cmd, level_MSB, level_LSB], verbose=verbose, waitanswer=waitanswer)
-        #res = command( bus, [module] , 'SetDACLevel', [tmp_cmd,level], verbose= verbose)
+        # res = command( bus, [module] , 'SetDACLevel', [tmp_cmd,level], verbose= verbose)
         # print "resout: ",res
     if module and waitanswer:
         if res[0][mod2r(module)][0][0] != 2:
@@ -490,8 +491,8 @@ def setLED(
         verbose=False,
         waitanswer=True):
     if verbose:
-        print ('Set the LED ON/OFF...')
-        print ('Set the LED ON/OFF...')
+        print('Set the LED ON/OFF...')
+        print('Set the LED ON/OFF...')
     res = None
     led_LSB = led & 0xFF
     led_MSB = (led & 0xFF00) >> 8
@@ -580,4 +581,3 @@ def initialise_can(cts):
         broadcastAnswer=True,
         verbose=False)
     return
-

@@ -13,7 +13,6 @@ try:
 except ImportError:
     import code
 
-
     def embed():
         vars = globals()
         vars.update(locals())
@@ -25,11 +24,11 @@ class CTSServer:
     '''
     CTSClient class is the OpcUa client for the CTS OpcUa server.
 
-    It also contains various high level function allowing to turn on and off leds,
-    run scans, display the CTS status, load MC events in the CTS, etc...
+    It also contains various high level function allowing to turn on and off
+    leds, run scans, display the CTS status, load MC events in the CTS, etc...
 
     Input:
-          - angle_cts : the configuration of the CTS (0., 120. or 240. degrees )
+        - angle_cts : the configuration of the CTS (0., 120. or 240. degrees )
 
     '''
 
@@ -38,7 +37,8 @@ class CTSServer:
         Initialise function for CTSClient
 
         Input:
-               - angle_cts : the configuration of the CTS (0., 120. or 240. degrees )
+            - angle_cts : the configuration of the CTS
+            (0., 120. or 240. degrees)
 
         '''
 
@@ -376,4 +376,3 @@ if __name__ == "__main__":
         embed()
     finally:
         ctsserver.server.stop()
-

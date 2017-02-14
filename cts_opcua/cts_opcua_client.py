@@ -27,6 +27,7 @@ class CTSClient():
         self.client = Client("opc.tcp://0.0.0.0:4843/cameratestsetup/server/", timeout=10000)
         self.client_on()
 
+
     def __del__(self):
         self.client_off()
         print('---|> Done')

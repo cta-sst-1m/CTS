@@ -43,7 +43,12 @@ where angle can be 0,120,240
 
 ## Client
 
+
 Then in another console run the client, it can actually run on any python version (prefer 3)
+
+'''
+source activate ctapipe
+'''
 
 '''
 python CTSControl.py angle

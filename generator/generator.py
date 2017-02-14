@@ -1,6 +1,4 @@
-import visa,time
-
-
+import visa, time
 
 try:
     from IPython import embed
@@ -15,65 +13,90 @@ except ImportError:
         shell.interact()
 
 
-
 class Generator:
-    def __init__(self,url = "129.194.55.68", rm = visa.ResourceManager('@py')):
-        self.rm = rm
-        self.inst = self.rm.open_resource("TCPIP::"+url+"::9221::SOCKET")
+    def __init__(self,url = "129.194.52.244"):
+        self.url = url
+        try :
+            self.rm = visa.ResourceManager('@py')
+        except Exception as inst:
+            raise inst
+        try :
+            self.inst = self.rm.open_resource("TCPIP::" + self.url + "::9221::SOCKET")
+        except Exception as inst:
+            raise inst
         return
 
-    def __del__(self):
-        self.inst.write('LOCAL')
-        self.inst.close()
+    def apply_config(self, conf_type = 'burst'):
+        '''
+        configure , method to configure the pulse generator. If n_pulse > 1048575 turn to continuous mode
+        :return:
+        '''
+        print('conftype',conf_type)
+        self.conf_type = conf_type
 
-    def start_trigger(self):
-        if self.conf_type == 'continuous': self.inst.write('OUTPUT ON')
-        elif self.conf_type == 'burst': self.inst.write('*TRG')
-        return
-
-    def stop_trigger(self):
-        if self.conf_type == 'continuous' or self.conf_type== 'burst': self.inst.write('OUTPUT OFF')
-        return
-
-    def configure_trigger(self,n_trigger):
-        self.inst.write('BSTCOUNT '+str(n_trigger))
-        return
-
-    def load_configuration(self,conf_type):
-        if conf_type=='continuous':
-            self.inst.write('WAVE SQUARE')
-            self.inst.write('FREQ 1')
-            self.inst.write('AMPL 0.8')
-            self.inst.write('DCOFFS -0.4')
-            self.inst.write('ZLOAD 50')
-
-        elif conf_type=='burst':
+        if  self.conf_type == 'continuous' :
+            print('configure')
             self.inst.write('WAVE PULSE')
             self.inst.write('OUTPUT INVERT')
             self.inst.write('ZLOAD 50')
             self.inst.write('AMPL 0.8')
             self.inst.write('DCOFFS -0.4')
-            self.inst.write('PULSSYMM 50')
+            self.inst.write('PULSWID 0.00000002')
             self.inst.write('PULSFREQ 1000')
             self.inst.write('PULSEDGE 0.000000005')
-            self.inst.write('BST NCYC')
-            self.inst.write('BSTCOUNT 10')
-            self.inst.write('BSTTRGSRC MAN')
             self.inst.write('OUTPUT ON')
+            self.inst.write('BST INFINITE')
+            self.inst.write('BSTTRGSRC MAN')
+            print('end configure')
 
-            #self.inst.write('TRGOUT BURST')
-        self.conf_type = conf_type
+        elif self.conf_type == 'burst' :
+            self.inst.write('WAVE PULSE')
+            self.inst.write('OUTPUT INVERT')
+            self.inst.write('ZLOAD 50')
+            self.inst.write('AMPL 0.8')
+            self.inst.write('DCOFFS -0.4')
+            self.inst.write('PULSWID 0.00000002')
+            self.inst.write('PULSFREQ 1000')
+            self.inst.write('PULSEDGE 0.000000005')
+            self.inst.write('OUTPUT ON')
+            self.inst.write('BST NCYC')
+            self.inst.write('BSTCOUNT 1')
+            self.inst.write('BSTTRGSRC MAN')
 
         return
 
+    def configure_trigger(self, freq = 1000 , n_pulse = 10 ):
+        if self.conf_type == 'continuous':
+            self.inst.write('PULSFREQ '+str(freq))
+        elif self.conf_type == 'burst':
+            self.inst.write('BSTCOUNT '+str(n_pulse))
+            self.inst.write('PULSFREQ '+str(freq))
+        return
+
+    def start_trigger_sequence(self):
+        '''
+
+        :return:
+        '''
+        self.inst.write('*TRG')
+        return
 
 
+    def stop_trigger_sequence(self):
+        if self.conf_type == 'continuous': self.inst.write('*TRG')
+        return
 
-if __name__ == "__main__":
-    generator =  Generator()
-    try:
-        generator.load_configuration(conf_type='burst')
-        embed()
-    finally:
-        generator.inst.write('LOCAL')
-        generator.inst.close()
+    def reset_generator(self):
+        self.inst.write('*RST')
+        return
+
+
+    def close_generator(self):
+        '''
+
+        :return:
+        '''
+        self.inst.write('LOCAL')
+        self.inst.close()
+        self.rm.close()
+        return

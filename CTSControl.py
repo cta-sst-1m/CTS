@@ -49,7 +49,9 @@ def man():
 
 
 if __name__ == "__main__":
+    ion()
     ctsmaster = cts_master.CTSMaster(float(sys.argv[1]))
+
     print('---|> The client is starting, reset of the board can take a little time')
     ctsmaster.reset()
     cts = ctsmaster.cts
@@ -61,4 +63,7 @@ if __name__ == "__main__":
     finally:
         print('---|> The client will be reset and turned off, wait...')
         ctsmaster.reset()
+        ctsmaster.cts_client.client_off()
+        ctsmaster.generator.inst.write('LOCAL')
+        ctsmaster.generator.inst.close()
         print('---|> Done')
