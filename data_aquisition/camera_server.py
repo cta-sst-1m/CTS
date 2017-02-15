@@ -9,7 +9,9 @@ class CameraServer:
 
     def __init__(self):
         self.cam_server = None
-        self.
+        self.logger = logger.initialise_logger( logname=sys.modules['__main__'].__name__+'', verbose = options_yaml['steering']['verbose'],
+                              logfile = '%s/%s_cameraserver.log'%(options_yaml['steering']['output_directory'],
+                                                     options_yaml['steering']['name']))
         return
 
     def configuration(self,config):

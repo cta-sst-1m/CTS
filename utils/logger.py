@@ -4,7 +4,7 @@ import io
 
 __all__ = ['initialise_logger']
 
-def initialise_logger(options):
+def initialise_logger(logname = sys.modules['__main__'].__name__, verbose = False ,logfile = '/dev/null'):
     """
     Setting up the main logger
 
@@ -12,13 +12,13 @@ def initialise_logger(options):
     :return:
     """
     # define base logger
-    logger = logging.getLogger(sys.modules['__main__'].__name__)
+    logger = logging.getLogger(logname)
     logger.setLevel(logging.INFO if options.verbose else logging.DEBUG)
     # define file handler and stream handler
-    fh = logging.FileHandler('%s/%s.log' % (options['steering']['output_directory'],options['steering']['name']))
-    fh.setLevel(logging.INFO if options.verbose else logging.DEBUG)
+    fh = logging.FileHandler(logfile)
+    fh.setLevel(logging.INFO if verbose else logging.DEBUG)
     ch = logging.StreamHandler()
-    ch.setLevel(level= logging.INFO if options.verbose else logging.DEBUG)
+    ch.setLevel(level= logging.INFO if verbose else logging.DEBUG)
     # define format
     formatter_fh = logging.Formatter('%(asctime)s | %(levelname)s | %(name)s : \t %(message)s')
     formatter_ch = logging.Formatter('%(levelname)s:%(name)s: %(message)s')

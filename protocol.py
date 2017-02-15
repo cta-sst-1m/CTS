@@ -87,13 +87,9 @@ if __name__ == '__main__':
     print('\t\t-|> Will store files in: %s' % options_yaml['steering']['output_directory'])
 
     # Start the loggers
-    logger.initialise_logger( options, )
-    # load the analysis module
-    analysis_module = __import__('analysis.%s'%options.analysis_module,
-                                 locals=None,
-                                 globals=None,
-                                 fromlist=[None],
-                                 level=0)
+    logger.initialise_logger( logname=sys.modules['__main__'].__name__, verbose = options_yaml['steering']['verbose'],
+                              logfile = '%s/%s.log'%(options_yaml['steering']['output_directory'],
+                                                     options_yaml['steering']['name']))
 
     # Some logging
     log = logging.getLogger(sys.modules['__main__'].__name__)
@@ -103,9 +99,6 @@ if __name__ == '__main__':
         for key_sub,val_sub in val.items():
             log.info('\t\t |----|> %s : \t %s'%(key_sub,val_sub))
     log.info('-|')
-    
-    
-
 
     # Start the master FSM
     masterfsm = MasterFsm(logger_name=sys.modules['__main__'].__name__)
