@@ -1,5 +1,6 @@
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE,STDOUT
 import time
+from utils import logger
 
 class ZFitsWriter:
     '''
@@ -40,7 +41,7 @@ class ZFitsWriter:
 
     '''
 
-    def __init__(self):
+    def __init__(self,log_location):
         self.writer = None
         self.output_dir = None
         self.input = 'tcp://localhost:13581'
@@ -49,7 +50,9 @@ class ZFitsWriter:
         self.num_comp_threads = 5
         self.comp_scheme = 'zrice'
         self.suffix = ''
-        return
+        self.log = logger.initialise_logger(logname='ZFitsWriter',
+                                               logfile='%s/%s.log' % (log_location,'zfitswriter'),
+                                               stream = False)
 
     def configuration(self, config):
         """
@@ -61,6 +64,9 @@ class ZFitsWriter:
             if hasattr(self,key):
                 setattr(self,key,val)
 
+    def log_subprocess_output(self,pipe):
+        for line in iter(pipe.readline, b''):  # b'\n'-separated lines
+            self.log.info('%r', line)
 
     def start_writing(self):
         list_param = []
@@ -69,9 +75,25 @@ class ZFitsWriter:
             elif k == 'loop' and self.loop: list_param +=['--%s'%k]
             else :
                 list_param +=['--%s'%k,getattr(self,k)]
-        list_param+=['--output_dir',self.output_dir]
-        self.writer = Popen('/home/sst1m-user/SST1M/digicam-raw/Build.Release/bin/ZFitsWriter --output_dir /data/datasets/ --input tcp://localhost:13581 --loop',
-                            env=dict(os.environ, my_env_prop='value'))
+        list_param = ['/home/sst1m-user/SST1M/digicam-raw/Build.Release/bin/ZFitsWriter']+list_param
+        str_param = ''
+        for p in list_param:
+            str_param += p + ' '
+
+        self.log.info('Running %s'%str_param)
+        5./0.
+
+        self.writer = Popen(list_param,
+                            stdout = PIPE,
+                            stderr =STDOUT)
+                            #env=dict(os.environ, my_env_prop='value'))
+
+        process_output, _ = self.writer.communicate()
+
+        # process_output is now a string, not a file,
+        # you may want to do:
+        # process_output = StringIO(process_output)
+        self.log_subprocess_output(process_output)
         return
 
     def stop_writing(self):

@@ -1,0 +1,12 @@
+---
+# Steering
+type                  : steering
+name                  : test_writer
+verbose               : True
+---
+# Writer configruation
+type                  : writer_configuration
+compression           : zrice
+number_of_thread      : 5
+number_of_events_per_file : 100
+input                 : tcp://localhost:13581

@@ -3,12 +3,68 @@
 # external modules
 from optparse import OptionParser
 from  yaml import load,dump,load_all
-import matplotlib.pyplot as plt
 import logging,sys
 from cts_fsm.master_fsm import MasterFsm
 import time,os
+import fysom
 #internal modules
 from utils import logger
+
+def load_configuration(options):
+    """
+    Merge the interactive options with the yaml options to configure the data taking
+    :param options:
+    :return:
+    """
+
+    # Load the YAML configuration
+    options_yaml = {}
+    with open(options.yaml_config) as f:
+        for data in load_all(f):
+            options_yaml[data['type']]={}
+            for k,v in data.items():
+                if k == 'type': continue
+                options_yaml[data['type']][k]=v
+
+    # Update with interactive options
+    for key,val in options.__dict__.items():
+        if not (key in options_yaml['steering'].keys()):
+            options_yaml['steering'][key]=val
+        else:
+            options_yaml['steering'][key] = val
+
+    return options_yaml
+
+def create_directory(options):
+    """
+    Create the output directory containing the logs and output file from the writer
+    :param options:
+    :return:
+    """
+
+    # Check if the directory name was specified, otherwise replace by the steering name
+    if not options['steering']['output_directory']:
+        print('\t\t-|> No output_directory option was specified, will use the steering name: %s'
+                         % options['steering']['name'])
+        options['steering']['output_directory'] = options['steering']['name']
+
+    _tmp_dir = time.strftime(options['steering']['output_directory_basis'] + '/%Y%m%d', time.gmtime())
+
+    # If no directory exists for today, then create it
+    if not os.path.isdir(_tmp_dir):
+        os.mkdir(_tmp_dir)
+
+    options['steering']['output_directory'] = _tmp_dir + '/' + options['steering']['output_directory']
+    # Create the new directory. If it exist, increment
+    if not os.path.isdir(options['steering']['output_directory']):
+        os.mkdir(options['steering']['output_directory'])
+    else:
+        list_dir = os.listdir(os.path.dirname(options['steering']['output_directory']))
+        n_dir = 0
+        for d in list_dir:
+            if d.count(os.path.basename(options['steering']['output_directory'])) > 0.5: n_dir += 1
+        options['steering']['output_directory'] += '_%d' % n_dir
+        os.mkdir(options['steering']['output_directory'])
 
 
 if __name__ == '__main__':
@@ -21,9 +77,9 @@ if __name__ == '__main__':
     # Job configuration (the only mandatory option)
     parser.add_option("-y", "--yaml_config", dest="yaml_config",
                       help="full path of the yaml configuration function",
-                      default='/data/software/CTS/options/hv_off.yaml')
+                      default='/data/software/CTS/config/test_writer.yaml')
 
-    # Other options allows to overwrite the yaml_config interactively
+    # Other options allows to overwrite the steering part of the yaml_config interactively
 
     # Output level
     parser.add_option("-v", "--verbose",
@@ -32,86 +88,65 @@ if __name__ == '__main__':
 
     # Steering of the passes
     parser.add_option("-o", "--output_directory", dest="output_directory",
-                      help="Where to store the data from this run", default=None)
+                      help="Where to store the data from this run")
 
     # Steering of the passes
     parser.add_option("-b", "--output_directory_basis", dest="output_directory_basis",
-                      help="Basis directory for commissioning data storage", default='/data/datasets/DigiCamCommissionning')
+                      help="Basis directory for commissioning data storage", default='/data/datasets/TEST')
 
 
     # Parse the options
     (options, args) = parser.parse_args()
-
-    # Load the YAML configuration
-    options_yaml = {}
-    with open(options.yaml_config) as f:
-        for data in load_all(f):
-            options_yaml[data['type']]={}
-            for k,v in data.items():
-                if k == 'type': continue
-                options_yaml[data['type']][k]=v
-
-    # Update with interactive options
-    for key,val in options_yaml['steering'].items():
-        if not (key in options.__dict__.keys()):
-            options.__dict__[key]=val
-        else:
-            options_yaml['steering'][key]=options.__dict__[key]
-
-    __name__ = options_yaml['steering']['name']
-
-    # Check if the directory name was specified, otherwise replace by the steering name
-    if not options_yaml['steering']['output_directory']:
-        print('\t\t-|> No output_directory option was specified, will use the steering name: %s'
-                         % options_yaml['steering']['name'])
-        options_yaml['steering']['output_directory'] = options_yaml['steering']['name']
-
-    _tmp_dir = time.strftime(options_yaml['steering']['output_directory_basis'] + '/%Y%m%d', time.gmtime())
-
-    # If no directory exists for today, then create it
-    if not os.path.isdir(_tmp_dir):
-        os.mkdir(_tmp_dir)
-
-    options_yaml['steering']['output_directory'] = _tmp_dir + '/' + options_yaml['steering']['output_directory']
-    # Create the new directory. If it exist, increment
-    if not os.path.isdir(options_yaml['steering']['output_directory']):
-        os.mkdir(options_yaml['steering']['output_directory'])
-    else:
-        list_dir = os.listdir(os.path.dirname(options_yaml['steering']['output_directory']))
-        n_dir = 0
-        for d in list_dir:
-            if d.count(os.basename(options_yaml['steering']['output_directory']) > 0.5): n_dir += 1
-        options_yaml['steering']['output_directory'] += '_%d' % n_dir
-        os.mkdir(options_yaml['steering']['output_directory'])
-
-    print('\t\t-|> Will store files in: %s' % options_yaml['steering']['output_directory'])
-
+    # Merge the configurations of yaml with the inteactive one
+    options = load_configuration(options)
+    # Rename the process
+    __name__ = options['steering']['name']
+    # Create the directory
+    create_directory(options)
     # Start the loggers
-    logger.initialise_logger( logname=sys.modules['__main__'].__name__, verbose = options_yaml['steering']['verbose'],
-                              logfile = '%s/%s.log'%(options_yaml['steering']['output_directory'],
-                                                     options_yaml['steering']['name']))
-
+    logger.initialise_logger( logname=sys.modules['__main__'].__name__, verbose = options['steering']['verbose'],
+                              logfile = '%s/%s.log'%(options['steering']['output_directory'],
+                                                     options['steering']['name']))
     # Some logging
     log = logging.getLogger(sys.modules['__main__'].__name__)
-    log.info('\t\t-|> Will run %s with the following configuration:'%options_yaml['steering']['name'])
-    for key,val in options_yaml.items():
+
+    log.info('\t\t-|> Will run %s with the following configuration:'%options['steering']['name'])
+    log.info('\t\t-|> Files will be stored in: %s' % options['steering']['output_directory'])
+
+    for key,val in options.items():
         log.info('\t\t |--|> %s :'%(key))
         for key_sub,val_sub in val.items():
             log.info('\t\t |----|> %s : \t %s'%(key_sub,val_sub))
-    log.info('-|')
+    log.info('\t\t-|')
 
     # Start the master FSM
-    masterfsm = MasterFsm(logger_name=sys.modules['__main__'].__name__)
-
-    masterfsm.allocate()
-    masterfsm.configure()
-    masterfsm.start_run()
-    masterfsm.start_trigger()
-    masterfsm.stop_trigger()
-    masterfsm.stop_run()
-    masterfsm.reset()
-    masterfsm.deallocate()
+    masterfsm = MasterFsm( options=options,logger_name=sys.modules['__main__'].__name__ )
 
 
+    try:
+        try :
+            masterfsm.allocate()
+        except fysom.Canceled:
+            print('MASTER could not be alocated')
+        except fysom.Error:
+            print('MASTER could not be alocated')
+
+        try :
+            masterfsm.configure()
+        except fysom.Canceled:
+            print('MASTER could not be alocated')
+        except fysom.Error:
+            print('MASTER was not in the proper state')
+
+        masterfsm.start_run()
+        masterfsm.start_trigger()
+        time.sleep(20)
+        masterfsm.stop_trigger()
+        masterfsm.stop_run()
+        masterfsm.reset()
+        masterfsm.deallocate()
+        IPython.embed()
+    finally:
+        print('---|> Done')
 
 
