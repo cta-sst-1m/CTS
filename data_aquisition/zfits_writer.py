@@ -42,9 +42,9 @@ class ZFitsWriter:
 
     def __init__(self):
         self.writer = None
-        self.output_dir = time.strftime('/data/datasets/%Y%m%d',time.gmtime())
+        self.output_dir = None
         self.input = 'tcp://localhost:13581'
-        self.loop = ''
+        self.loop = True
         self.max_evts_per_file = 10000
         self.num_comp_threads = 5
         self.comp_scheme = 'zrice'
@@ -58,12 +58,18 @@ class ZFitsWriter:
         :return:
         """
         for key , val in config.items():
-            setattr(self,key,val)
+            if hasattr(self,key):
+                setattr(self,key,val)
 
 
     def start_writing(self):
         list_param = []
-
+        for k,v in self.__dict__.items():
+            if k == 'writer': continue
+            elif k == 'loop' and self.loop: list_param +=['--%s'%k]
+            else :
+                list_param +=['--%s'%k,getattr(self,k)]
+        list_param+=['--output_dir',self.output_dir]
         self.writer = Popen('/home/sst1m-user/SST1M/digicam-raw/Build.Release/bin/ZFitsWriter --output_dir /data/datasets/ --input tcp://localhost:13581 --loop',
                             env=dict(os.environ, my_env_prop='value'))
         return
