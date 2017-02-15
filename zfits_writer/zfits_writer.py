@@ -48,12 +48,22 @@ class ZFitsWriter:
         self.max_evts_per_file = 10000
         self.num_comp_threads = 5
         self.comp_scheme = 'zrice'
+        self.suffix = ''
         return
 
-    def configuration(self):
+    def configuration(self, config):
+        """
+        Config is a dictionnary whose key correspond to the private members of the ZFitsWriter
+        :param config:
+        :return:
+        """
+        for key , val in config.items():
+            setattr(self,key,val)
 
 
     def start_writing(self):
+        list_param = []
+
         self.writer = Popen('/home/sst1m-user/SST1M/digicam-raw/Build.Release/bin/ZFitsWriter --output_dir /data/datasets/ --input tcp://localhost:13581 --loop',
                             env=dict(os.environ, my_env_prop='value'))
         return
