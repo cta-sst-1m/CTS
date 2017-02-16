@@ -1,4 +1,4 @@
-import visa, time
+import visa, time,logging
 
 try:
     from IPython import embed
@@ -14,7 +14,8 @@ except ImportError:
 
 
 class Generator:
-    def __init__(self,url = "129.194.52.244"):
+    def __init__(self,logger_name ,url = "129.194.52.244"):
+        self.log = logging.getLogger(logger_name+'.generator')
         self.url = url
         try :
             self.rm = visa.ResourceManager('@py')
@@ -31,11 +32,9 @@ class Generator:
         configure , method to configure the pulse generator. If n_pulse > 1048575 turn to continuous mode
         :return:
         '''
-        print('conftype',conf_type)
         self.conf_type = conf_type
 
         if  self.conf_type == 'continuous' :
-            print('configure')
             self.inst.write('WAVE PULSE')
             self.inst.write('OUTPUT INVERT')
             self.inst.write('ZLOAD 50')
@@ -47,7 +46,6 @@ class Generator:
             self.inst.write('OUTPUT ON')
             self.inst.write('BST INFINITE')
             self.inst.write('BSTTRGSRC MAN')
-            print('end configure')
 
         elif self.conf_type == 'burst' :
             self.inst.write('WAVE PULSE')

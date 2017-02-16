@@ -55,7 +55,7 @@ class CameraServer:
         # self.s set server mode if true
         self.s = True
         # self.A do not connect SWAT if true
-        self.A = True
+        self.A = 1
         # self.L interface
         self.L = 'eth2'
         # self.b port (if 0 and -L read all UDP packets)
@@ -95,6 +95,9 @@ class CameraServer:
     def enqueue_output(self, out):
         for line in iter(out.readline, b''):
             self.log.info('%r', line)
+            v = '%r'%(line)
+            if v.count('std::runtime_error')>0:
+                raise Exception('CameraServer',line)
 
     def start_server(self):
         list_param = []

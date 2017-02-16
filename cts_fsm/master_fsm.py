@@ -2,7 +2,7 @@ import utils.fsm_def
 from fysom import Fysom
 import generator.generator as generator
 import logging,time,os,sys
-import cts.master as cts_master
+import cts.cts_control as cts_master
 from cts_fsm import cts_fsm,writer_fsm,camera_server_fsm,generator_fsm
 import pickle
 
@@ -290,7 +290,7 @@ class MasterFsm(Fysom):
         """
         self.logger.debug('\t-|> MasterFSM reset call')
         try:
-            for key in self.elements.keys():
+            for key in ['writer','camera_server','generator','cts']:
                 if key in self.elements.keys():
                     self.elements[key].reset()
             self.logger.info('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))

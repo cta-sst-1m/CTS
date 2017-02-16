@@ -1,103 +1,101 @@
 import utils.fsm_def
 from fysom import Fysom
 import generator.generator as generator
-import logging
+import logging,sys
 
 try:
     import IPython
 except ImportError:
     import code
 
-class GeneratorFsm(Fysom):
+class GeneratorFsm(Fysom,generator.Generator):
     """
     CTSMaster implements the FSM which control the experimental setup
 
     """
-
-    def __init__(self, fsm_table=utils.fsm_def.FSM_TABLE, url='129.194.55.68', logger_name='master'):
+    def __init__(self, fsm_table=utils.fsm_def.FSM_TABLE, options = None,
+                 logger_name=sys.modules['__main__'].__name__ ):
         """
         Initialise function of the generator FSM
 
         :param fsm_table: Table defining the FSM
-        :param url:       IP address of the generator
+        :param options  : A dictionary containing the necessary options
+        :param : logger_name : the parent logger name
+        :param fsm_table: Table defining the FSM
         """
 
-        callbacks = {'onbeforeallocate': self.onallocate,
+        callbacks = {'onbeforeallocate': self.onbeforeallocate,
                      'onnot_ready': self.onnot_ready,
-                     'onbeforeconfigure': self.onconfigure,
+                     'onbeforeconfigure': self.onbeforeconfigure,
                      'onstand_by': self.onstand_by,
-                     'onbeforestart_run': self.onstart_run,
+                     'onbeforestart_run': self.onbeforestart_run,
                      'onready': self.onready,
-                     'onbeforestart_trigger': self.onstart_trigger,
+                     'onbeforestart_trigger': self.onbeforestart_trigger,
                      'onrunning': self.onrunning,
-                     'onbeforestop_trigger': self.onstop_trigger,
-                     'onbeforestop_run': self.onstop_run,
-                     'onbeforereset': self.onreset,
-                     'onbeforedeallocate': self.ondeallocate}
+                     'onbeforestop_trigger': self.onbeforestop_trigger,
+                     'onbeforestop_run': self.onbeforestop_run,
+                     'onbeforereset': self.onbeforereset,
+                     'onbeforedeallocate': self.onbeforedeallocate}
 
         Fysom.__init__(self, cfg = fsm_table, callbacks = callbacks)
 
         # Set up the logger
-        self.urlconfig = url
-        self.logger = logging.getLogger(logger_name + '.generator')
-        self.logger.info('---|> Append the generator to the setup')
-
-        """
-        onbeforeallocate (fired before allocate)  can return false
-        onleaveunallocated (fired when leaving allocated) can return false
-        onenternot_ready (fired when entering not_ready) eq. onnot_ready
-        onafterallocate (fired after allocate have been fired)  eq. onallocate
-        """
-
+        self.logger = logging.getLogger(logger_name + '.cts_fsm')
+        self.logger.info('\t-|--|> Append the GeneratorFSM to the setup')
+        self.options = options
     # Actions callbacks
 
-    def onallocate(self, e):
+
+    def onbeforeallocate(self, e):
         """
         FSM callback on the allocate event
 
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-
         try:
-            self.object = generator.Generator.__init__(self, self.urlconfig)  # TODO use the configsŝ
-            self.logger.info('------|> Generator %s : %s to %s' % (e.event, e.src, e.dst))
+            generator.Generator.__init__(self,logger_name=sys.modules['__main__'].__name__ ,url = self.options['generator_url'])
+            self.logger.debug('\t-|--|> Generator %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
-            self.logger.info('------|> Failed allocation of generator %s: ', inst.__cause__)
+            self.logger.error('\t-|--|> Failed allocation of Generator %s: ', inst)
             return False
 
-    def onconfigure(self, e):
+
+
+    def onbeforeconfigure(self, e):
         """
         FSM callback on the configure event
 
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        print('enters2')
         try:
-            # TODO check the configs (only allow to move to ready if configurations exists and are applied)
-            self.logger.info('------|> Generator %s : %s to %s' % (e.event, e.src, e.dst))
-            print('enters')
-            print(self.object.rm.last_status)
-            print('bla')
-            self.object.apply_config('continuous')
+            self.logger.debug('-|--|>  Configure the Generator with: ')
+            for k,v in self.options.items():
+                self.logger.debug('\t-|--|--|>  %s :\t %s '%(k,v))
+            try:
+                self.apply_config(self.options['configuration_mode'])
+                if ('frequency' in self.options.keys()) and ('number_of_pulses' in self.options.keys()):
+                    self.configure_trigger( freq=int(self.options['frequency']), n_pulse=int(self.options['number_of_pulses']))
+            except Exception as inst:
+                raise inst
+            self.logger.debug('-|--|> Generator %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
-            self.logger.info('------|> Failed configuration of generator %s: ', inst.__cause__)
+            self.logger.error('-|--|> Failed configuration of Generator %s: ', inst)
             return False
 
-    def onstart_run(self, e):
+    def onbeforestart_run(self, e):
         """
         FSM callback on the start_run event
 
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        self.logger.info('------|> Generator %s : %s to %s' % (e.event, e.src, e.dst))
         return True
 
-    def onstart_trigger(self, e):
+    def onbeforestart_trigger(self, e):
         """
         FSM callback on the start_trigger event
 
@@ -105,39 +103,51 @@ class GeneratorFsm(Fysom):
         :return: handler for the fsm (boolean)
         """
         try:
-            self.logger.info('------|> Generator %s : %s to %s' % (e.event, e.src, e.dst))
-            self.object.start_trigger_sequence()
+            self.logger.debug('-|--|>  Send trigger from Generator ')
+            try:
+                #print('No trig')
+                self.start_trigger_sequence()
+            except Exception as inst:
+                raise inst
+            self.logger.debug('-|--|> Generator %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
-            self.logger.info('------|> Failed starting the trigger %s: ', inst.__cause__)
+            self.logger.error('-|--|> Failed configuration of Generator %s: ', inst)
             return False
+        return True
 
-    def onstop_trigger(self, e):
+    def onbeforestop_trigger(self, e):
         """
         FSM callback on the stop_trigger event
 
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
+
         try:
-            self.logger.info('------|> Generator %s : %s to %s' % (e.event, e.src, e.dst))
-            self.object.stop_trigger_sequence()
+            self.logger.debug('-|--|>  Send trigger from Generator ')
+            try:
+                #print('No stop trig')
+                self.stop_trigger_sequence()
+            except Exception as inst:
+                raise inst
+            self.logger.debug('-|--|> Generator %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
-            self.logger.info('------|> Failed stopping the trigger %s: ', inst.__cause__)
+            self.logger.error('-|--|> Failed configuration of Generator %s: ', inst)
             return False
+        return True
 
-    def onstop_run(self, e):
+    def onbeforestop_run(self, e):
         """
         FSM callback on the stop_run event
 
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        self.logger.info('------|> Generator %s : %s to %s' % (e.event, e.src, e.dst))
         return True
 
-    def onreset(self, e):
+    def onbeforereset(self, e):
         """
         FSM callback on the reset event
 
@@ -145,14 +155,18 @@ class GeneratorFsm(Fysom):
         :return: handler for the fsm (boolean)
         """
         try:
-            self.logger.info('------|> Generator %s : %s to %s' % (e.event, e.src, e.dst))
-            self.object.reset_generator()
+            self.logger.debug('-|--|>  Reset the Generator with: ')
+            try:
+                self.reset_generator()
+            except Exception as inst:
+                raise inst
+            self.logger.debug('-|--|> Generator %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
-            self.logger.info('------|> Failed reseting the generator %s: ', inst.__cause__)
+            self.logger.error('-|--|> Failed Reset of Generator %s: ', inst)
             return False
 
-    def ondeallocate(self, e):
+    def onbeforedeallocate(self, e):
         """
         FSM callback on the deallocate event
 
@@ -160,14 +174,18 @@ class GeneratorFsm(Fysom):
         :return: handler for the fsm (boolean)
         """
         try:
-            self.logger.info('------|> Generator %s : %s to %s' % (e.event, e.src, e.dst))
-            self.object.close_generator()
+            self.logger.debug('-|--|>  Deallocate the Generator with: ')
+            try:
+                self.close_generator()
+            except Exception as inst:
+                raise inst
+            self.logger.debug('-|--|> Generator %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
-            self.logger.info('------|> Failed closing and giving back the hand %s: ', inst.__cause__)
+            self.logger.error('-|--|> Failed Deallocate of Generator %s: ', inst)
             return False
 
-    def onabort(self, e):
+    def onbeforeabort(self, e):
         """
         FSM callback on the abort event
 
@@ -186,7 +204,6 @@ class GeneratorFsm(Fysom):
         return True
 
     # States callbacks
-
     def onnot_ready(self, e):
         """
         FSM callback when reaching the not_ready state
@@ -194,7 +211,7 @@ class GeneratorFsm(Fysom):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        print(e.event,e.src,e.dst)
+        self.logger.debug('-|--|>Generator is in NOT_READY state')
         return True
 
     def onready(self, e):
@@ -204,7 +221,7 @@ class GeneratorFsm(Fysom):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        print(e.event,e.src,e.dst)
+        self.logger.debug('-|--|> Generator is in READY state')
         return True
 
     def onstand_by(self, e):
@@ -214,48 +231,15 @@ class GeneratorFsm(Fysom):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        print(e.event,e.src,e.dst)
+        self.logger.debug('-|--|> Generator is in STAND_BY state')
         return True
 
     def onrunning(self, e):
         """
         FSM callback when reaching the running state
 
-        :param e: event instance
-
-if __name__ == "__main__":
-    generator =  Generator()
-    generator.initialise()
-    try:
-        generator.apply_config(conf_type='continuous')
-        embed()
-    finally:
-        generator.close()
-(see fysom)
-
+        :param e: event instance(see fysom)
         :return: handler for the fsm (boolean)
         """
-        print(e.event,e.src,e.dst)
+        self.logger.debug('-|--|> Generator is in RUNNING state')
         return True
-
-
-if __name__ == "__main__":
-    fsm_generator = GeneratorFsm()
-
-    logging.basicConfig(filename='example.log', level=logging.DEBUG)
-
-    print('---|> The FSM generator is starting')
-
-    try:
-        fsm_generator.allocate()
-        fsm_generator.current
-        fsm_generator.configure()
-        fsm_generator.current
-        fsm_generator.start_run()
-        fsm_generator.current
-        fsm_generator.start_trigger()
-        fsm_generator.current
-
-        IPython.embed()
-    finally:
-        print('---|> Done')

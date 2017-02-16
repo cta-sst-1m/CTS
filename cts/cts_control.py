@@ -8,7 +8,7 @@ from ctapipe.io.camera import CameraGeometry
 from ctapipe.io.camera import find_neighbor_pixels
 from ctapipe import visualization
 from utils import mcevent
-
+import logging
 from opcua import ua
 from astropy import units as u
 
@@ -17,10 +17,9 @@ import time
 
 
 
-class CTSMaster:
+class CTSController:
     def __init__(self, logger_name):
-        self.log = logging.getLogger(logger_name)
-        self.digicam_client = None
+        self.log = logging.getLogger(logger_name+'.CTS')
         self.cts = None
         self.cts_client = None
         self.plotting = False
@@ -29,18 +28,23 @@ class CTSMaster:
         self.dc_level = None
         self.ac_level = None
 
-    def configure(self,options):
+    def configuration(self,options):
         self.options = options
         # Get the CTS mapping
-        self.cts = cameratestsetup.CTS('config/cts_config_' + str(self.options['cts_angle']) + '.cfg',
-                                       'config/camera_config.cfg', angle=float(self.options['cts_angle']), connected=False)
+        try :
+            self.cts = cameratestsetup.CTS('config/cts_config_' + str(int(self.options['cts_angle'])) + '.cfg',
+                                           'config/camera_config.cfg', angle=float(self.options['cts_angle']), connected=False)
+        except Exception as inst:
+            raise inst
+
         # Get the CTS OpcUA client
-        self.cts_client = cts_client.CTSClient()
-        # Get the digicam OpcUA client
-        self.digicam_client = None
+        try :
+            self.cts_client = cts_client.CTSClient()
+        except Exception as inst:
+            raise inst
         # Prepare plots
 
-        self.plotting = plotting
+        self.plotting = options['plots'] if 'plots' in options.keys() else self.plotting
         if self.plotting:
             self.plots = []
         # Prepare data cube
@@ -54,10 +58,11 @@ class CTSMaster:
         # plt.ion()
         if self.plotting:
             self.plot()
+        print('exit config of the CTSControloer')
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         print('---|> The client will be reset and turned off, wait...')
-        self.reset()
+        self.reset_cts()
 
     def initialise_plots(self):
         # first load in a very nasty way the camera geometry
@@ -96,7 +101,7 @@ class CTSMaster:
     def update(self):
         self.cts_client.update()
 
-    def reset(self):
+    def reset_cts(self):
         """
         reset()
 
@@ -109,6 +114,7 @@ class CTSMaster:
             for pixel in self.cts.pixel_to_led[led_type].keys():
                 self.turn_off(pixel, led_type)
         self.plotting = True if plotting else False
+        self.log.info('Rest of the CTS has been performed')
 
     def turn_on(self, pixel, led_type, level, enable_plot = True):
         """

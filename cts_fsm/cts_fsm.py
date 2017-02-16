@@ -1,6 +1,6 @@
 import utils.fsm_def
 from fysom import Fysom
-from data_aquisition import camera_server
+from cts import cts_control
 import logging,sys
 import inspect
 
@@ -9,15 +9,14 @@ try:
 except ImportError:
     import code
 
-class CTSFsm(Fysom,cts.master):
+class CTSFsm(Fysom,cts_control.CTSController):
     """
     The FSM that control the ZFitsCameraServer
 
     """
 
     def __init__(self, fsm_table=utils.fsm_def.FSM_TABLE, options = None,
-                 logger_name=sys.modules['__main__'].__name__ ,
-                 logger_dir = '.'):
+                 logger_name=sys.modules['__main__'].__name__ ):
         """
         Initialise function of the generator FSM
 
@@ -46,7 +45,6 @@ class CTSFsm(Fysom,cts.master):
         self.logger = logging.getLogger(logger_name + '.cts_fsm')
         self.logger.info('\t-|--|> Append the CTSFsm to the setup')
         self.options = options
-        self.logger_dir = logger_dir
     # Actions callbacks
 
     def onbeforeallocate(self, e):
@@ -57,11 +55,11 @@ class CTSFsm(Fysom,cts.master):
         :return: handler for the fsm (boolean)
         """
         try:
-            cts.CTSMaster.__init__(self,log_location = self.logger_dir)
-            self.logger.debug('\t-|--|> CameraServer %s : move from %s to %s' % (e.event, e.src, e.dst))
+            cts_control.CTSController.__init__(self,logger_name=sys.modules['__main__'].__name__ )
+            self.logger.debug('\t-|--|> CTSMaster %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
-            self.logger.error('\t-|--|> Failed allocation of CameraServer %s: ', inst.__cause__)
+            self.logger.error('\t-|--|> Failed allocation of CTSMaster %s: ', inst)
             return False
 
     def onbeforeconfigure(self, e):
@@ -72,19 +70,18 @@ class CTSFsm(Fysom,cts.master):
         :return: handler for the fsm (boolean)
         """
         try:
-            self.logger.debug('-|--|>  Configure the CameraServer with: ')
+            self.logger.debug('-|--|>  Configure the CTSMaster with: ')
             for k,v in self.options.items():
                 self.logger.debug('\t-|--|--|>  %s :\t %s '%(k,v))
-            self.configuration(self.options)
-            self.logger.debug('-|--|>  Start the CameraServer, see log')
+            print('enter config')
             try:
-                self.start_server()
+                self.configuration(self.options)
             except Exception as inst:
-                self.logger.error(inst)
-            self.logger.debug('-|--|> CameraServer %s : move from %s to %s' % (e.event, e.src, e.dst))
+                raise inst
+            self.logger.debug('-|--|> CTSMaster %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
-            self.logger.error('-|--|> Failed configuration and start-up of CameraServer %s: ', inst.__cause__)
+            self.logger.error('-|--|> Failed configuration and start-up of CTSMaster %s: ', inst)
             return False
 
     def onbeforestart_run(self, e):
@@ -131,11 +128,15 @@ class CTSFsm(Fysom,cts.master):
         :return: handler for the fsm (boolean)
         """
         try:
-            self.stop_server()
-            self.logger.info('-|--|> CameraServer have been stopped, see log')
+            self.logger.debug('-|--|>  Reset the CTSMaster with: ')
+            try:
+                self.reset_cts()
+            except Exception as inst:
+                raise inst
+            self.logger.debug('-|--|> CTSMaster %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
-            self.logger.error('-|--|>  Failed reseting the camera server %s: ', inst.__cause__)
+            self.logger.error('-|--|> Failed Reset of CTSMaster %s: ', inst)
             return False
 
     def onbeforedeallocate(self, e):
@@ -145,7 +146,17 @@ class CTSFsm(Fysom,cts.master):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        return True
+        try:
+            self.logger.debug('-|--|>  Deallocate the CTSMaster with: ')
+            try:
+                self.cts_client.client_off()
+            except Exception as inst:
+                raise inst
+            self.logger.debug('-|--|> CTSMaster %s : move from %s to %s' % (e.event, e.src, e.dst))
+            return True
+        except Exception as inst:
+            self.logger.error('-|--|> Failed Deallocate of CTSMaster %s: ', inst)
+            return False
 
     def onbeforeabort(self, e):
         """

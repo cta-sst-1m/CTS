@@ -83,7 +83,7 @@ if __name__ == '__main__':
     # Job configuration (the only mandatory option)
     parser.add_option("-y", "--yaml_config", dest="yaml_config",
                       help="full path of the yaml configuration function",
-                      default='/data/software/CTS/config/test_writer_server.yaml')
+                      default='/data/software/CTS/config/test_writer_server_cts_gene.yaml')
 
     # Other options allows to overwrite the steering part of the yaml_config interactively
 
@@ -146,7 +146,7 @@ if __name__ == '__main__':
 
         masterfsm.start_run()
         masterfsm.start_trigger()
-        time.sleep(10)
+        time.sleep(30)
         masterfsm.stop_trigger()
         masterfsm.stop_run()
         masterfsm.reset()

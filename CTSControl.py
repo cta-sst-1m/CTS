@@ -1,4 +1,4 @@
-import cts.master as cts_master
+import cts.cts_control as cts_master
 import sys
 from matplotlib.pyplot import ion
 
@@ -50,10 +50,10 @@ def man():
 
 if __name__ == "__main__":
     ion()
-    ctsmaster = cts_master.CTSMaster(float(sys.argv[1]))
+    ctsmaster = cts_master.CTSController(float(sys.argv[1]))
 
     print('---|> The client is starting, reset of the board can take a little time')
-    ctsmaster.reset()
+    ctsmaster.reset_cts()
     cts = ctsmaster.cts
     generator = ctsmaster.generator
     print('---|> The client have been started')
@@ -62,7 +62,7 @@ if __name__ == "__main__":
         IPython.embed()
     finally:
         print('---|> The client will be reset and turned off, wait...')
-        ctsmaster.reset()
+        ctsmaster.reset_cts()
         ctsmaster.cts_client.client_off()
         ctsmaster.generator.inst.write('LOCAL')
         ctsmaster.generator.inst.close()
