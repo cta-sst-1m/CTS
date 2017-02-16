@@ -9,7 +9,7 @@ try:
 except ImportError:
     import code
 
-class CTSFsm(Fysom,camera_server.CameraServer):
+class CTSFsm(Fysom,cts.master):
     """
     The FSM that control the ZFitsCameraServer
 
@@ -43,7 +43,7 @@ class CTSFsm(Fysom,camera_server.CameraServer):
         Fysom.__init__(self, cfg = fsm_table, callbacks = callbacks)
 
         # Set up the logger
-        self.logger = logging.getLogger(logger_name + '.camserver_fsm')
+        self.logger = logging.getLogger(logger_name + '.cts_fsm')
         self.logger.info('\t-|--|> Append the CTSFsm to the setup')
         self.options = options
         self.logger_dir = logger_dir
@@ -57,7 +57,7 @@ class CTSFsm(Fysom,camera_server.CameraServer):
         :return: handler for the fsm (boolean)
         """
         try:
-            camera_server.CameraServer.__init__(self,log_location = self.logger_dir)
+            cts.CTSMaster.__init__(self,log_location = self.logger_dir)
             self.logger.debug('\t-|--|> CameraServer %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
