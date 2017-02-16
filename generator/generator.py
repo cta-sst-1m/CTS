@@ -26,7 +26,7 @@ class Generator:
             raise inst
         return
 
-    def apply_config(self, conf_type = 'burst'):
+    def apply_config(self, conf_type='burst'):
         '''
         configure , method to configure the pulse generator. If n_pulse > 1048575 turn to continuous mode
         :return:
@@ -34,8 +34,9 @@ class Generator:
         print('conftype',conf_type)
         self.conf_type = conf_type
 
-        if  self.conf_type == 'continuous' :
+        if self.conf_type == 'continuous':
             print('configure')
+            self.inst.write('*RST')
             self.inst.write('WAVE PULSE')
             self.inst.write('OUTPUT INVERT')
             self.inst.write('ZLOAD 50')
@@ -49,7 +50,8 @@ class Generator:
             self.inst.write('BSTTRGSRC MAN')
             print('end configure')
 
-        elif self.conf_type == 'burst' :
+        elif self.conf_type == 'burst':
+            self.inst.write('*RST')
             self.inst.write('WAVE PULSE')
             self.inst.write('OUTPUT INVERT')
             self.inst.write('ZLOAD 50')
@@ -62,6 +64,38 @@ class Generator:
             self.inst.write('BST NCYC')
             self.inst.write('BSTCOUNT 1')
             self.inst.write('BSTTRGSRC MAN')
+            print('end configure burst')
+
+        elif self.conf_type == 'master':
+            self.inst.write('*RST')
+            self.inst.write('WAVE PULSE')
+            self.inst.write('PULSFREQ 1000')
+            self.inst.write('ZLOAD 50')
+            self.inst.write('AMPL 0.8')
+            self.inst.write('DCOFFS -0.4')
+            self.inst.write('OUTPUT INVERT')
+            self.inst.write('PULSWID 0.00000002')
+            self.inst.write('PULSEDGE 0.000000005')
+            self.inst.write('BST NCYC')
+            self.inst.write('BSTCOUNT 1')
+            self.inst.write('BSTTRGSRC INT')
+            print('end configure master')
+
+        elif self.conf_type == 'slave':
+            self.inst.write('*RST')
+            self.inst.write('WAVE PULSE')
+            self.inst.write('PULSFREQ 1000')
+            self.inst.write('OUTPUT NORMAL')
+            self.inst.write('ZLOAD 50')
+            self.inst.write('AMPL 0.8')
+            self.inst.write('DCOFFS 0.4')
+            self.inst.write('PULSWID 0.00000002')
+            self.inst.write('PULSEDGE 0.000000005')
+            self.inst.write('BST NCYC')
+            self.inst.write('BSTCOUNT 1')
+            self.inst.write('BSTTRGSRC EXT')
+            self.inst.write('CLKSRC EXT')
+            print('end configure slave')
 
         return
 
@@ -75,7 +109,6 @@ class Generator:
 
     def start_trigger_sequence(self):
         '''
-
         :return:
         '''
         self.inst.write('*TRG')

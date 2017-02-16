@@ -30,11 +30,16 @@ def man():
 if __name__ == "__main__":
     ion()
     mtsmaster = mts_master.MTSMaster()
-    #genmaster = mtsmaster.generatorMaster
+    genmaster = mtsmaster.generatorMaster
     genslave = mtsmaster.generatorSlave
     man()
     try:
         IPython.embed()
+        # Start with dark run
+        # mtsmaster.dark_run()
+        # mtsmaster.low_run()
+        # mtsmaster.medium_run()
+        # mtsmaster.high_run()
     finally:
         mtsmaster.generatorMaster.inst.write('LOCAL')
         mtsmaster.generatorMaster.inst.close()
