@@ -54,7 +54,9 @@ class GeneratorFsm(Fysom,generator.Generator):
         :return: handler for the fsm (boolean)
         """
         try:
-            generator.Generator.__init__(self,logger_name=sys.modules['__main__'].__name__ ,url = self.options['generator_url'])
+            generator.Generator.__init__(self,logger_name=sys.modules['__main__'].__name__ ,
+                                         url = self.options['generator_url'],
+                                         slave_url= self.options['slave_generator_url'] if 'slave_generator_url' in self.options.keys() else None )
             self.logger.debug('\t-|--|> Generator %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:

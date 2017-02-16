@@ -14,15 +14,20 @@ except ImportError:
 
 
 class Generator:
-    def __init__(self,logger_name ,url = "129.194.52.244"):
+    def __init__(self,logger_name ,url = "129.194.52.244", slave_url = None):
         self.log = logging.getLogger(logger_name+'.generator')
         self.url = url
-        try :
+        if slave_url:
+            self.slave_url = slave_url
+        try:
             self.rm = visa.ResourceManager('@py')
         except Exception as inst:
             raise inst
-        try :
+        try:
             self.inst = self.rm.open_resource("TCPIP::" + self.url + "::9221::SOCKET")
+            if hasattr(self, 'slave_url'):
+                self.inst_slave = self.rm.open_resource("TCPIP::" + self.slave_url + "::9221::SOCKET")
+
         except Exception as inst:
             raise inst
         return
@@ -34,7 +39,7 @@ class Generator:
         '''
         self.conf_type = conf_type
 
-        if  self.conf_type == 'continuous' :
+        if  self.conf_type == 'continuous' and not hasattr(self,'slave_url'):
             self.inst.write('WAVE PULSE')
             self.inst.write('OUTPUT INVERT')
             self.inst.write('ZLOAD 50')
@@ -47,7 +52,7 @@ class Generator:
             self.inst.write('BST INFINITE')
             self.inst.write('BSTTRGSRC MAN')
 
-        elif self.conf_type == 'burst' :
+        elif self.conf_type == 'burst' and not hasattr(self,'slave_url'):
             self.inst.write('WAVE PULSE')
             self.inst.write('OUTPUT INVERT')
             self.inst.write('ZLOAD 50')
@@ -61,6 +66,8 @@ class Generator:
             self.inst.write('BSTCOUNT 1')
             self.inst.write('BSTTRGSRC MAN')
 
+        elif  hasattr(self,'slave_url'):
+            print('todo')
         return
 
     def configure_trigger(self, freq = 1000 , n_pulse = 10 ):
