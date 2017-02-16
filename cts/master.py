@@ -16,6 +16,7 @@ import numpy as np
 import time
 
 
+
 class CTSMaster:
     def __init__(self, angle_cts, plotting=True):
         # Get the CTS mapping
