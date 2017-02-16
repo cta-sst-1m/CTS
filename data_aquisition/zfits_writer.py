@@ -69,17 +69,21 @@ class ZFitsWriter:
             self.log.info('%r', line)
 
     def start_writing(self):
+        print('start writing')
         list_param = []
         for k,v in self.__dict__.items():
+            if type(v).__name__ in ['function','Logger','dict','None']: continue
+            print(k,v,type(v).__name__)
             if k == 'writer': continue
             elif k == 'loop' and self.loop: list_param +=['--%s'%k]
             else :
                 list_param +=['--%s'%k,getattr(self,k)]
+
         list_param = ['/home/sst1m-user/SST1M/digicam-raw/Build.Release/bin/ZFitsWriter']+list_param
         str_param = ''
         for p in list_param:
             str_param += p + ' '
-
+        print('ready to log',str_param)
         self.log.info('Running %s'%str_param)
         5./0.
 

@@ -150,7 +150,6 @@ class MasterFsm(Fysom):
         self.logger.debug('\t-|> MasterFSM start-run call')
         self.run_number +=1
         pickle.dump({'run_number':self.run_number}, open(self.options['steering']['output_directory_basis']+'/run.p', "wb"))
-        print('here')
         try:
             for key in ['writer','camera_server','cts','generator']:
                 if key in self.elements.keys():
