@@ -78,6 +78,11 @@ class Generator:
             self.inst.write('PULSFREQ '+str(freq))
         return
 
+    def configure_slave(self, amplitude = 0 , offset = 0 ):
+        self.inst_slave.write('AMPL %0.3f'%amplitude)
+        self.inst_slave.write('DCOFFS %0.4f'%offset)
+        return
+
     def start_trigger_sequence(self):
         '''
 

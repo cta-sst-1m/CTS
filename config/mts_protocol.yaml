@@ -1,0 +1,42 @@
+# Steering
+type                  : steering
+name                  : scan_ac_level
+verbose               : True
+output_directory      : None
+---
+# Camera configuration
+type                  : camera_configuration
+trigger_configuration : external
+fadcs                 : [[0,1,2,3,4,5,6,7,8],[],[]]
+---
+# CTS configuration
+type                  : cts_configuration
+cts_angle             : 240.
+---
+# Protocol configuration
+type                  : protocol_configuration
+name                  : module_test_setup
+low_light_level               : 1.
+low_light_number_of_events    : 10000
+medium_light_level            : 1.
+medium_light_number_of_events : 10000
+high_light_level              : 1.
+high_light_number_of_events   : 10000
+---
+# Trigger configuration
+type                  : generator_configuration
+generator_url         : 129.194.52.244
+slave_generator_url   : 129.194.52.244
+configuration_mode    : master
+frequency             : 1000
+number_of_pulses      : 10000
+---
+# Writer configruation
+type                  : writer_configuration
+compression           : zrice
+number_of_trhead      : 5
+input                 : tcp://localhost:13581
+---
+# Camera Server Configuration
+type                  : camera_server_configuration
+

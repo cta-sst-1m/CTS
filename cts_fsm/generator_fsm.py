@@ -80,6 +80,9 @@ class GeneratorFsm(Fysom,generator.Generator):
                 self.apply_config(self.options['configuration_mode'])
                 if ('frequency' in self.options.keys()) and ('number_of_pulses' in self.options.keys()):
                     self.configure_trigger( freq=int(self.options['frequency']), n_pulse=int(self.options['number_of_pulses']))
+                if 'slave_generator_url' in self.options.keys():
+                    self.configure_slave(amplitude=self.options['slave_amplitude'] if 'slave_amplitude' in self.options.keys() else 0.,
+                                         offset=self.options['slave_offset'] if 'slave_offset' in self.options.keys() else 0.)
             except Exception as inst:
                 raise inst
             self.logger.debug('-|--|> Generator %s : move from %s to %s' % (e.event, e.src, e.dst))

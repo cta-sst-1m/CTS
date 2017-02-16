@@ -2,12 +2,12 @@
 
 # external modules
 from optparse import OptionParser
-from  yaml import load,dump,load_all
-import logging,sys
+from  yaml import load, dump, load_all
+import logging, sys
 from cts_fsm.master_fsm import MasterFsm
-import time,os
+import time, os
 import fysom
-#internal modules
+# internal modules
 from utils import logger
 
 try:
@@ -27,19 +27,20 @@ def load_configuration(options):
     options_yaml = {}
     with open(options.yaml_config) as f:
         for data in load_all(f):
-            options_yaml[data['type']]={}
-            for k,v in data.items():
+            options_yaml[data['type']] = {}
+            for k, v in data.items():
                 if k == 'type': continue
-                options_yaml[data['type']][k]=v
+                options_yaml[data['type']][k] = v
 
     # Update with interactive options
-    for key,val in options.__dict__.items():
+    for key, val in options.__dict__.items():
         if not (key in options_yaml['steering'].keys()):
-            options_yaml['steering'][key]=val
+            options_yaml['steering'][key] = val
         else:
             options_yaml['steering'][key] = val
 
     return options_yaml
+
 
 def create_directory(options):
     """
@@ -51,7 +52,7 @@ def create_directory(options):
     # Check if the directory name was specified, otherwise replace by the steering name
     if not options['steering']['output_directory']:
         print('\t\t-|> No output_directory option was specified, will use the steering name: %s'
-                         % options['steering']['name'])
+              % options['steering']['name'])
         options['steering']['output_directory'] = options['steering']['name']
 
     _tmp_dir = time.strftime(options['steering']['output_directory_basis'] + '/%Y%m%d', time.gmtime())
@@ -100,7 +101,6 @@ if __name__ == '__main__':
     parser.add_option("-b", "--output_directory_basis", dest="output_directory_basis",
                       help="Basis directory for commissioning data storage", default='/data/datasets/TEST')
 
-
     # Parse the options
     (options, args) = parser.parse_args()
     # Merge the configurations of yaml with the inteactive one
@@ -110,49 +110,46 @@ if __name__ == '__main__':
     # Create the directory
     create_directory(options)
     # Start the loggers
-    logger.initialise_logger( logname=sys.modules['__main__'].__name__, verbose = options['steering']['verbose'],
-                              logfile = '%s/%s.log'%(options['steering']['output_directory'],
-                                                     options['steering']['name']))
+    logger.initialise_logger(logname=sys.modules['__main__'].__name__, verbose=options['steering']['verbose'],
+                             logfile='%s/%s.log' % (options['steering']['output_directory'],
+                                                    options['steering']['name']))
     # Some logging
     log = logging.getLogger(sys.modules['__main__'].__name__)
 
-    log.info('\t\t-|> Will run %s with the following configuration:'%options['steering']['name'])
+    log.info('\t\t-|> Will run %s with the following configuration:' % options['steering']['name'])
     log.info('\t\t-|> Files will be stored in: %s' % options['steering']['output_directory'])
 
-    for key,val in options.items():
-        log.info('\t\t |--|> %s :'%(key))
-        for key_sub,val_sub in val.items():
-            log.info('\t\t |----|> %s : \t %s'%(key_sub,val_sub))
+    for key, val in options.items():
+        log.info('\t\t |--|> %s :' % (key))
+        for key_sub, val_sub in val.items():
+            log.info('\t\t |----|> %s : \t %s' % (key_sub, val_sub))
     log.info('\t\t-|')
 
     # Start the master FSM
-    masterfsm = MasterFsm( options=options,logger_name=sys.modules['__main__'].__name__ )
+    masterfsm = MasterFsm(options=options, logger_name=sys.modules['__main__'].__name__)
 
+    # if a protocol has been defined
+    if 'protocol_configuration' in options.keys():
+        protocol = __import__('protocols.%s' % options['protocol_configuration']['name'],
+                              locals=None,
+                              globals=None,
+                              fromlist=[None],
+                              level=0)
 
-    try:
-        try :
+        if protocol.run(masterfsm):
+            log.info('\t\t-|>Ready to analyse')
+    else:
+        try:
             masterfsm.allocate()
-        except fysom.Canceled:
-            print('MASTER could not be alocated')
-        except fysom.Error:
-            print('MASTER could not be alocated')
-
-        try :
             masterfsm.configure()
-        except fysom.Canceled:
-            print('MASTER could not be alocated')
-        except fysom.Error:
-            print('MASTER was not in the proper state')
+            masterfsm.start_run()
+            masterfsm.start_trigger()
+            time.sleep(30)
+            masterfsm.stop_trigger()
+            masterfsm.stop_run()
+            masterfsm.reset()
+            masterfsm.deallocate()
+            IPython.embed()
 
-        masterfsm.start_run()
-        masterfsm.start_trigger()
-        time.sleep(30)
-        masterfsm.stop_trigger()
-        masterfsm.stop_run()
-        masterfsm.reset()
-        masterfsm.deallocate()
-        IPython.embed()
-    finally:
-        print('---|> Done')
-
-
+        finally:
+            print('\t\t-|> Done')
