@@ -1,4 +1,4 @@
-import cts.cts_control as cts_master
+import cts.original_master as cts_master
 import sys
 from matplotlib.pyplot import ion
 

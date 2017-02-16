@@ -56,3 +56,9 @@ python CTSControl.py angle
 '''
 
 when launching the client the various functionnalities are detailed
+
+or the more advanced
+
+'''
+python MajorTom.py -y theyamlfile
+'''
