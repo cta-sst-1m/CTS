@@ -1,66 +1,70 @@
 import utils.fsm_def
 from fysom import Fysom
-import generator.generator as generator
-import logging
+from data_aquisition import camera_server
+import logging,sys
+import inspect
 
 try:
     import IPython
 except ImportError:
     import code
 
-class GeneratorFsm(Fysom):
+class CTSFsm(Fysom,camera_server.CameraServer):
     """
-    CTSMaster implements the FSM which control the experimental setup
+    The FSM that control the ZFitsCameraServer
 
     """
 
-    def __init__(self, fsm_table=utils.fsm_def.FSM_TABLE, options=None , logger_name='master'):
+    def __init__(self, fsm_table=utils.fsm_def.FSM_TABLE, options = None,
+                 logger_name=sys.modules['__main__'].__name__ ,
+                 logger_dir = '.'):
         """
         Initialise function of the generator FSM
 
         :param fsm_table: Table defining the FSM
-        :param url:       IP address of the generator
+        :param options  : A dictionary containing the necessary options
+        :param : logger_name : the parent logger name
+        :param fsm_table: Table defining the FSM
         """
 
-        callbacks = {'onbeforeallocate': self.onallocate,
+        callbacks = {'onbeforeallocate': self.onbeforeallocate,
                      'onnot_ready': self.onnot_ready,
-                     'onbeforeconfigure': self.onconfigure,
+                     'onbeforeconfigure': self.onbeforeconfigure,
                      'onstand_by': self.onstand_by,
-                     'onbeforestart_run': self.onstart_run,
+                     'onbeforestart_run': self.onbeforestart_run,
                      'onready': self.onready,
-                     'onbeforestart_trigger': self.onstart_trigger,
+                     'onbeforestart_trigger': self.onbeforestart_trigger,
                      'onrunning': self.onrunning,
-                     'onbeforestop_trigger': self.onstop_trigger,
-                     'onbeforestop_run': self.onstop_run,
-                     'onbeforereset': self.onreset,
-                     'onbeforedeallocate': self.ondeallocate}
+                     'onbeforestop_trigger': self.onbeforestop_trigger,
+                     'onbeforestop_run': self.onbeforestop_run,
+                     'onbeforereset': self.onbeforereset,
+                     'onbeforedeallocate': self.onbeforedeallocate}
 
         Fysom.__init__(self, cfg = fsm_table, callbacks = callbacks)
 
         # Set up the logger
-        self.logger = logging.getLogger(logger_name + '.generator')
-        self.logger.info('---|> Append the generator to the setup')
+        self.logger = logging.getLogger(logger_name + '.camserver_fsm')
+        self.logger.info('\t-|--|> Append the CTSFsm to the setup')
         self.options = options
-
+        self.logger_dir = logger_dir
     # Actions callbacks
 
-    def onallocate(self, e):
+    def onbeforeallocate(self, e):
         """
         FSM callback on the allocate event
 
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-
         try:
-            ## Initialisation
-            self.logger.info('------|> Generator %s : %s to %s' % (e.event, e.src, e.dst))
+            camera_server.CameraServer.__init__(self,log_location = self.logger_dir)
+            self.logger.debug('\t-|--|> CameraServer %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
-            self.logger.info('------|> Failed allocation of generator %s: ', inst.__cause__)
+            self.logger.error('\t-|--|> Failed allocation of CameraServer %s: ', inst.__cause__)
             return False
 
-    def onconfigure(self, e):
+    def onbeforeconfigure(self, e):
         """
         FSM callback on the configure event
 
@@ -68,63 +72,58 @@ class GeneratorFsm(Fysom):
         :return: handler for the fsm (boolean)
         """
         try:
-            #configuration
+            self.logger.debug('-|--|>  Configure the CameraServer with: ')
+            for k,v in self.options.items():
+                self.logger.debug('\t-|--|--|>  %s :\t %s '%(k,v))
+            self.configuration(self.options)
+            self.logger.debug('-|--|>  Start the CameraServer, see log')
+            try:
+                self.start_server()
+            except Exception as inst:
+                self.logger.error(inst)
+            self.logger.debug('-|--|> CameraServer %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
-            self.logger.info('------|> Failed configuration of generator %s: ', inst.__cause__)
+            self.logger.error('-|--|> Failed configuration and start-up of CameraServer %s: ', inst.__cause__)
             return False
 
-    def onstart_run(self, e):
+    def onbeforestart_run(self, e):
         """
         FSM callback on the start_run event
 
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-            #run
         return True
 
-    def onstart_trigger(self, e):
+    def onbeforestart_trigger(self, e):
         """
         FSM callback on the start_trigger event
 
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        try:
-            self.logger.info('------|> Generator %s : %s to %s' % (e.event, e.src, e.dst))
-            self.object.start_trigger_sequence()
-            return True
-        except Exception as inst:
-            self.logger.info('------|> Failed starting the trigger %s: ', inst.__cause__)
-            return False
+        return True
 
-    def onstop_trigger(self, e):
+    def onbeforestop_trigger(self, e):
         """
         FSM callback on the stop_trigger event
 
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        try:
-            self.logger.info('------|> Generator %s : %s to %s' % (e.event, e.src, e.dst))
-            self.object.stop_trigger_sequence()
-            return True
-        except Exception as inst:
-            self.logger.info('------|> Failed stopping the trigger %s: ', inst.__cause__)
-            return False
+        return True
 
-    def onstop_run(self, e):
+    def onbeforestop_run(self, e):
         """
         FSM callback on the stop_run event
 
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        self.logger.info('------|> Generator %s : %s to %s' % (e.event, e.src, e.dst))
         return True
 
-    def onreset(self, e):
+    def onbeforereset(self, e):
         """
         FSM callback on the reset event
 
@@ -132,29 +131,23 @@ class GeneratorFsm(Fysom):
         :return: handler for the fsm (boolean)
         """
         try:
-            self.logger.info('------|> Generator %s : %s to %s' % (e.event, e.src, e.dst))
-            self.object.reset_generator()
+            self.stop_server()
+            self.logger.info('-|--|> CameraServer have been stopped, see log')
             return True
         except Exception as inst:
-            self.logger.info('------|> Failed reseting the generator %s: ', inst.__cause__)
+            self.logger.error('-|--|>  Failed reseting the camera server %s: ', inst.__cause__)
             return False
 
-    def ondeallocate(self, e):
+    def onbeforedeallocate(self, e):
         """
         FSM callback on the deallocate event
 
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        try:
-            self.logger.info('------|> Generator %s : %s to %s' % (e.event, e.src, e.dst))
-            self.object.close_generator()
-            return True
-        except Exception as inst:
-            self.logger.info('------|> Failed closing and giving back the hand %s: ', inst.__cause__)
-            return False
+        return True
 
-    def onabort(self, e):
+    def onbeforeabort(self, e):
         """
         FSM callback on the abort event
 
@@ -173,7 +166,6 @@ class GeneratorFsm(Fysom):
         return True
 
     # States callbacks
-
     def onnot_ready(self, e):
         """
         FSM callback when reaching the not_ready state
@@ -181,7 +173,7 @@ class GeneratorFsm(Fysom):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        print(e.event,e.src,e.dst)
+        self.logger.debug('-|--|>CTSFsm is in NOT_READY state')
         return True
 
     def onready(self, e):
@@ -191,7 +183,7 @@ class GeneratorFsm(Fysom):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        print(e.event,e.src,e.dst)
+        self.logger.debug('-|--|> CTSFsm is in READY state')
         return True
 
     def onstand_by(self, e):
@@ -201,48 +193,16 @@ class GeneratorFsm(Fysom):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        print(e.event,e.src,e.dst)
+        self.logger.debug('-|--|> CTSFsm is in STAND_BY state')
         return True
 
     def onrunning(self, e):
         """
         FSM callback when reaching the running state
 
-        :param e: event instance
-
-if __name__ == "__main__":
-    generator =  Generator()
-    generator.initialise()
-    try:
-        generator.apply_config(conf_type='continuous')
-        embed()
-    finally:
-        generator.close()
-(see fysom)
-
+        :param e: event instance(see fysom)
         :return: handler for the fsm (boolean)
         """
-        print(e.event,e.src,e.dst)
+        self.logger.debug('-|--|> CTSFsm is in RUNNING state')
         return True
 
-
-if __name__ == "__main__":
-    fsm_generator = GeneratorFsm()
-
-    logging.basicConfig(filename='example.log', level=logging.DEBUG)
-
-    print('---|> The FSM generator is starting')
-
-    try:
-        fsm_generator.allocate()
-        fsm_generator.current
-        fsm_generator.configure()
-        fsm_generator.current
-        fsm_generator.start_run()
-        fsm_generator.current
-        fsm_generator.start_trigger()
-        fsm_generator.current
-
-        IPython.embed()
-    finally:
-        print('---|> Done')

@@ -1,6 +1,9 @@
 from subprocess import Popen, PIPE,STDOUT
 import time
 from utils import logger
+import logging
+from threading  import Thread
+from queue import Queue, Empty
 
 class ZFitsWriter:
     '''
@@ -50,9 +53,10 @@ class ZFitsWriter:
         self.num_comp_threads = 5
         self.comp_scheme = 'zrice'
         self.suffix = ''
-        self.log = logger.initialise_logger(logname='ZFitsWriter',
-                                               logfile='%s/%s.log' % (log_location,'zfitswriter'),
-                                               stream = False)
+        logger.initialise_logger(logname='ZFitsWriter',
+                                            logfile='%s/%s.log' % (log_location,'zfitswriter'),stream=False)
+        self.log = logging.getLogger('ZFitsWriter')
+        self.log_thread = None
 
     def configuration(self, config):
         """
@@ -68,39 +72,39 @@ class ZFitsWriter:
         for line in iter(pipe.readline, b''):  # b'\n'-separated lines
             self.log.info('%r', line)
 
+    def enqueue_output(self,out):
+        for line in iter(out.readline, b''):
+            self.log.info('%r', line)
+
     def start_writing(self):
-        print('start writing')
         list_param = []
         for k,v in self.__dict__.items():
             if type(v).__name__ in ['function','Logger','dict','None']: continue
-            print(k,v,type(v).__name__)
-            if k == 'writer': continue
-            elif k == 'loop' and self.loop: list_param +=['--%s'%k]
+            if k in ['writer','log','current','_final','log_thread','logger_dir']: continue
+            if k == 'loop' and v :
+                list_param +=['--%s'%k]
             else :
-                list_param +=['--%s'%k,getattr(self,k)]
-
-        list_param = ['/home/sst1m-user/SST1M/digicam-raw/Build.Release/bin/ZFitsWriter']+list_param
+                list_param +=['--%s'%k,str(getattr(self,k))]
+        list_param = ['/data/software/DAQ/CamerasToACTL/Build.Release/bin/ZFitsWriter']+list_param
         str_param = ''
         for p in list_param:
-            str_param += p + ' '
-        print('ready to log',str_param)
+            str_param = str_param+ p + ' '
         self.log.info('Running %s'%str_param)
-        5./0.
 
         self.writer = Popen(list_param,
                             stdout = PIPE,
                             stderr =STDOUT)
                             #env=dict(os.environ, my_env_prop='value'))
+        if  not self.log_thread:
+            #self.log_queue = Queue()
+            self.log_thread = Thread(target=self.enqueue_output, args=(self.writer.stdout,))
+            self.log_thread.daemon = True # thread dies with the program
+            self.log_thread.start()
+        else:
+            self.log_thread.start()
 
-        process_output, _ = self.writer.communicate()
-
-        # process_output is now a string, not a file,
-        # you may want to do:
-        # process_output = StringIO(process_output)
-        self.log_subprocess_output(process_output)
         return
 
     def stop_writing(self):
         self.writer.terminate()
         self.writer.kill()
-        return

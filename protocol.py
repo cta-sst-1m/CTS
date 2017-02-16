@@ -10,6 +10,12 @@ import fysom
 #internal modules
 from utils import logger
 
+try:
+    import IPython
+except ImportError:
+    import code
+
+
 def load_configuration(options):
     """
     Merge the interactive options with the yaml options to configure the data taking
@@ -77,7 +83,7 @@ if __name__ == '__main__':
     # Job configuration (the only mandatory option)
     parser.add_option("-y", "--yaml_config", dest="yaml_config",
                       help="full path of the yaml configuration function",
-                      default='/data/software/CTS/config/test_writer.yaml')
+                      default='/data/software/CTS/config/test_writer_server.yaml')
 
     # Other options allows to overwrite the steering part of the yaml_config interactively
 
@@ -140,7 +146,7 @@ if __name__ == '__main__':
 
         masterfsm.start_run()
         masterfsm.start_trigger()
-        time.sleep(20)
+        time.sleep(10)
         masterfsm.stop_trigger()
         masterfsm.stop_run()
         masterfsm.reset()

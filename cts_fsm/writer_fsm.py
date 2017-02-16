@@ -16,7 +16,8 @@ class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
     """
 
     def __init__(self, fsm_table=utils.fsm_def.FSM_TABLE, options = None,
-                 logger_name=sys.modules['__main__'].__name__ +'.master_fsm'):
+                 logger_name=sys.modules['__main__'].__name__ +'.master_fsm',
+                 logger_dir = '.'):
         """
         Initialise function of the generator FSM
 
@@ -44,6 +45,7 @@ class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
         # Set up the logger
         self.logger = logging.getLogger(logger_name + '.writer_fsm')
         self.logger.info('\t-|--|> Append the WriterFSM to the setup')
+        self.logger_dir = logger_dir
         self.options = options
     # Actions callbacks
 
@@ -55,11 +57,11 @@ class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
         :return: handler for the fsm (boolean)
         """
         try:
-            zfits_writer.ZFitsWriter.__init__(self,log_location = self.options['output_dir'])
+            zfits_writer.ZFitsWriter.__init__(self,log_location = self.logger_dir)
             self.logger.debug('\t-|--|> Writer %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
-            self.logger.warning('\t-|--|> Failed allocation of writer %s: ', inst.__cause__)
+            self.logger.error('\t-|--|> Failed allocation of writer %s: ', inst.__cause__)
             return False
 
     def onbeforeconfigure(self, e):
@@ -78,7 +80,7 @@ class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
             self.logger.debug('\t-|--|> Writer %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
-            self.logger.debug('\t-|--|> Failed configuration of Writer %s: ', inst.__cause__)
+            self.logger.error('\t-|--|> Failed configuration of Writer %s: ', inst.__cause__)
             return False
 
     def onbeforestart_run(self, e):
@@ -89,12 +91,11 @@ class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
         :return: handler for the fsm (boolean)
         """
         try:
-            print('enter the start writing')
             self.start_writing()
-            self.logger.info('------|> Writer %s : %s to %s' % (e.event, e.src, e.dst))
+            self.logger.info('\t-|--|> Writer have been started, see log')
             return True
         except Exception as inst:
-            self.logger.info('------|> Failed starting the run %s: ', inst.__cause__)
+            self.logger.error('\t-|--|> Failed starting the writer %s: ', inst.__cause__)
             return False
 
     def onbeforestart_trigger(self, e):
@@ -104,12 +105,7 @@ class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        try:
-            self.logger.info('------|> Writer %s : %s to %s' % (e.event, e.src, e.dst))
-            return True
-        except Exception as inst:
-            self.logger.info('------|> Failed starting the trigger %s: ', inst.__cause__)
-            return False
+        return True
 
     def onbeforestop_trigger(self, e):
         """
@@ -118,12 +114,7 @@ class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        try:
-            self.logger.info('------|> Writer %s : %s to %s' % (e.event, e.src, e.dst))
-            return True
-        except Exception as inst:
-            self.logger.info('------|> Failed stopping the trigger %s: ', inst.__cause__)
-            return False
+        return True
 
     def onbeforestop_run(self, e):
         """
@@ -134,10 +125,10 @@ class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
         """
         try:
             self.stop_writing()
-            self.logger.info('------|> Writer %s : %s to %s' % (e.event, e.src, e.dst))
+            self.logger.info('\t-|--|> Writer have been stopped, see log')
             return True
         except Exception as inst:
-            self.logger.info('------|> Failed starting the run %s: ', inst.__cause__)
+            self.logger.error('\t-|--|>  Failed stopping the run %s: ', inst.__cause__)
             return False
 
     def onbeforereset(self, e):
@@ -147,12 +138,7 @@ class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        try:
-            self.logger.info('------|> Writer %s : %s to %s' % (e.event, e.src, e.dst))
-            return True
-        except Exception as inst:
-            self.logger.info('------|> Failed reseting the writer %s: ', inst.__cause__)
-            return False
+        return True
 
     def onbeforedeallocate(self, e):
         """
@@ -161,12 +147,7 @@ class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        try:
-            self.logger.info('------|> Writer %s : %s to %s' % (e.event, e.src, e.dst))
-            return True
-        except Exception as inst:
-            self.logger.info('------|> Failed closing and giving back the hand %s: ', inst.__cause__)
-            return False
+        return True
 
     def onbeforeabort(self, e):
         """
@@ -214,7 +195,7 @@ class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        self.logger.info('\t-|--|> WriterFSM is in STAND_BY state')
+        self.logger.debug('\t-|--|> WriterFSM is in STAND_BY state')
         return True
 
     def onrunning(self, e):
@@ -224,6 +205,6 @@ class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
         :param e: event instance(see fysom)
         :return: handler for the fsm (boolean)
         """
-        self.logger.info('---|> %s,%s,%s')%(e.event,e.src,e.dst)
+        self.logger.debug('\t-|--|> WriterFSM is in RUNNING state')
         return True
 
