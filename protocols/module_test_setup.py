@@ -2,6 +2,7 @@ from protocols.fsm_steps import *
 import logging,sys,time
 from tqdm import tqdm
 from utils.logger import TqdmToLogger
+
 def prepare_run(master_fsm):
 
     log = logging.getLogger(sys.modules['__main__'].__name__)
@@ -58,8 +59,12 @@ def single_run(master_fsm,sub_run= 'low_light'):
     timeout = float(master_fsm.options['protocol_configuration']['%s_number_of_events'%sub_run])\
               /master_fsm.options['generator_configuration']['frequency']+2
 
-    log.info('Wait %f s'%timeout)
-    time.sleep(timeout)
+    pbar = tqdm(total=int(timeout))
+    tqdm_out = TqdmToLogger(log, level=logging.INFO)
+    i=0
+    while i < timeout:
+        time.sleep(1)
+        pbar.update(1)
 
     if not stop_trigger(master_fsm): return False
     if not stop_run(master_fsm): return False

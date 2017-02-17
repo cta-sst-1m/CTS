@@ -266,7 +266,7 @@ class MasterFsm(Fysom):
         """
         self.logger.debug('\t-|> MasterFSM stop-run call')
         try:
-            for key in ['generator','cts','writer','camera_server']:
+            for key in ['camera_server','writer','generator','cts']:
                 if key in self.elements.keys():
                     self.elements[key].stop_run()
             self.logger.info('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
