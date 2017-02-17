@@ -1,3 +1,8 @@
+The full documentation can be found at https://github.com/cocov/CTS/wiki
+
+In the following you can find quick installation and usage procedure
+
+
 # Installation
 
 build and install python-opcua as in OpcUaCameraSlowControl/python-opcua

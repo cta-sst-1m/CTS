@@ -66,8 +66,34 @@ class Generator:
             self.inst.write('BSTCOUNT 1')
             self.inst.write('BSTTRGSRC MAN')
 
-        elif  hasattr(self,'slave_url'):
-            print('todo')
+        elif  hasattr(self,'slave_url') and self.conf_type == 'module_test_setup':
+            self.inst.write('*RST')
+            self.inst.write('WAVE PULSE')
+            self.inst.write('PULSFREQ 1000')
+            self.inst.write('ZLOAD 50')
+            self.inst.write('AMPL 0.8')
+            self.inst.write('DCOFFS -0.4')
+            self.inst.write('OUTPUT INVERT')
+            self.inst.write('PULSWID 0.00000002')
+            self.inst.write('PULSEDGE 0.000000005')
+            self.inst.write('BST NCYC')
+            self.inst.write('BSTCOUNT 1')
+            self.inst.write('BSTTRGSRC INT')
+
+            self.inst_slave.write('*RST')
+            self.inst_slave.write('WAVE PULSE')
+            self.inst_slave.write('PULSFREQ 1000')
+            self.inst_slave.write('OUTPUT NORMAL')
+            self.inst_slave.write('ZLOAD 50')
+            self.inst_slave.write('AMPL 0.8')
+            self.inst_slave.write('DCOFFS 0.4')
+            self.inst_slave.write('PULSWID 0.00000002')
+            self.inst_slave.write('PULSEDGE 0.000000005')
+            self.inst_slave.write('BST NCYC')
+            self.inst_slave.write('BSTCOUNT 1')
+            self.inst_slave.write('BSTTRGSRC EXT')
+            self.inst_slave.write('CLKSRC EXT')
+
         return
 
     def configure_trigger(self, freq = 1000 , n_pulse = 10 ):
@@ -88,12 +114,24 @@ class Generator:
 
         :return:
         '''
-        self.inst.write('*TRG')
+        if self.conf_type == 'continuous' or self.conf_type == 'burst':
+            self.inst.write('*TRG')
+        elif self.conf_type == 'module_test_setup':
+            self.inst.write('OUTPUT ON')
+            self.inst_slave.write('OUTPUT ON')
         return
 
 
     def stop_trigger_sequence(self):
-        if self.conf_type == 'continuous': self.inst.write('*TRG')
+        '''
+
+        :return:
+        '''
+        if self.conf_type == 'continuous':
+            self.inst.write('*TRG')
+        elif self.conf_type == 'module_test_setup':
+            self.inst.write('OUTPUT OFF')
+            self.inst_slave.write('OUTPUT OFF')
         return
 
     def reset_generator(self):
