@@ -95,7 +95,7 @@ class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
             self.logger.info('\t-|--|> Writer have been started, see log')
             return True
         except Exception as inst:
-            self.logger.error('\t-|--|> Failed starting the writer %s: ', inst.__cause__)
+            self.logger.error('\t-|--|> Failed starting the writer %s: ', inst)
             return False
 
     def onbeforestart_trigger(self, e):
@@ -125,10 +125,11 @@ class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
         """
         try:
             self.stop_writing()
+            print(self.writer.pid)
             self.logger.info('\t-|--|> Writer have been stopped, see log')
             return True
         except Exception as inst:
-            self.logger.error('\t-|--|>  Failed stopping the run %s: ', inst.__cause__)
+            self.logger.error('\t-|--|>  Failed stopping the run %s: ', inst)
             return False
 
     def onbeforereset(self, e):

@@ -95,6 +95,7 @@ class MasterFsm(Fysom):
                     if (str(c*10+fadc) in options['camera_server_configuration']['N'].split(',')): continue
                     options['camera_server_configuration']['N'] += optN + '%d' % (c * 10 + fadc)
 
+
             # now reformat M
             i = 0
             start_cnt = 0

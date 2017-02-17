@@ -46,6 +46,7 @@ class CameraServerFsm(Fysom,camera_server.CameraServer):
         self.logger = logging.getLogger(logger_name + '.camserver_fsm')
         self.logger.info('\t-|--|> Append the CameraServerFSM to the setup')
         self.options = options
+        print(options['M'],options['N'])
         self.logger_dir = logger_dir
     # Actions callbacks
 
@@ -57,16 +58,8 @@ class CameraServerFsm(Fysom,camera_server.CameraServer):
         :return: handler for the fsm (boolean)
         """
         try:
-            self.logger.debug('-|--|>  Configure the CameraServer with: ')
+            self.logger.debug('-|--|>  Allocate the CameraServer with: ')
             camera_server.CameraServer.__init__(self,log_location = self.logger_dir)
-            for k,v in self.options.items():
-                self.logger.debug('\t-|--|--|>  %s :\t %s '%(k,v))
-            self.configuration(self.options)
-            self.logger.debug('-|--|>  Start the CameraServer, see log')
-            try:
-                self.start_server()
-            except Exception as inst:
-                self.logger.error(inst)
             self.logger.debug('-|--|> CameraServer %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
@@ -80,8 +73,6 @@ class CameraServerFsm(Fysom,camera_server.CameraServer):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        return True
-
         try:
             self.logger.debug('-|--|>  Configure the CameraServer with: ')
             for k,v in self.options.items():

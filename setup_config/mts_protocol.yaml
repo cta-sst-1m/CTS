@@ -1,32 +1,31 @@
 # Steering
 type                  : steering
-name                  : scan_ac_level
+name                  : module_test_setup
 verbose               : True
 output_directory      : None
 ---
 # Camera configuration
 type                  : camera_configuration
 trigger_configuration : external
-fadcs                 : [[0,1,2,3,4,5,6,7,8],[],[]]
----
-# CTS configuration
-type                  : cts_configuration
-cts_angle             : 240.
+fadcs                 : [[0,1,2,3],[],[]]
 ---
 # Protocol configuration
 type                  : protocol_configuration
 name                  : module_test_setup
+dark_light_level               : 0.
+dark_light_number_of_events    : 20000
 low_light_level               : 0.8
-low_light_number_of_events    : 10000
+low_light_number_of_events    : 20000
 medium_light_level            : 1.2
-medium_light_number_of_events : 10000
+medium_light_number_of_events : 20000
 high_light_level              : 1.6
-high_light_number_of_events   : 10000
+high_light_number_of_events   : 20000
 ---
 # Trigger configuration
 type                  : generator_configuration
 generator_url         : 129.194.52.244
 slave_generator_url   : 129.194.53.100
+rate                  : 1000
 configuration_mode    : module_test_setup
 ---
 # Writer configruation

@@ -145,6 +145,10 @@ class Generator:
         :return:
         '''
         self.inst.write('LOCAL')
+        if  hasattr(self,'slave_url') :
+            self.inst_slave.write('LOCAL')
         self.inst.close()
+        if  hasattr(self,'slave_url') :
+            self.inst_slave.close()
         self.rm.close()
         return

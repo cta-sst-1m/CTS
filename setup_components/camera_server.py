@@ -129,4 +129,5 @@ class CameraServer:
         return
 
     def stop_server(self):
-        p = Popen('sudo kill %d'%(int(self.camera_server.pid)+3), stdout=PIPE, stderr=STDOUT,shell=True)
+        print(self.camera_server.pid+6)
+        p = Popen('sudo kill %d'%(int(self.camera_server.pid)+6), stdout=PIPE, stderr=STDOUT,shell=True)

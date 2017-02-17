@@ -84,7 +84,7 @@ if __name__ == '__main__':
     # Job configuration (the only mandatory option)
     parser.add_option("-y", "--yaml_config", dest="yaml_config",
                       help="full path of the yaml configuration function",
-                      default='/data/software/CTS/config/test_writer_server_cts_gene.yaml')
+                      default='/data/software/CTS/setup_config/mts_protocol.yaml')
 
     # Other options allows to overwrite the steering part of the yaml_config interactively
 

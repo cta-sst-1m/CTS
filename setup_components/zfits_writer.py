@@ -1,5 +1,5 @@
 from subprocess import Popen, PIPE,STDOUT
-import time
+import time,os,signal
 from utils import logger
 import logging
 from threading  import Thread
@@ -91,9 +91,9 @@ class ZFitsWriter:
             str_param = str_param+ p + ' '
         self.log.info('Running %s'%str_param)
 
-        self.writer = Popen(list_param,
+        self.writer = Popen(str_param,
                             stdout = PIPE,
-                            stderr =STDOUT)
+                            stderr =STDOUT,shell=True)
                             #env=dict(os.environ, my_env_prop='value'))
         if  not self.log_thread:
             #self.log_queue = Queue()
@@ -106,5 +106,12 @@ class ZFitsWriter:
         return
 
     def stop_writing(self):
+        os.kill(self.writer.pid,signal.SIGTERM)
+        #print('zfits',int(self.writer.pid))
+        #p = Popen('sudo kill %d'%(int(self.writer.pid)), stdout=PIPE, stderr=STDOUT,shell=True)
+        #self.writer.terminate()
+        #self.writer.kill()
+        #del self.writer
+        #self.writer = None
         self.writer.terminate()
         self.writer.kill()
