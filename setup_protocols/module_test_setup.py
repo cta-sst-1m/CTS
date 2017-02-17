@@ -1,4 +1,4 @@
-from protocols.fsm_steps import *
+from setup_protocols.fsm_steps import *
 import logging,sys,time
 from tqdm import tqdm
 from utils.logger import TqdmToLogger

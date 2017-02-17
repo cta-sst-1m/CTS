@@ -1,14 +1,17 @@
-import utils.fsm_def
+import logging
+import sys
+
 from fysom import Fysom
-import generator.generator as generator
-import logging,sys
+
+import utils.fsm_def
+from setup_components import generator as generator
 
 try:
     import IPython
 except ImportError:
     import code
 
-class GeneratorFsm(Fysom,generator.Generator):
+class GeneratorFsm(Fysom, generator.Generator):
     """
     CTSMaster implements the FSM which control the experimental setup
 
@@ -40,7 +43,7 @@ class GeneratorFsm(Fysom,generator.Generator):
         Fysom.__init__(self, cfg = fsm_table, callbacks = callbacks)
 
         # Set up the logger
-        self.logger = logging.getLogger(logger_name + '.cts_fsm')
+        self.logger = logging.getLogger(logger_name + '.setup_fsm')
         self.logger.info('\t-|--|> Append the GeneratorFSM to the setup')
         self.options = options
     # Actions callbacks
@@ -54,9 +57,9 @@ class GeneratorFsm(Fysom,generator.Generator):
         :return: handler for the fsm (boolean)
         """
         try:
-            generator.Generator.__init__(self,logger_name=sys.modules['__main__'].__name__ ,
+            generator.Generator.__init__(self, logger_name=sys.modules['__main__'].__name__,
                                          url = self.options['generator_url'],
-                                         slave_url= self.options['slave_generator_url'] if 'slave_generator_url' in self.options.keys() else None )
+                                         slave_url= self.options['slave_generator_url'] if 'slave_generator_url' in self.options.keys() else None)
             self.logger.debug('\t-|--|> Generator %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:

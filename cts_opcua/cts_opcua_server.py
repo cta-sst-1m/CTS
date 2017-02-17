@@ -4,7 +4,7 @@ import time
 
 from opcua.ua.uatypes import NodeId
 
-import cts.cameratestsetup as camtestsetup
+import cts_core.cameratestsetup as camtestsetup
 import cts_can.cts_can as com
 
 

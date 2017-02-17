@@ -1,4 +1,4 @@
-import cts.original_master as cts_master
+import cts_core.original_master as cts_master
 import sys
 from matplotlib.pyplot import ion
 
@@ -43,7 +43,7 @@ def man():
         >> help(ctsmaster.function_you_want_to_understand)
 
     From ctsmaster, you have access to all mapping information through the CTS class accessible
-    with ctsmaster.cts
+    with ctsmaster.cts_core
     '''
     print(string_help)
 

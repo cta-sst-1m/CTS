@@ -1,6 +1,6 @@
 import utils.fsm_def
 from fysom import Fysom
-from data_aquisition import camera_server
+from setup_components import camera_server
 import logging,sys
 import inspect
 

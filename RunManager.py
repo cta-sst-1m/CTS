@@ -4,7 +4,7 @@
 from optparse import OptionParser
 from  yaml import load, dump, load_all
 import logging, sys
-from cts_fsm.master_fsm import MasterFsm
+from setup_fsm.master_fsm import MasterFsm
 import time, os
 import fysom
 # internal modules
@@ -130,7 +130,7 @@ if __name__ == '__main__':
 
     # if a protocol has been defined
     if 'protocol_configuration' in options.keys():
-        protocol = __import__('protocols.%s' % options['protocol_configuration']['name'],
+        protocol = __import__('setup_protocols.%s' % options['protocol_configuration']['name'],
                               locals=None,
                               globals=None,
                               fromlist=[None],

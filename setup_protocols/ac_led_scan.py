@@ -1,5 +1,5 @@
 import logging,sys,fysom,time
-from protocols.fsm_steps import *
+from setup_protocols.fsm_steps import *
 from tqdm import tqdm
 from utils.logger import TqdmToLogger
 
@@ -63,7 +63,7 @@ def run(master_fsm):
         return False
 
     # Turn on the AC LEDs
-    master_fsm.elements['cts'].all_on('AC',0)
+    master_fsm.elements['cts_core'].all_on('AC',0)
 
     AC_DAC_Levels = master_fsm['protocol_configuration']['levels']
 
@@ -71,9 +71,9 @@ def run(master_fsm):
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
     for i,level in AC_DAC_Levels :
-        for patch in master_fsm.elements['cts'].cts.LED_patches:
+        for patch in master_fsm.elements['cts_core'].cts.LED_patches:
             log.debug('  -|> Level %d'%level)
-            master_fsm.elements['cts'].cts_client.set_ac_level(patch.camera_patch_id, level)
+            master_fsm.elements['cts_core'].cts_client.set_ac_level(patch.camera_patch_id, level)
         timeout = master_fsm['protocol_configuration']['events_per_level']\
                   /master_fsm['generator_configuration']['rate']
         if not run_level(master_fsm,timeout):
@@ -82,7 +82,7 @@ def run(master_fsm):
         pbar.update(1)
 
     # Turn off the AC LEDs
-    master_fsm.elements['cts'].all_off('AC',0)
+    master_fsm.elements['cts_core'].all_off('AC',0)
 
     if not end_run(master_fsm):
         log.error('Failed to terminate the '+protocol_name+' run')

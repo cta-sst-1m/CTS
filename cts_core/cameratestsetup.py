@@ -2,8 +2,8 @@ import numpy as np
 import sys
 
 if sys.version_info[0] == 3:
-    import cts.geometry as gp
-    import cts.camera as camera
+    import cts_core.geometry as gp
+    import cts_core.camera as camera
 else:
     import geometry as gp
     import camera as camera
@@ -46,7 +46,7 @@ class LED():
         self.camera_patch_id = _camera_patch_id
         self.angle_configuration = _cts_angle
 
-        # Define geometry components
+        # Define geometry setup_components
         # if _has_geometry:
         self._init_geometry(_x, _y)
 
@@ -123,7 +123,7 @@ class LEDPatch():
         self.id_in_led_board = self.LEDs[0].led_patch
         self.led_board = self.LEDs[0].led_board
 
-        # Define geometry components
+        # Define geometry setup_components
         if _has_geometry:
             self._init_geometry()
 

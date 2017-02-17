@@ -1,7 +1,7 @@
 import sys
 
 if sys.version_info[0] == 3:
-    import cts.geometry as gp
+    import cts_core.geometry as gp
 else:
     import geometry as gp
 

@@ -1,5 +1,5 @@
 import logging,sys,fysom,time
-from protocols.fsm_steps import *
+from setup_protocols.fsm_steps import *
 from tqdm import tqdm
 from utils.logger import TqdmToLogger
 
@@ -63,13 +63,13 @@ def run(master_fsm):
         return False
 
     # Turn on the DC LEDs
-    master_fsm.elements['cts'].all_on('DC',0)
+    master_fsm.elements['cts_core'].all_on('DC',0)
     if 'ac_level' in master_fsm['protocol_configuration'].keys():
-        master_fsm.elements['cts'].all_on('AC',0)
+        master_fsm.elements['cts_core'].all_on('AC',0)
         level = master_fsm['protocol_configuration']['ac_level']
         log.debug('  -|> Set AC Level to %d' % level)
-        for patch in master_fsm.elements['cts'].cts.LED_patches:
-            master_fsm.elements['cts'].cts_client.set_ac_level(patch.camera_patch_id, level)
+        for patch in master_fsm.elements['cts_core'].cts.LED_patches:
+            master_fsm.elements['cts_core'].cts_client.set_ac_level(patch.camera_patch_id, level)
 
     DC_DAC_Levels = master_fsm['protocol_configuration']['levels']
 
@@ -77,8 +77,8 @@ def run(master_fsm):
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
     for i,level in DC_DAC_Levels :
-        for board in master_fsm.elements['cts'].cts.LED_boards:
-            master_fsm.elements['cts'].cts_client.set_dc_level(board.internal_id, level)
+        for board in master_fsm.elements['cts_core'].cts.LED_boards:
+            master_fsm.elements['cts_core'].cts_client.set_dc_level(board.internal_id, level)
 
         timeout = master_fsm['protocol_configuration']['events_per_level']\
                   /master_fsm['generator_configuration']['rate']
@@ -88,9 +88,9 @@ def run(master_fsm):
         pbar.update(1)
 
     # Turn off the AC LEDs
-    master_fsm.elements['cts'].all_off('DC',0)
+    master_fsm.elements['cts_core'].all_off('DC',0)
     if 'ac_level' in master_fsm['protocol_configuration'].keys():
-        master_fsm.elements['cts'].all_off('AC', 0)
+        master_fsm.elements['cts_core'].all_off('AC', 0)
 
     if not end_run(master_fsm):
         log.error('Failed to terminate the '+protocol_name+' run')

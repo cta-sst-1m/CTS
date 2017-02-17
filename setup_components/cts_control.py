@@ -1,20 +1,16 @@
-import cts_opcua.cts_opcua_client as cts_client
-import cts.cameratestsetup as cameratestsetup
-import generator.generator as gen
+import logging
 
 import matplotlib.pyplot as plt
-from ctapipe.io.hessio import hessio_event_source
+import numpy as np
+from astropy import units as u
+from ctapipe import visualization
 from ctapipe.io.camera import CameraGeometry
 from ctapipe.io.camera import find_neighbor_pixels
-from ctapipe import visualization
-from utils import mcevent
-import logging
 from opcua import ua
-from astropy import units as u
 
-import numpy as np
-import time
-
+import cts_core.cameratestsetup as cameratestsetup
+import cts_opcua.cts_opcua_client as cts_client
+from utils import mcevent
 
 
 class CTSController:
