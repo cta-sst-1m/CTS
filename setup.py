@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
     name='CameraTestSetup',
     version='',
-    packages=['cts', 'cts_opcua','cts_can','cts_fsm','digicam_opcua','utils','data_aquisition','generator'],
+    packages=['cts_core', 'cts_opcua','cts_can','setup_fsm','setup_components','utils'],
     url='',
     license='',
     author='cocov',

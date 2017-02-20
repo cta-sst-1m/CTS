@@ -1,10 +1,12 @@
-import utils.fsm_def
-from fysom import Fysom
-import generator.generator as generator
-import logging,time,os,sys
-import cts.master as cts_master
-from cts_fsm import cts_fsm,writer_fsm,camera_server_fsm,generator_fsm
+import logging
+import os
 import pickle
+import sys
+
+from fysom import Fysom
+
+import utils.fsm_def
+from setup_fsm import cts_fsm,writer_fsm,camera_server_fsm,generator_fsm
 
 try:
     import IPython
@@ -51,7 +53,7 @@ class MasterFsm(Fysom):
 
         self.run_number = pickle.load( open( self.options['steering']['output_directory_basis']+"/run.p", "rb" ) )['run_number']
         self.elements = {}
-        # Initialise the components
+        # Initialise the setup_components
         if 'writer_configuration' in self.options.keys():
             # Append the path to the writer
             self.options['writer_configuration']['output_dir'] = self.options['steering']['output_directory']
@@ -71,9 +73,9 @@ class MasterFsm(Fysom):
             self.elements['writer'] = writer_fsm.WriterFsm(options=options['writer_configuration'],
                                           logger_name=logger_name,logger_dir=self.options['steering']['output_directory'] )
 
-        # Initialise the components
+        # Initialise the setup_components
         if 'cts_configuration' in self.options.keys():
-            self.elements['cts'] = cts_fsm.CTSFsm(options = options['cts_configuration'] ,
+            self.elements['cts_core'] = cts_fsm.CTSFsm(options = options['cts_configuration'] ,
                                                             logger_name=logger_name )
 
         if 'camera_server_configuration' in self.options.keys():
@@ -92,6 +94,7 @@ class MasterFsm(Fysom):
                 for fadc in range(10):
                     if (str(c*10+fadc) in options['camera_server_configuration']['N'].split(',')): continue
                     options['camera_server_configuration']['N'] += optN + '%d' % (c * 10 + fadc)
+
 
             # now reformat M
             i = 0
@@ -192,7 +195,7 @@ class MasterFsm(Fysom):
         self.run_number +=1
         pickle.dump({'run_number':self.run_number}, open(self.options['steering']['output_directory_basis']+'/run.p', "wb"))
         try:
-            for key in ['writer','camera_server','cts','generator']:
+            for key in ['writer','camera_server','cts_core','generator']:
                 if key in self.elements.keys():
                     self.elements[key].start_run()
             self.logger.info('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
@@ -218,7 +221,7 @@ class MasterFsm(Fysom):
         self.run_number +=1
         pickle.dump({'run_number':self.run_number}, open(self.options['steering']['output_directory_basis']+'/run.p', "wb"))
         try:
-            for key in ['cts','generator','writer','camera_server']:
+            for key in ['cts_core','generator','writer','camera_server']:
                 if key in self.elements.keys():
                     self.elements[key].start_trigger()
             self.logger.info('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
@@ -243,7 +246,7 @@ class MasterFsm(Fysom):
         """
         self.logger.debug('\t-|> MasterFSM stop-trigger call')
         try:
-            for key in ['generator','cts','writer','camera_server']:
+            for key in ['generator','cts_core','writer','camera_server']:
                 if key in self.elements.keys():
                     self.elements[key].stop_trigger()
             self.logger.info('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
@@ -266,7 +269,7 @@ class MasterFsm(Fysom):
         """
         self.logger.debug('\t-|> MasterFSM stop-run call')
         try:
-            for key in ['generator','cts','writer','camera_server']:
+            for key in ['camera_server','writer','generator','cts_core']:
                 if key in self.elements.keys():
                     self.elements[key].stop_run()
             self.logger.info('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
@@ -290,7 +293,7 @@ class MasterFsm(Fysom):
         """
         self.logger.debug('\t-|> MasterFSM reset call')
         try:
-            for key in self.elements.keys():
+            for key in ['writer','camera_server','generator','cts_core']:
                 if key in self.elements.keys():
                     self.elements[key].reset()
             self.logger.info('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))

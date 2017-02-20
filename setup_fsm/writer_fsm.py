@@ -1,6 +1,6 @@
 import utils.fsm_def
 from fysom import Fysom
-from data_aquisition import camera_server
+from setup_components import zfits_writer
 import logging,sys
 import inspect
 
@@ -9,14 +9,14 @@ try:
 except ImportError:
     import code
 
-class CTSFsm(Fysom,cts.master):
+class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
     """
-    The FSM that control the ZFitsCameraServer
+    The FSM that control the ZFitsWriter
 
     """
 
     def __init__(self, fsm_table=utils.fsm_def.FSM_TABLE, options = None,
-                 logger_name=sys.modules['__main__'].__name__ ,
+                 logger_name=sys.modules['__main__'].__name__ +'.master_fsm',
                  logger_dir = '.'):
         """
         Initialise function of the generator FSM
@@ -43,10 +43,10 @@ class CTSFsm(Fysom,cts.master):
         Fysom.__init__(self, cfg = fsm_table, callbacks = callbacks)
 
         # Set up the logger
-        self.logger = logging.getLogger(logger_name + '.cts_fsm')
-        self.logger.info('\t-|--|> Append the CTSFsm to the setup')
-        self.options = options
+        self.logger = logging.getLogger(logger_name + '.writer_fsm')
+        self.logger.info('\t-|--|> Append the WriterFSM to the setup')
         self.logger_dir = logger_dir
+        self.options = options
     # Actions callbacks
 
     def onbeforeallocate(self, e):
@@ -57,11 +57,11 @@ class CTSFsm(Fysom,cts.master):
         :return: handler for the fsm (boolean)
         """
         try:
-            cts.CTSMaster.__init__(self,log_location = self.logger_dir)
-            self.logger.debug('\t-|--|> CameraServer %s : move from %s to %s' % (e.event, e.src, e.dst))
+            zfits_writer.ZFitsWriter.__init__(self,log_location = self.logger_dir)
+            self.logger.debug('\t-|--|> Writer %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
-            self.logger.error('\t-|--|> Failed allocation of CameraServer %s: ', inst.__cause__)
+            self.logger.error('\t-|--|> Failed allocation of writer %s: ', inst.__cause__)
             return False
 
     def onbeforeconfigure(self, e):
@@ -71,20 +71,16 @@ class CTSFsm(Fysom,cts.master):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
+
         try:
-            self.logger.debug('-|--|>  Configure the CameraServer with: ')
+            self.logger.debug('\t-|--|>  Configure the Writer with: ')
             for k,v in self.options.items():
                 self.logger.debug('\t-|--|--|>  %s :\t %s '%(k,v))
             self.configuration(self.options)
-            self.logger.debug('-|--|>  Start the CameraServer, see log')
-            try:
-                self.start_server()
-            except Exception as inst:
-                self.logger.error(inst)
-            self.logger.debug('-|--|> CameraServer %s : move from %s to %s' % (e.event, e.src, e.dst))
+            self.logger.debug('\t-|--|> Writer %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
-            self.logger.error('-|--|> Failed configuration and start-up of CameraServer %s: ', inst.__cause__)
+            self.logger.error('\t-|--|> Failed configuration of Writer %s: ', inst.__cause__)
             return False
 
     def onbeforestart_run(self, e):
@@ -94,7 +90,13 @@ class CTSFsm(Fysom,cts.master):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        return True
+        try:
+            self.start_writing()
+            self.logger.info('\t-|--|> Writer have been started, see log')
+            return True
+        except Exception as inst:
+            self.logger.error('\t-|--|> Failed starting the writer %s: ', inst)
+            return False
 
     def onbeforestart_trigger(self, e):
         """
@@ -121,7 +123,14 @@ class CTSFsm(Fysom,cts.master):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        return True
+        try:
+            self.stop_writing()
+            print(self.writer.pid)
+            self.logger.info('\t-|--|> Writer have been stopped, see log')
+            return True
+        except Exception as inst:
+            self.logger.error('\t-|--|>  Failed stopping the run %s: ', inst)
+            return False
 
     def onbeforereset(self, e):
         """
@@ -130,13 +139,7 @@ class CTSFsm(Fysom,cts.master):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        try:
-            self.stop_server()
-            self.logger.info('-|--|> CameraServer have been stopped, see log')
-            return True
-        except Exception as inst:
-            self.logger.error('-|--|>  Failed reseting the camera server %s: ', inst.__cause__)
-            return False
+        return True
 
     def onbeforedeallocate(self, e):
         """
@@ -173,7 +176,7 @@ class CTSFsm(Fysom,cts.master):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        self.logger.debug('-|--|>CTSFsm is in NOT_READY state')
+        self.logger.debug('\t-|--|>WriterFSM is in NOT_READY state')
         return True
 
     def onready(self, e):
@@ -183,7 +186,7 @@ class CTSFsm(Fysom,cts.master):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        self.logger.debug('-|--|> CTSFsm is in READY state')
+        self.logger.debug('\t-|--|> WriterFSM is in READY state')
         return True
 
     def onstand_by(self, e):
@@ -193,7 +196,7 @@ class CTSFsm(Fysom,cts.master):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        self.logger.debug('-|--|> CTSFsm is in STAND_BY state')
+        self.logger.debug('\t-|--|> WriterFSM is in STAND_BY state')
         return True
 
     def onrunning(self, e):
@@ -203,6 +206,6 @@ class CTSFsm(Fysom,cts.master):
         :param e: event instance(see fysom)
         :return: handler for the fsm (boolean)
         """
-        self.logger.debug('-|--|> CTSFsm is in RUNNING state')
+        self.logger.debug('\t-|--|> WriterFSM is in RUNNING state')
         return True
 

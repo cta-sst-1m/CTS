@@ -1,6 +1,6 @@
 import utils.fsm_def
 from fysom import Fysom
-from data_aquisition import camera_server
+from setup_components import camera_server
 import logging,sys
 import inspect
 
@@ -46,6 +46,7 @@ class CameraServerFsm(Fysom,camera_server.CameraServer):
         self.logger = logging.getLogger(logger_name + '.camserver_fsm')
         self.logger.info('\t-|--|> Append the CameraServerFSM to the setup')
         self.options = options
+        print(options['M'],options['N'])
         self.logger_dir = logger_dir
     # Actions callbacks
 
@@ -57,11 +58,12 @@ class CameraServerFsm(Fysom,camera_server.CameraServer):
         :return: handler for the fsm (boolean)
         """
         try:
+            self.logger.debug('-|--|>  Allocate the CameraServer with: ')
             camera_server.CameraServer.__init__(self,log_location = self.logger_dir)
-            self.logger.debug('\t-|--|> CameraServer %s : move from %s to %s' % (e.event, e.src, e.dst))
+            self.logger.debug('-|--|> CameraServer %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
-            self.logger.error('\t-|--|> Failed allocation of CameraServer %s: ', inst.__cause__)
+            self.logger.error('\t-|--|> Failed allocation of CameraServer %s: ', inst)
             return False
 
     def onbeforeconfigure(self, e):
@@ -76,16 +78,12 @@ class CameraServerFsm(Fysom,camera_server.CameraServer):
             for k,v in self.options.items():
                 self.logger.debug('\t-|--|--|>  %s :\t %s '%(k,v))
             self.configuration(self.options)
-            self.logger.debug('-|--|>  Start the CameraServer, see log')
-            try:
-                self.start_server()
-            except Exception as inst:
-                self.logger.error(inst)
             self.logger.debug('-|--|> CameraServer %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
             self.logger.error('-|--|> Failed configuration and start-up of CameraServer %s: ', inst.__cause__)
             return False
+
 
     def onbeforestart_run(self, e):
         """
@@ -94,6 +92,13 @@ class CameraServerFsm(Fysom,camera_server.CameraServer):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
+
+        try:
+            self.start_server()
+            return True
+        except Exception as inst:
+            self.logger.error('\t-|--|> Failed starting the CameraServer %s: ', inst)
+            return False
         return True
 
     def onbeforestart_trigger(self, e):
@@ -121,7 +126,13 @@ class CameraServerFsm(Fysom,camera_server.CameraServer):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        return True
+        try:
+            self.stop_server()
+            self.logger.info('-|--|> CameraServer have been stopped, see log')
+            return True
+        except Exception as inst:
+            self.logger.error('-|--|>  Failed stopping the run the camera server %s: ', inst)
+            return False
 
     def onbeforereset(self, e):
         """
@@ -130,13 +141,7 @@ class CameraServerFsm(Fysom,camera_server.CameraServer):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        try:
-            self.stop_server()
-            self.logger.info('-|--|> CameraServer have been stopped, see log')
-            return True
-        except Exception as inst:
-            self.logger.error('-|--|>  Failed reseting the camera server %s: ', inst.__cause__)
-            return False
+        return True
 
     def onbeforedeallocate(self, e):
         """
