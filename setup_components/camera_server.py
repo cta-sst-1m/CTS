@@ -1,9 +1,9 @@
 
 from subprocess import Popen, PIPE, STDOUT
-import time
+import time,os,sys
 from utils import logger
 import logging
-from threading import Thread
+from threading import Thread,Event
 from queue import Queue, Empty
 
 class CameraServer:
@@ -81,6 +81,8 @@ class CameraServer:
                                  logfile='%s/%s.log' % (log_location, 'cameraserver'), stream=False)
         self.log = logging.getLogger('CameraServer')
         self.log_thread = None
+        self.log_queue = None
+        self.stop_event = None
 
     def configuration(self, config):
         """
@@ -92,18 +94,26 @@ class CameraServer:
             if hasattr(self, key):
                 setattr(self, key, val)
 
-    def enqueue_output(self, out):
-        for line in iter(out.readline, b''):
-            self.log.info('%r', line)
-            v = '%r'%(line)
-            if v.count('std::runtime_error')>0:
-                raise Exception('CameraServer',line)
+    def enqueue_output(self, q,out,stop_event):
+        while not stop_event.is_set():
+            for line in iter(out.readline,b''):
+                self.log.info('%s', line)
+                v = '%r' % (line)
+                if v.count('std::runtime_error') > 0:
+                    try:
+                        raise Exception('CameraServer', line)
+                    except Exception:
+                        q.put(sys.exc_info())
+                #if 'what():  The ZMQ context associated with the specified socket was terminated' in v:
+                # raise Exception('')
+                q.put(None)
+
 
     def start_server(self):
         list_param = []
         for k, v in self.__dict__.items():
             if type(v).__name__ in ['function', 'Logger', 'dict', 'None']: continue
-            if k in ['camera_server', 'log', 'current', '_final', 'log_thread','logger_dir']: continue
+            if k in ['camera_server', 'log', 'current', '_final', 'log_thread', 'log_queue', 'stop_event','logger_dir']: continue
             if type(v).__name__ == 'bool' and v:
                 list_param += ['-%s' % k]
             elif k in ['N','M']:
@@ -116,18 +126,26 @@ class CameraServer:
             str_param = str_param + p + ' '
         self.log.info('Running %s' % str_param)
 
-        self.camera_server = Popen(str_param, stdout=PIPE, stderr=STDOUT,shell=True)
+        self.camera_server = Popen(str_param, stdout=PIPE, stderr=STDOUT,shell=True)#,preexec_fn=os.setsid)
         # env=dict(os.environ, my_env_prop='value'))
-        if not self.log_thread:
-            # self.log_queue = Queue()
-            self.log_thread = Thread(target=self.enqueue_output, args=(self.camera_server.stdout,))
-            self.log_thread.daemon = True  # thread dies with the program
-            self.log_thread.start()
-        else:
-            self.log_thread.start()
+        if not self.log_queue : self.log_queue = Queue()
+        if not self.stop_event: self.stop_event= Event()
+        self.log_thread = Thread(target=self.enqueue_output, args=(self.log_queue ,self.camera_server.stdout,self.stop_event))
+        self.log_thread.daemon = True  # thread dies with the program
+        self.stop_event.clear()
+        self.log_thread.start()
+
 
         return
 
     def stop_server(self):
-        print(self.camera_server.pid+6)
-        p = Popen('sudo kill %d'%(int(self.camera_server.pid)+6), stdout=PIPE, stderr=STDOUT,shell=True)
+        try :
+            p = Popen('sudo kill %d'%(int(self.camera_server.pid)), stdout=PIPE, stderr=STDOUT,shell=True)
+            p.wait()
+            self.camera_server.wait()
+        except Exception:
+            self.camera_server.wait()
+        self.stop_event.set()
+        self.log_thread.join()
+
+        #p = Popen('sudo kill %d'%(int(self.camera_server.pid)+6), stdout=PIPE, stderr=STDOUT,shell=True)

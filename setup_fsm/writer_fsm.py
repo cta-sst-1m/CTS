@@ -1,8 +1,10 @@
-import utils.fsm_def
-from fysom import Fysom
-from setup_components import zfits_writer
-import logging,sys
 import inspect
+import logging
+import sys,time,os
+from fysom import Fysom
+
+import setup_fsm.fsm_def
+from setup_components import zfits_writer
 
 try:
     import IPython
@@ -15,7 +17,7 @@ class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
 
     """
 
-    def __init__(self, fsm_table=utils.fsm_def.FSM_TABLE, options = None,
+    def __init__(self, fsm_table=setup_fsm.fsm_def.FSM_TABLE, options = None,
                  logger_name=sys.modules['__main__'].__name__ +'.master_fsm',
                  logger_dir = '.'):
         """
@@ -73,9 +75,9 @@ class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
         """
 
         try:
-            self.logger.debug('\t-|--|>  Configure the Writer with: ')
+            self.logger.info('\t-|--|>  Configure the Writer with: ')
             for k,v in self.options.items():
-                self.logger.debug('\t-|--|--|>  %s :\t %s '%(k,v))
+                self.logger.info('\t-|--|--|>  %s :\t %s '%(k,v))
             self.configuration(self.options)
             self.logger.debug('\t-|--|> Writer %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
@@ -92,7 +94,8 @@ class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
         """
         try:
             self.start_writing()
-            self.logger.info('\t-|--|> Writer have been started, see log')
+            time.sleep(3)
+            self.logger.info('\t-|--|> Writer have been started')
             return True
         except Exception as inst:
             self.logger.error('\t-|--|> Failed starting the writer %s: ', inst)
@@ -125,8 +128,7 @@ class WriterFsm(Fysom,zfits_writer.ZFitsWriter):
         """
         try:
             self.stop_writing()
-            print(self.writer.pid)
-            self.logger.info('\t-|--|> Writer have been stopped, see log')
+            self.logger.info('\t-|--|> Writer have been stopped')
             return True
         except Exception as inst:
             self.logger.error('\t-|--|>  Failed stopping the run %s: ', inst)

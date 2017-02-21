@@ -12,9 +12,9 @@ fadcs                 : [[0,1,2,3],[],[]]
 # Protocol configuration
 type                  : protocol_configuration
 name                  : module_test_setup
-dark_light_level               : 0.
+dark_light_level               : 0
 dark_light_number_of_events    : 20000
-low_light_level               : 0.8
+low_light_level               : 0.9
 low_light_number_of_events    : 20000
 medium_light_level            : 1.2
 medium_light_number_of_events : 20000

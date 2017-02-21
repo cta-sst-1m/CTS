@@ -54,10 +54,8 @@ class CTSController:
         # plt.ion()
         if self.plotting:
             self.plot()
-        print('exit config of the CTSControloer')
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        print('---|> The client will be reset and turned off, wait...')
         self.reset_cts()
 
     def initialise_plots(self):
@@ -110,7 +108,7 @@ class CTSController:
             for pixel in self.cts.pixel_to_led[led_type].keys():
                 self.turn_off(pixel, led_type)
         self.plotting = True if plotting else False
-        self.log.info('Rest of the CTS has been performed')
+        self.log.debug('Rest of the CTS has been performed')
 
     def turn_on(self, pixel, led_type, level, enable_plot = True):
         """

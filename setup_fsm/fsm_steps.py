@@ -1,4 +1,4 @@
-import fysom,logging,sys
+import fysom,logging,sys,time
 
 __all__= ['allocate','configure','start_run','start_trigger','stop_trigger','stop_run','reset','deallocate','abort']
 
@@ -12,6 +12,14 @@ def allocate(master_fsm):
     log = logging.getLogger(sys.modules['__main__'].__name__)
     try:
         getattr(master_fsm, sys._getframe().f_code.co_name)()
+        i,is_ready = 0,False
+        while i<100 and not is_ready:
+            i+=1
+            time.sleep(0.1)
+            is_ready = master_fsm.current == 'not_ready'
+        if i>99:
+            log.warning('ALLOCATE timeout, go back to UNALLOCATED state')
+            return False
     except fysom.Canceled:
         log.warning('ALLOCATE canceled, go back to UNALLOCATED state')
         return False
@@ -31,6 +39,14 @@ def configure(master_fsm):
     log = logging.getLogger(sys.modules['__main__'].__name__)
     try:
         getattr(master_fsm, sys._getframe().f_code.co_name)()
+        i,is_ready = 0,False
+        while i<100 and not is_ready:
+            i+=1
+            time.sleep(0.1)
+            is_ready = master_fsm.current == 'ready'
+        if i>99:
+            log.warning('CONFIGURE timeout, go back to NOT_READY state')
+            return False
     except fysom.Canceled:
         log.warning('CONFIGURE canceled, go back to NOT_READY state')
         return False
@@ -50,6 +66,14 @@ def start_run(master_fsm):
     log = logging.getLogger(sys.modules['__main__'].__name__)
     try:
         getattr(master_fsm, sys._getframe().f_code.co_name)()
+        i,is_ready = 0,False
+        while i<100 and not is_ready:
+            i+=1
+            time.sleep(0.1)
+            is_ready = master_fsm.current == 'stand_by'
+        if i>99:
+            log.warning('START_RUN timeout, go back to READY state')
+            return False
     except fysom.Canceled:
         log.warning('START_RUN canceled, go back to READY state')
         return False
@@ -69,6 +93,14 @@ def start_trigger(master_fsm):
     log = logging.getLogger(sys.modules['__main__'].__name__)
     try:
         getattr(master_fsm, sys._getframe().f_code.co_name)()
+        i,is_ready = 0,False
+        while i<100 and not is_ready:
+            i+=1
+            time.sleep(0.1)
+            is_ready = master_fsm.current == 'running'
+        if i>99:
+            log.warning('START_TRIGGER timeout, go back to STAND_BY state')
+            return False
     except fysom.Canceled:
         log.warning('START_TRIGGER canceled, go back to STAND_BY state')
         return False
@@ -88,6 +120,14 @@ def stop_trigger(master_fsm):
     log = logging.getLogger(sys.modules['__main__'].__name__)
     try:
         getattr(master_fsm, sys._getframe().f_code.co_name)()
+        i,is_ready = 0,False
+        while i<100 and not is_ready:
+            i+=1
+            time.sleep(0.1)
+            is_ready = master_fsm.current == 'stand_by'
+        if i>99:
+            log.warning('STOP_TRIGGER timeout, go back to RUNNING state')
+            return False
     except fysom.Canceled:
         log.warning('STOP_TRIGGER canceled, go back to RUNNING state')
         return False
@@ -106,6 +146,14 @@ def stop_run(master_fsm):
     log = logging.getLogger(sys.modules['__main__'].__name__)
     try:
         getattr(master_fsm, sys._getframe().f_code.co_name)()
+        i,is_ready = 0,False
+        while i<100 and not is_ready:
+            i+=1
+            time.sleep(0.1)
+            is_ready = master_fsm.current == 'ready'
+        if i>99:
+            log.warning('STOP_RUN timeout, go back to STAND_BY state')
+            return False
     except fysom.Canceled:
         log.warning('STOP_RUN canceled, go back to STAND_BY state')
         return False
@@ -124,6 +172,14 @@ def reset(master_fsm):
     log = logging.getLogger(sys.modules['__main__'].__name__)
     try:
         getattr(master_fsm, sys._getframe().f_code.co_name)()
+        i,is_ready = 0,False
+        while i<100 and not is_ready:
+            i+=1
+            time.sleep(0.1)
+            is_ready = master_fsm.current == 'not_ready'
+        if i>99:
+            log.warning('RESET timeout, go back to READY state')
+            return False
     except fysom.Canceled:
         log.warning('RESET canceled, go back to READY state')
         return False
@@ -142,6 +198,14 @@ def deallocate(master_fsm):
     log = logging.getLogger(sys.modules['__main__'].__name__)
     try:
         getattr(master_fsm, sys._getframe().f_code.co_name)()
+        i,is_ready = 0,False
+        while i<100 and not is_ready:
+            i+=1
+            time.sleep(0.1)
+            is_ready = master_fsm.current == 'unallocated'
+        if i>99:
+            log.warning('DEALLOCATE timeout, go back to RESET state')
+            return False
     except fysom.Canceled:
         log.warning('DEALLOCATE canceled, go back to NOT_READY state')
         return False

@@ -51,8 +51,6 @@ def create_directory(options):
 
     # Check if the directory name was specified, otherwise replace by the steering name
     if not options['steering']['output_directory']:
-        print('\t\t-|> No output_directory option was specified, will use the steering name: %s'
-              % options['steering']['name'])
         options['steering']['output_directory'] = options['steering']['name']
 
     _tmp_dir = time.strftime(options['steering']['output_directory_basis'] + '/%Y%m%d', time.gmtime())
@@ -84,7 +82,7 @@ if __name__ == '__main__':
     # Job configuration (the only mandatory option)
     parser.add_option("-y", "--yaml_config", dest="yaml_config",
                       help="full path of the yaml configuration function",
-                      default='/data/software/CTS/setup_config/mts_protocol.yaml')
+                      default='/data/software/CTS/setup_config/scan_ac_led.yaml')
 
     # Other options allows to overwrite the steering part of the yaml_config interactively
 
@@ -102,11 +100,12 @@ if __name__ == '__main__':
                       help="Basis directory for commissioning data storage", default='/data/datasets/TEST')
 
     # Parse the options
+    # Parse the options
     (options, args) = parser.parse_args()
     # Merge the configurations of yaml with the inteactive one
     options = load_configuration(options)
     # Rename the process
-    __name__ = options['steering']['name']
+    __name__ = 'RunManager'#options['steering']['name']
     # Create the directory
     create_directory(options)
     # Start the loggers
@@ -116,28 +115,45 @@ if __name__ == '__main__':
     # Some logging
     log = logging.getLogger(sys.modules['__main__'].__name__)
 
-    log.info('\t\t-|> Will run %s with the following configuration:' % options['steering']['name'])
-    log.info('\t\t-|> Files will be stored in: %s' % options['steering']['output_directory'])
+    log.info('\t\t-|----------------------------------------------------------------------------')
+    log.info('\t\t-|> Run %s protocol' % options['steering']['name'])
+    log.info('\t\t-|----------------------------------------------------------------------------')
+    log.info('\t\t-|> Main configuration :')
+    log.info('\t\t-|--|> output directory: %s' % options['steering']['output_directory'])
 
     for key, val in options.items():
         log.info('\t\t |--|> %s :' % (key))
         for key_sub, val_sub in val.items():
             log.info('\t\t |----|> %s : \t %s' % (key_sub, val_sub))
-    log.info('\t\t-|')
+    log.info('\t\t-|----------------------------------------------------------------------------')
+
+    log.info('\033[1m\033[91m\t\t-|> Build the experimental setup\033[0m' )
 
     # Start the master FSM
     masterfsm = MasterFsm(options=options, logger_name=sys.modules['__main__'].__name__)
 
     # if a protocol has been defined
     if 'protocol_configuration' in options.keys():
-        protocol = __import__('setup_protocols.%s' % options['protocol_configuration']['name'],
-                              locals=None,
-                              globals=None,
-                              fromlist=[None],
-                              level=0)
+        if isinstance(options['protocol_configuration']['name'], list ):
+            for protocol_config in options['protocol_configuration']['name']:
+                protocol = __import__('setup_protocols.%s' % protocol_config,
+                                      locals=None,
+                                      globals=None,
+                                      fromlist=[None],
+                                      level=0)
+            if protocol.run(masterfsm):
+                log.info('\t\t-|----------------------------------------------------------------------------')
+        else:
+            protocol = __import__('setup_protocols.%s' % options['protocol_configuration']['name'],
+                                  locals=None,
+                                  globals=None,
+                                  fromlist=[None],
+                                  level=0)
+            if protocol.run(masterfsm):
+                log.info('\t\t-|----------------------------------------------------------------------------')
+                log.info('\t\t-|> Ready to analyse')
 
-        if protocol.run(masterfsm):
-            log.info('\t\t-|>Ready to analyse')
+
     else:
         try:
             masterfsm.allocate()

@@ -1,8 +1,11 @@
-import utils.fsm_def
-from fysom import Fysom
-from setup_components import camera_server
-import logging,sys
 import inspect
+import logging
+import sys,time
+from fysom import Fysom
+
+from subprocess import Popen, PIPE, STDOUT
+import setup_fsm.fsm_def
+from setup_components import camera_server
 
 try:
     import IPython
@@ -15,8 +18,8 @@ class CameraServerFsm(Fysom,camera_server.CameraServer):
 
     """
 
-    def __init__(self, fsm_table=utils.fsm_def.FSM_TABLE, options = None,
-                 logger_name=sys.modules['__main__'].__name__ ,
+    def __init__(self, fsm_table=setup_fsm.fsm_def.FSM_TABLE, options = None,
+                 logger_name=sys.modules['__main__'].__name__,
                  logger_dir = '.'):
         """
         Initialise function of the generator FSM
@@ -40,13 +43,13 @@ class CameraServerFsm(Fysom,camera_server.CameraServer):
                      'onbeforereset': self.onbeforereset,
                      'onbeforedeallocate': self.onbeforedeallocate}
 
+
         Fysom.__init__(self, cfg = fsm_table, callbacks = callbacks)
 
         # Set up the logger
         self.logger = logging.getLogger(logger_name + '.camserver_fsm')
         self.logger.info('\t-|--|> Append the CameraServerFSM to the setup')
         self.options = options
-        print(options['M'],options['N'])
         self.logger_dir = logger_dir
     # Actions callbacks
 
@@ -58,9 +61,16 @@ class CameraServerFsm(Fysom,camera_server.CameraServer):
         :return: handler for the fsm (boolean)
         """
         try:
-            self.logger.debug('-|--|>  Allocate the CameraServer with: ')
+            self.logger.info('\t-|--|>  Configure the CameraServer with: ')
             camera_server.CameraServer.__init__(self,log_location = self.logger_dir)
-            self.logger.debug('-|--|> CameraServer %s : move from %s to %s' % (e.event, e.src, e.dst))
+            for k,v in self.options.items():
+                self.logger.info('\t-|--|--|>  %s :\t %s '%(k,v))
+            self.configuration(self.options)
+            self.logger.debug('\t-|--|> Waiting for the server to start')
+            self.start_server()
+            time.sleep(3)
+            self.logger.info('\t-|--|>  Camera server has been started')
+            self.logger.debug('\t-|--|> CameraServer %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
             self.logger.error('\t-|--|> Failed allocation of CameraServer %s: ', inst)
@@ -73,17 +83,7 @@ class CameraServerFsm(Fysom,camera_server.CameraServer):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        try:
-            self.logger.debug('-|--|>  Configure the CameraServer with: ')
-            for k,v in self.options.items():
-                self.logger.debug('\t-|--|--|>  %s :\t %s '%(k,v))
-            self.configuration(self.options)
-            self.logger.debug('-|--|> CameraServer %s : move from %s to %s' % (e.event, e.src, e.dst))
-            return True
-        except Exception as inst:
-            self.logger.error('-|--|> Failed configuration and start-up of CameraServer %s: ', inst.__cause__)
-            return False
-
+        return True
 
     def onbeforestart_run(self, e):
         """
@@ -92,14 +92,9 @@ class CameraServerFsm(Fysom,camera_server.CameraServer):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-
-        try:
-            self.start_server()
-            return True
-        except Exception as inst:
-            self.logger.error('\t-|--|> Failed starting the CameraServer %s: ', inst)
-            return False
         return True
+
+
 
     def onbeforestart_trigger(self, e):
         """
@@ -126,13 +121,7 @@ class CameraServerFsm(Fysom,camera_server.CameraServer):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        try:
-            self.stop_server()
-            self.logger.info('-|--|> CameraServer have been stopped, see log')
-            return True
-        except Exception as inst:
-            self.logger.error('-|--|>  Failed stopping the run the camera server %s: ', inst)
-            return False
+        return True
 
     def onbeforereset(self, e):
         """
@@ -150,7 +139,14 @@ class CameraServerFsm(Fysom,camera_server.CameraServer):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        return True
+        try:
+            self.stop_server()
+            #time.sleep(5)
+            self.logger.info('\t-|--|> CameraServer have been stopped')
+            return True
+        except Exception as inst:
+            self.logger.error('\t-|--|>  Failed stopping the run the camera server %s: ', inst)
+            return False
 
     def onbeforeabort(self, e):
         """

@@ -1,6 +1,10 @@
-import logging,sys,fysom,time
-from setup_protocols.fsm_steps import *
+import fysom
+import logging
+import sys
+import time
 from tqdm import tqdm
+
+from setup_fsm.fsm_steps import *
 from utils.logger import TqdmToLogger
 
 protocol_name = 'SIMPLE_DAQ'

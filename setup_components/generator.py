@@ -17,6 +17,7 @@ class Generator:
     def __init__(self,logger_name ,url = "129.194.52.244", slave_url = None):
         self.log = logging.getLogger(logger_name+'.generator')
         self.url = url
+        self.slave_off = True
         if slave_url:
             self.slave_url = slave_url
         try:
@@ -107,6 +108,8 @@ class Generator:
     def configure_slave(self, amplitude = 0 , offset = 0 ):
         self.inst_slave.write('AMPL %0.3f'%amplitude)
         self.inst_slave.write('DCOFFS %0.4f'%offset)
+        if amplitude == 0.: self.slave_off = True
+        else: self.slave_off = False
         return
 
     def start_trigger_sequence(self):
@@ -118,7 +121,10 @@ class Generator:
             self.inst.write('*TRG')
         elif self.conf_type == 'module_test_setup':
             self.inst.write('OUTPUT ON')
-            self.inst_slave.write('OUTPUT ON')
+            if self.slave_off :
+                self.inst_slave.write('OUTPUT OFF')
+            else:
+                self.inst_slave.write('OUTPUT ON')
         return
 
 
@@ -136,6 +142,8 @@ class Generator:
 
     def reset_generator(self):
         self.inst.write('*RST')
+        if hasattr(self, 'slave_url'):
+            self.inst_slave.write('*RST')
         return
 
 

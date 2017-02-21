@@ -1,9 +1,8 @@
 import logging
 import sys
-
 from fysom import Fysom
 
-import utils.fsm_def
+import setup_fsm.fsm_def
 from setup_components import cts_control
 
 try:
@@ -17,8 +16,8 @@ class CTSFsm(Fysom, cts_control.CTSController):
 
     """
 
-    def __init__(self, fsm_table=utils.fsm_def.FSM_TABLE, options = None,
-                 logger_name=sys.modules['__main__'].__name__ ):
+    def __init__(self, fsm_table=setup_fsm.fsm_def.FSM_TABLE, options = None,
+                 logger_name=sys.modules['__main__'].__name__):
         """
         Initialise function of the generator FSM
 
@@ -72,10 +71,9 @@ class CTSFsm(Fysom, cts_control.CTSController):
         :return: handler for the fsm (boolean)
         """
         try:
-            self.logger.debug('-|--|>  Configure the CTSMaster with: ')
+            self.logger.info('\t-|--|>  Configure the CTSMaster with: ')
             for k,v in self.options.items():
-                self.logger.debug('\t-|--|--|>  %s :\t %s '%(k,v))
-            print('enter config')
+                self.logger.info('\t-|--|--|>  %s :\t %s '%(k,v))
             try:
                 self.configuration(self.options)
             except Exception as inst:
