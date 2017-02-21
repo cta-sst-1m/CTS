@@ -73,7 +73,7 @@ def run(master_fsm):
     AC_DAC_Levels = master_fsm.options['protocol_configuration']['levels']
 
     # Define the progress bar
-    log.info('\033[1m\033[91m\t\t-|> Start the DAC level loop\033[0m' )
+    log.info('\033[1m\033[91m\t\t-|> Start the AC DAC level loop\033[0m' )
     pbar = tqdm(total=len(AC_DAC_Levels))
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
     for i,level in enumerate(AC_DAC_Levels) :
