@@ -55,6 +55,7 @@ class ZFitsWriter:
         self.max_comp_mem = 5000
         self.max_file_size = 5000
         self.suffix = ''
+        self.run_number_in_suffix = True
         logger.initialise_logger(logname='ZFitsWriter',
                                             logfile='%s/%s.log' % (log_location,'zfitswriter'),stream=False)
         self.log = logging.getLogger('ZFitsWriter')
@@ -73,7 +74,8 @@ class ZFitsWriter:
                 setattr(self,key,val)
 
     def update_run_number(self,n):
-        self.suffix = 'run_%d'%n
+        if self.run_number_in_suffix:
+            self.suffix = 'run_%d'%n
 
 
     def log_subprocess_output(self,pipe):
@@ -89,7 +91,7 @@ class ZFitsWriter:
         list_param = []
         for k,v in self.__dict__.items():
             if type(v).__name__ in ['function','Logger','dict','None']: continue
-            if k in ['writer','log','current','_final','log_thread','logger_dir','log_thread','log_queue','stop_event']: continue
+            if k in ['writer','log','current','_final','log_thread','logger_dir','log_thread','log_queue','stop_event','run_number_in_suffix']: continue
             if k == 'loop' and v :
                 list_param +=['--%s'%k]
             else :

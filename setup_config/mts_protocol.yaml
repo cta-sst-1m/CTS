@@ -33,6 +33,7 @@ type                  : writer_configuration
 compression           : zrice
 number_of_trhead      : 5
 input                 : tcp://localhost:13581
+run_number_in_suffix  : False
 ---
 # Camera Server Configuration
 type                  : camera_server_configuration

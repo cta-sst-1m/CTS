@@ -53,7 +53,7 @@ def single_run(master_fsm,sub_run= 'low_light'):
     # CONFIGURE FOR WRITER
     master_fsm.options['writer_configuration']['max_evts_per_file'] =\
         master_fsm.options['protocol_configuration']['%s_number_of_events'%sub_run]
-
+    master_fsm.elements['writer'].suffix = sub_run
     # NOW CONFIGURE THE GENERATOR SLAVE FOR THE LIGHT LEVEL
     offset = master_fsm.options['protocol_configuration']['%s_level'%sub_run] / 2
     master_fsm.options['generator_configuration']['slave_amplitude']= master_fsm.options['protocol_configuration']['%s_level'%sub_run]
