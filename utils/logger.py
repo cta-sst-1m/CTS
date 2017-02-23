@@ -18,7 +18,7 @@ def initialise_logger(logname = sys.modules['__main__'].__name__, verbose = Fals
     fh = logging.FileHandler(logfile)
     fh.setLevel(logging.DEBUG if verbose else logging.INFO)
     ch = logging.StreamHandler()
-    ch.setLevel(level= logging.DEBUG)
+    ch.setLevel(level= logging.INFO)
     # define format
     formatter_fh = logging.Formatter('%(asctime)s | %(levelname)s | %(name)s : \t %(message)s')
     formatter_ch = logging.Formatter('%(levelname)s:%(name)s: %(message)s')

@@ -57,14 +57,11 @@ class CTSClient():
         Call the necessary step to exit the client
         """
         # set the DCDC values to OFF (they are applied the first time when a level value is applied, ie in the reset)
-        print('go for dcdcoff')
         self._dcdc_off()
         # put all led to OFF and all level to 0
         # self.reset()
         # disconnect
-        print('go for disconnect')
         self.client.disconnect()
-        print('disconnected')
 
     # Functions published by the OpcUa server
 

@@ -15,8 +15,9 @@ cts_angle             : 240.
 ---
 # Trigger configuration
 type                  : generator_configuration
-config                : master
-rate                  : 1000
+generator_url         : 129.194.52.244
+rate                  : 5000
+configuration_mode    : burst
 ---
 # Writer configruation
 type                  : writer_configuration

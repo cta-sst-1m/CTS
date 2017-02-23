@@ -2,10 +2,9 @@ import logging
 import os
 import pickle
 import sys
-
 from fysom import Fysom
 
-import utils.fsm_def
+import setup_fsm.fsm_def
 from setup_fsm import cts_fsm,writer_fsm,camera_server_fsm,generator_fsm
 
 try:
@@ -19,7 +18,7 @@ class MasterFsm(Fysom):
 
     """
 
-    def __init__(self, fsm_table=utils.fsm_def.FSM_TABLE, options = None , logger_name=sys.modules['__main__'].__name__ ):
+    def __init__(self, fsm_table=setup_fsm.fsm_def.FSM_TABLE, options = None, logger_name=sys.modules['__main__'].__name__):
         """
         Initialise function of the generator FSM
 
@@ -65,7 +64,12 @@ class MasterFsm(Fysom):
                 self.options['writer_configuration']['num_comp_threads'] = self.options['writer_configuration'].pop('number_of_thread')
             if 'number_of_events_per_file' in self.options['writer_configuration'].keys():
                 self.options['writer_configuration']['max_evts_per_file'] = self.options['writer_configuration'].pop('number_of_events_per_file')
-            # Initialise the componant
+            if 'maximum_file_size' in self.options['writer_configuration'].keys():
+                self.options['writer_configuration']['max_file_size'] = self.options['writer_configuration'].pop('maximum_file_size')
+            elif 'max_evts_per_file' in self.options['writer_configuration'] and not ('maximum_file_size' in self.options['writer_configuration'].keys() ):
+                self.options['writer_configuration']['max_file_size'] = 5000
+
+                # Initialise the componant
 
             self.logger.debug('\t |--|> Update the writer configuration')
             for k,v in options['writer_configuration'].items():
@@ -130,8 +134,6 @@ class MasterFsm(Fysom):
                                           logger_name=logger_name )
 
 
-    # Actions callbacks
-
     def onbeforeallocate(self, e):
         """
         FSM callback on the allocate event
@@ -141,10 +143,10 @@ class MasterFsm(Fysom):
         """
         self.logger.debug('\t-|> Start MasterFSM Allocation')
         try:
-            status_ok = True
-            for key,val in self.elements.items():
-                val.allocate()
-            self.logger.info('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
+            for key in ['generator','camera_server','cts_core','writer']:
+                if key in self.elements.keys():
+                    self.elements[key].allocate()
+            self.logger.debug('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
 
             for key,val in self.elements.items():
                 if val.current != 'not_ready':
@@ -152,7 +154,7 @@ class MasterFsm(Fysom):
             return True
 
         except Exception as inst:
-            self.logger.info('\t-|> Failed ALLOCATE of MasterFSM %s: ', inst.__cause__)
+            self.logger.error('\t-|> Failed ALLOCATE of MasterFSM %s: ', inst)
             # revert the child processes
             for key,val in self.elements.items():
                 if val.current == 'not_ready':
@@ -180,7 +182,7 @@ class MasterFsm(Fysom):
             return True
 
         except Exception as inst:
-            self.logger.info('\t-|> Failed CONFIGURE of MasterFSM %s: ', inst.__cause__)
+            self.logger.error('\t-|> Failed CONFIGURE of MasterFSM %s: ', inst)
             return False
 
 
@@ -197,8 +199,9 @@ class MasterFsm(Fysom):
         try:
             for key in ['writer','camera_server','cts_core','generator']:
                 if key in self.elements.keys():
+                    if key == 'writer': self.elements[key].update_run_number(self.run_number)
                     self.elements[key].start_run()
-            self.logger.info('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
+            self.logger.debug('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
 
             for key, val in self.elements.items():
                 if val.current != 'stand_by':
@@ -206,7 +209,7 @@ class MasterFsm(Fysom):
             return True
 
         except Exception as inst:
-            self.logger.info('\t-|> Failed START_RUN of MasterFSM %s: ', inst.__cause__)
+            self.logger.error('\t-|> Failed START_RUN of MasterFSM %s: ', inst)
             return False
 
     def onbeforestart_trigger(self, e):
@@ -216,15 +219,12 @@ class MasterFsm(Fysom):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-
         self.logger.debug('\t-|> MasterFSM start-trigger call')
-        self.run_number +=1
-        pickle.dump({'run_number':self.run_number}, open(self.options['steering']['output_directory_basis']+'/run.p', "wb"))
         try:
             for key in ['cts_core','generator','writer','camera_server']:
                 if key in self.elements.keys():
                     self.elements[key].start_trigger()
-            self.logger.info('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
+            self.logger.debug('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
 
             for key, val in self.elements.items():
                 if val.current != 'running':
@@ -232,7 +232,7 @@ class MasterFsm(Fysom):
             return True
 
         except Exception as inst:
-            self.logger.info('\t-|> Failed START_TRIGGER of MasterFSM %s: ', inst.__cause__)
+            self.logger.error('\t-|> Failed START_TRIGGER of MasterFSM %s: ', inst)
             return False
 
 
@@ -249,7 +249,7 @@ class MasterFsm(Fysom):
             for key in ['generator','cts_core','writer','camera_server']:
                 if key in self.elements.keys():
                     self.elements[key].stop_trigger()
-            self.logger.info('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
+            self.logger.debug('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
 
             for key, val in self.elements.items():
                 if val.current != 'stand_by':
@@ -257,7 +257,7 @@ class MasterFsm(Fysom):
             return True
 
         except Exception as inst:
-            self.logger.info('\t-|> Failed STOP_TRIGGER of MasterFSM %s: ', inst.__cause__)
+            self.logger.error('\t-|> Failed STOP_TRIGGER of MasterFSM %s: ', inst)
             return False
 
     def onbeforestop_run(self, e):
@@ -272,7 +272,7 @@ class MasterFsm(Fysom):
             for key in ['camera_server','writer','generator','cts_core']:
                 if key in self.elements.keys():
                     self.elements[key].stop_run()
-            self.logger.info('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
+            self.logger.debug('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
 
             for key, val in self.elements.items():
                 if val.current != 'ready':
@@ -280,7 +280,7 @@ class MasterFsm(Fysom):
             return True
 
         except Exception as inst:
-            self.logger.info('\t-|> Failed STOP_RUN of MasterFSM %s: ', inst.__cause__)
+            self.logger.error('\t-|> Failed STOP_RUN of MasterFSM %s: ', inst)
             return False
 
 
@@ -296,7 +296,7 @@ class MasterFsm(Fysom):
             for key in ['writer','camera_server','generator','cts_core']:
                 if key in self.elements.keys():
                     self.elements[key].reset()
-            self.logger.info('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
+            self.logger.debug('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
 
             for key, val in self.elements.items():
                 if val.current != 'not_ready':
@@ -304,7 +304,7 @@ class MasterFsm(Fysom):
             return True
 
         except Exception as inst:
-            self.logger.info('\t-|> Failed RESET of MasterFSM %s: ', inst.__cause__)
+            self.logger.error('\t-|> Failed RESET of MasterFSM %s: ', inst)
             return False
 
 
@@ -320,7 +320,7 @@ class MasterFsm(Fysom):
             for key in self.elements.keys():
                 if key in self.elements.keys():
                     self.elements[key].deallocate()
-            self.logger.info('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
+            self.logger.debug('\t-|>  Master %s : move from %s to %s' % (e.event, e.src, e.dst))
 
             for key, val in self.elements.items():
                 if val.current != 'unallocated':
@@ -328,7 +328,7 @@ class MasterFsm(Fysom):
             return True
 
         except Exception as inst:
-            self.logger.info('\t-|> Failed DEALLOCATE of MasterFSM %s: ', inst.__cause__)
+            self.logger.error('\t-|> Failed DEALLOCATE of MasterFSM %s: ', inst)
             return False
 
 
@@ -360,7 +360,7 @@ class MasterFsm(Fysom):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        self.logger.debug('\t-|> MasterFSM is in NOT_READY state')
+        self.logger.info('\t-|> MasterFSM is in NOT_READY state')
         return True
 
     def onready(self, e):
@@ -370,7 +370,7 @@ class MasterFsm(Fysom):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        self.logger.debug('\t-|> MasterFSM is in READY state')
+        self.logger.info('\t-|> MasterFSM is in READY state')
         return True
 
     def onstand_by(self, e):
@@ -380,7 +380,7 @@ class MasterFsm(Fysom):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-        self.logger.debug('\t-|> MasterFSM is on STAND_BY state')
+        #self.logger.info('\t-|> MasterFSM is on STAND_BY state')
         return True
 
     def onrunning(self, e):
@@ -390,6 +390,6 @@ class MasterFsm(Fysom):
         :param e: event instance(see fysom)
         :return: handler for the fsm (boolean)
         """
-        self.logger.debug('\t-|> MasterFSM is on RUNNING state')
+        #self.logger.info('\t-|> MasterFSM is on RUNNING state')
         return True
 

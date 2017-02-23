@@ -1,9 +1,8 @@
 import logging
-import sys
-
+import sys,time
 from fysom import Fysom
 
-import utils.fsm_def
+import setup_fsm.fsm_def
 from setup_components import generator as generator
 
 try:
@@ -16,8 +15,8 @@ class GeneratorFsm(Fysom, generator.Generator):
     CTSMaster implements the FSM which control the experimental setup
 
     """
-    def __init__(self, fsm_table=utils.fsm_def.FSM_TABLE, options = None,
-                 logger_name=sys.modules['__main__'].__name__ ):
+    def __init__(self, fsm_table=setup_fsm.fsm_def.FSM_TABLE, options = None,
+                 logger_name=sys.modules['__main__'].__name__):
         """
         Initialise function of the generator FSM
 
@@ -60,6 +59,9 @@ class GeneratorFsm(Fysom, generator.Generator):
             generator.Generator.__init__(self, logger_name=sys.modules['__main__'].__name__,
                                          url = self.options['generator_url'],
                                          slave_url= self.options['slave_generator_url'] if 'slave_generator_url' in self.options.keys() else None)
+
+            self.apply_config(self.options['configuration_mode'])
+            time.sleep(3)
             self.logger.debug('\t-|--|> Generator %s : move from %s to %s' % (e.event, e.src, e.dst))
             return True
         except Exception as inst:
@@ -76,11 +78,37 @@ class GeneratorFsm(Fysom, generator.Generator):
         :return: handler for the fsm (boolean)
         """
         try:
-            self.logger.debug('-|--|>  Configure the Generator with: ')
+            self.logger.info('\t-|--|>  Configure the Generator with: ')
             for k,v in self.options.items():
-                self.logger.debug('\t-|--|--|>  %s :\t %s '%(k,v))
+                self.logger.info('\t-|--|--|>  %s :\t %s '%(k,v))
             try:
-                self.apply_config(self.options['configuration_mode'])
+                if ('rate' in self.options.keys()) and ('number_of_pulses' in self.options.keys()):
+                    self.configure_trigger( freq=int(self.options['rate']), n_pulse=int(self.options['number_of_pulses']))
+                if 'slave_generator_url' in self.options.keys():
+                    self.configure_slave(amplitude=self.options['slave_amplitude'] if 'slave_amplitude' in self.options.keys() else 0.,
+                                         offset=self.options['slave_offset'] if 'slave_offset' in self.options.keys() else 0.)
+            except Exception as inst:
+                raise inst
+            self.logger.debug('\t\t-|--|> Generator %s : move from %s to %s' % (e.event, e.src, e.dst))
+            return True
+        except Exception as inst:
+            self.logger.error('-|--|> Failed configuration of Generator %s: ', inst)
+            return False
+
+    def onbeforestart_run(self, e):
+        """
+        FSM callback on the start_run event
+
+        :param e: event instance (see fysom)
+        :return: handler for the fsm (boolean)
+        """
+
+        try:
+            self.logger.debug('-|--|>  Run dependent configuration of the Generator')
+            for k in ['rate','number_of_pulses','slave_amplitude','slave_offset']:
+                if k in self.options.keys():
+                    self.logger.debug('\t-|--|--|>  %s :\t %s '%(k,self.options[k]))
+            try:
                 if ('rate' in self.options.keys()) and ('number_of_pulses' in self.options.keys()):
                     self.configure_trigger( freq=int(self.options['rate']), n_pulse=int(self.options['number_of_pulses']))
                 if 'slave_generator_url' in self.options.keys():
@@ -94,13 +122,6 @@ class GeneratorFsm(Fysom, generator.Generator):
             self.logger.error('-|--|> Failed configuration of Generator %s: ', inst)
             return False
 
-    def onbeforestart_run(self, e):
-        """
-        FSM callback on the start_run event
-
-        :param e: event instance (see fysom)
-        :return: handler for the fsm (boolean)
-        """
         return True
 
     def onbeforestart_trigger(self, e):
@@ -113,7 +134,6 @@ class GeneratorFsm(Fysom, generator.Generator):
         try:
             self.logger.debug('-|--|>  Send trigger from Generator ')
             try:
-                #print('No trig')
                 self.start_trigger_sequence()
             except Exception as inst:
                 raise inst
@@ -135,7 +155,6 @@ class GeneratorFsm(Fysom, generator.Generator):
         try:
             self.logger.debug('-|--|>  Send trigger from Generator ')
             try:
-                #print('No stop trig')
                 self.stop_trigger_sequence()
             except Exception as inst:
                 raise inst

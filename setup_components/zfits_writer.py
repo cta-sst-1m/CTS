@@ -2,7 +2,7 @@ from subprocess import Popen, PIPE,STDOUT
 import time,os,signal
 from utils import logger
 import logging
-from threading  import Thread
+from threading  import Thread,Event
 from queue import Queue, Empty
 
 class ZFitsWriter:
@@ -52,11 +52,15 @@ class ZFitsWriter:
         self.max_evts_per_file = 10000
         self.num_comp_threads = 5
         self.comp_scheme = 'zrice'
+        self.max_comp_mem = 5000
+        self.max_file_size = 5000
         self.suffix = ''
         logger.initialise_logger(logname='ZFitsWriter',
                                             logfile='%s/%s.log' % (log_location,'zfitswriter'),stream=False)
         self.log = logging.getLogger('ZFitsWriter')
         self.log_thread = None
+        self.log_queue = None
+        self.stop_event = None
 
     def configuration(self, config):
         """
@@ -68,19 +72,24 @@ class ZFitsWriter:
             if hasattr(self,key):
                 setattr(self,key,val)
 
+    def update_run_number(self,n):
+        self.suffix = 'run_%d'%n
+
+
     def log_subprocess_output(self,pipe):
         for line in iter(pipe.readline, b''):  # b'\n'-separated lines
             self.log.info('%r', line)
 
-    def enqueue_output(self,out):
-        for line in iter(out.readline, b''):
-            self.log.info('%r', line)
+    def enqueue_output(self,q,out,stop_event):
+        while not stop_event.is_set():
+            for line in iter(out.readline, b''):
+                self.log.info('%r', line)
 
     def start_writing(self):
         list_param = []
         for k,v in self.__dict__.items():
             if type(v).__name__ in ['function','Logger','dict','None']: continue
-            if k in ['writer','log','current','_final','log_thread','logger_dir']: continue
+            if k in ['writer','log','current','_final','log_thread','logger_dir','log_thread','log_queue','stop_event']: continue
             if k == 'loop' and v :
                 list_param +=['--%s'%k]
             else :
@@ -93,25 +102,21 @@ class ZFitsWriter:
 
         self.writer = Popen(str_param,
                             stdout = PIPE,
-                            stderr =STDOUT,shell=True)
+                            stderr =STDOUT,shell=True, preexec_fn=os.setsid)
                             #env=dict(os.environ, my_env_prop='value'))
-        if  not self.log_thread:
-            #self.log_queue = Queue()
-            self.log_thread = Thread(target=self.enqueue_output, args=(self.writer.stdout,))
-            self.log_thread.daemon = True # thread dies with the program
-            self.log_thread.start()
-        else:
-            self.log_thread.start()
+
+
+        if not self.log_queue : self.log_queue = Queue()
+        if not self.stop_event: self.stop_event= Event()
+        self.log_thread = Thread(target=self.enqueue_output, args=(self.log_queue ,self.writer.stdout,self.stop_event))
+        self.log_thread.daemon = True  # thread dies with the program
+        self.stop_event.clear()
+        self.log_thread.start()
 
         return
 
     def stop_writing(self):
-        os.kill(self.writer.pid,signal.SIGTERM)
-        #print('zfits',int(self.writer.pid))
-        #p = Popen('sudo kill %d'%(int(self.writer.pid)), stdout=PIPE, stderr=STDOUT,shell=True)
-        #self.writer.terminate()
-        #self.writer.kill()
-        #del self.writer
-        #self.writer = None
-        self.writer.terminate()
-        self.writer.kill()
+        os.killpg(os.getpgid(self.writer.pid), signal.SIGTERM)
+        self.writer.wait()
+        self.stop_event.set()
+        self.log_thread.join()
