@@ -63,7 +63,7 @@ def single_run(master_fsm,sub_run= 'low_light'):
     if not start_trigger(master_fsm): return False
 
     timeout = float(master_fsm.options['protocol_configuration']['%s_number_of_events'%sub_run])\
-              /master_fsm.options['generator_configuration']['rate']+3
+              /master_fsm.options['generator_configuration']['rate']
 
     pbar = tqdm(total=int(timeout))
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
@@ -74,6 +74,7 @@ def single_run(master_fsm,sub_run= 'low_light'):
         i+=1
 
     if not stop_trigger(master_fsm): return False
+    time.sleep(2)
     if not stop_run(master_fsm): return False
 
     return True
@@ -94,9 +95,13 @@ def run(master_fsm):
     if not prepare_run(master_fsm):
         log.error('Failed to prepare the MTS run')
         return False
-
     # Now move to the various runs
-    for l in ['dark','low','medium','high']:
+    # Get the run names:
+    run_set = set()
+    for run in master_fsm.options['protocol_configuration']:
+        if run == 'name': continue
+        run_set.add(run.split('_')[0])
+    for l in run_set:
         if not single_run(master_fsm, sub_run='%s_light'%l):
             log.error('Failed to run the %s light MTS'%l)
             return False

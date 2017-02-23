@@ -64,7 +64,12 @@ class MasterFsm(Fysom):
                 self.options['writer_configuration']['num_comp_threads'] = self.options['writer_configuration'].pop('number_of_thread')
             if 'number_of_events_per_file' in self.options['writer_configuration'].keys():
                 self.options['writer_configuration']['max_evts_per_file'] = self.options['writer_configuration'].pop('number_of_events_per_file')
-            # Initialise the componant
+            if 'maximum_file_size' in self.options['writer_configuration'].keys():
+                self.options['writer_configuration']['max_file_size'] = self.options['writer_configuration'].pop('maximum_file_size')
+            elif 'max_evts_per_file' in self.options['writer_configuration'] and not ('maximum_file_size' in self.options['writer_configuration'].keys() ):
+                self.options['writer_configuration']['max_file_size'] = 5000
+
+                # Initialise the componant
 
             self.logger.debug('\t |--|> Update the writer configuration')
             for k,v in options['writer_configuration'].items():
@@ -214,10 +219,7 @@ class MasterFsm(Fysom):
         :param e: event instance (see fysom)
         :return: handler for the fsm (boolean)
         """
-
         self.logger.debug('\t-|> MasterFSM start-trigger call')
-        self.run_number +=1
-        pickle.dump({'run_number':self.run_number}, open(self.options['steering']['output_directory_basis']+'/run.p', "wb"))
         try:
             for key in ['cts_core','generator','writer','camera_server']:
                 if key in self.elements.keys():

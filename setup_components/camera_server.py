@@ -65,7 +65,7 @@ class CameraServer:
         # self.N remap id mod
         self.N = None
         # self.T local clock rate
-        self.T = 1
+        self.T = -1
         # self.x pixel mapping
         self.x = '/data/software/DAQ/CamerasToACTL/Cameras/Digicam/digicam_pixels_mapping_V3.txt'
         # self.F future time margin ???
@@ -76,6 +76,8 @@ class CameraServer:
         self.q = 300000
         # self.u set socket buffer size
         self.u = 10000000000
+        # self.I set socket buffer size
+        self.I = 500000
 
         logger.initialise_logger(logname='CameraServer',
                                  logfile='%s/%s.log' % (log_location, 'cameraserver'), stream=False)

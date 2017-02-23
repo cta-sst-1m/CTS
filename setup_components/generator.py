@@ -88,7 +88,7 @@ class Generator:
             self.inst_slave.write('ZLOAD 50')
             self.inst_slave.write('AMPL 0.8')
             self.inst_slave.write('DCOFFS 0.4')
-            self.inst_slave.write('PULSWID 0.00000002')
+            self.inst_slave.write('PULSWID 0.00000004')
             self.inst_slave.write('PULSEDGE 0.000000005')
             self.inst_slave.write('BST NCYC')
             self.inst_slave.write('BSTCOUNT 1')
@@ -120,11 +120,12 @@ class Generator:
         if self.conf_type == 'continuous' or self.conf_type == 'burst':
             self.inst.write('*TRG')
         elif self.conf_type == 'module_test_setup':
-            self.inst.write('OUTPUT ON')
             if self.slave_off :
                 self.inst_slave.write('OUTPUT OFF')
             else:
                 self.inst_slave.write('OUTPUT ON')
+            time.sleep(1.5)
+            self.inst.write('OUTPUT ON')
         return
 
 

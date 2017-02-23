@@ -52,6 +52,8 @@ class ZFitsWriter:
         self.max_evts_per_file = 10000
         self.num_comp_threads = 5
         self.comp_scheme = 'zrice'
+        self.max_comp_mem = 5000
+        self.max_file_size = 5000
         self.suffix = ''
         logger.initialise_logger(logname='ZFitsWriter',
                                             logfile='%s/%s.log' % (log_location,'zfitswriter'),stream=False)
