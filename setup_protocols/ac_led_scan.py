@@ -60,7 +60,7 @@ def run(master_fsm):
         master_fsm.options['protocol_configuration']['events_per_level']
 
     master_fsm.options['writer_configuration']['max_evts_per_file'] = \
-        master_fsm.options['protocol_configuration']['events_per_level']*10
+        master_fsm.options['protocol_configuration']['events_per_level']*5
 
     # Call the FSMs transition to start the run
     if not prepare_run(master_fsm):
@@ -83,7 +83,7 @@ def run(master_fsm):
         log.debug('\033[1m\033[91m\t\t-|> Level%d\033[0m' % level)
         timeout = float(master_fsm.options['protocol_configuration']['events_per_level'])\
                   /master_fsm.options['generator_configuration']['rate']
-        timeout+=0.2
+        timeout+=1.
         if not run_level(master_fsm,timeout):
             log.error('Failed at level %d'%level)
             return False

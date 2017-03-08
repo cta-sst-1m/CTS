@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     # Steering of the passes
     parser.add_option("-b", "--output_directory_basis", dest="output_directory_basis",
-                      help="Basis directory for commissioning data storage", default='/data/datasets/TEST')
+                      help="Basis directory for commissioning data storage", default='/data/datasets/DATA')
 
     # Parse the options
     # Parse the options

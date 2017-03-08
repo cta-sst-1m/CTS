@@ -1,0 +1,64 @@
+# Steering
+type                  : steering
+name                  : module_test_setup
+verbose               : True
+output_directory      : None
+---
+# Camera configuration
+type                  : camera_configuration
+trigger_configuration : external
+fadcs                 : [[0,1,2,3,4,5,6,7,8,9],[],[]]
+---
+# Protocol configuration
+type                  : protocol_configuration
+name                  : module_test_setup
+dark_light_level               : 0
+dark_light_number_of_events    : 10000
+a_light_level               : 1.45
+a_light_number_of_events    : 10000
+b_light_level            : 1.46
+b_light_number_of_events : 10000
+c_light_level              : 1.47
+c_light_number_of_events   : 10000
+d_light_level               : 1.48
+d_light_number_of_events    : 10000
+e_light_level               : 1.49
+e_light_number_of_events    : 10000
+f_light_level               : 1.5
+f_light_number_of_events    : 10000
+g_light_level               : 1.52
+g_light_number_of_events    : 10000
+h_light_level               : 1.55
+h_light_number_of_events    : 10000
+i_light_level               : 1.6
+i_light_number_of_events    : 10000
+j_light_level               : 1.65
+j_light_number_of_events    : 10000
+k_light_level               : 1.7
+k_light_number_of_events    : 10000
+l_light_level               : 1.75
+l_light_number_of_events    : 10000
+m_light_level               : 1.8
+m_light_number_of_events    : 10000
+n_light_level               : 1.9
+n_light_number_of_events    : 10000
+o_light_level               : 2.
+o_light_number_of_events    : 10000
+---
+# Trigger configuration
+type                  : generator_configuration
+generator_url         : 129.194.52.244
+slave_generator_url   : 129.194.53.100
+rate                  : 1000
+configuration_mode    : module_test_setup
+---
+# Writer configruation
+type                  : writer_configuration
+compression           : zrice
+number_of_trhead      : 5
+input                 : tcp://localhost:13581
+run_number_in_suffix  : False
+---
+# Camera Server Configuration
+type                  : camera_server_configuration
+

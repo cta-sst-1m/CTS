@@ -32,6 +32,7 @@ def run(master_fsm):
     while i < timeout:
         time.sleep(1)
         pbar.update(1)
+        i+=1
 
     if not stop_trigger(master_fsm): return False
     if not stop_run(master_fsm): return False

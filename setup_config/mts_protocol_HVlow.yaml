@@ -12,14 +12,8 @@ fadcs                 : [[0,1,2,3,4,5,6,7,8,9],[],[]]
 # Protocol configuration
 type                  : protocol_configuration
 name                  : module_test_setup
-dark_light_level               : 0
-dark_light_number_of_events    : 10000
-low_light_level               : 1.46
-low_light_number_of_events    : 10000
-medium_light_level            : 1.6
-medium_light_number_of_events : 10000
-high_light_level              : 2.
-high_light_number_of_events   : 10000
+HVlow_light_level               : 0
+HVlow_light_number_of_events    : 10000
 ---
 # Trigger configuration
 type                  : generator_configuration
