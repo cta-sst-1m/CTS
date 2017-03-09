@@ -86,22 +86,22 @@ def run(master_fsm):
     pbar = tqdm(total=len(DC_DAC_Levels))
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
-    for i,level in DC_DAC_Levels :
+    for i,level in enumerate(DC_DAC_Levels) :
         for board in master_fsm.elements['cts_core'].cts.LED_boards:
             master_fsm.elements['cts_core'].cts_client.set_dc_level(board.internal_id, level)
-
+        time.sleep(1)
         timeout = master_fsm.options['protocol_configuration']['events_per_level']\
                   /master_fsm.options['generator_configuration']['rate']
-        timeout+=1.
+        timeout+=2.
         if not run_level(master_fsm,timeout):
             log.error('Failed at level %d'%level)
             return False
         pbar.update(1)
 
     # Turn off the AC LEDs
-    master_fsm.elements['cts_core'].all_off('DC',0)
+    master_fsm.elements['cts_core'].all_off('DC')
     if 'ac_level' in master_fsm.options['protocol_configuration'].keys():
-        master_fsm.elements['cts_core'].all_off('AC', 0)
+        master_fsm.elements['cts_core'].all_off('AC')
 
     # And finalise the run
     if not end_run(master_fsm):

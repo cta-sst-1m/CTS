@@ -27,5 +27,5 @@ type                  : camera_server_configuration
 # Protocol configuration
 type                  : protocol_configuration
 name                  : simple_daq
-number_of_events      : 100000
+number_of_events      : 50000
 
