@@ -92,7 +92,7 @@ def run(master_fsm):
 
         timeout = master_fsm.options['protocol_configuration']['events_per_level']\
                   /master_fsm.options['generator_configuration']['rate']
-        timeout+=0.2
+        timeout+=1.
         if not run_level(master_fsm,timeout):
             log.error('Failed at level %d'%level)
             return False
