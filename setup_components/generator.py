@@ -97,7 +97,7 @@ class Generator:
 
         return
 
-    def configure_trigger(self, freq = 1000 , n_pulse = 10 ):
+    def configure_trigger(self, freq = 1000 , n_pulse = 1 ):
         if self.conf_type == 'continuous':
             self.inst.write('PULSFREQ '+str(freq))
         elif self.conf_type == 'burst':

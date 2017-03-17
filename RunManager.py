@@ -153,6 +153,16 @@ if __name__ == '__main__':
                 log.info('\t\t-|----------------------------------------------------------------------------')
                 log.info('\t\t-|> Ready to analyse')
 
+        while True:
+            print('\x1b[?5h')
+            time.sleep(0.4)
+            print('\x1b[?5l')
+            i = input("Press a key")
+            if not i:
+                break
+
+
+
 
     else:
         try:

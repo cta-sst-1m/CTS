@@ -111,6 +111,8 @@ class GeneratorFsm(Fysom, generator.Generator):
             try:
                 if ('rate' in self.options.keys()) and ('number_of_pulses' in self.options.keys()):
                     self.configure_trigger( freq=int(self.options['rate']), n_pulse=int(self.options['number_of_pulses']))
+                elif 'rate' in self.options.keys():
+                    self.configure_trigger( freq=int(self.options['rate']), n_pulse=1)
                 if 'slave_generator_url' in self.options.keys():
                     self.configure_slave(amplitude=self.options['slave_amplitude'] if 'slave_amplitude' in self.options.keys() else 0.,
                                          offset=self.options['slave_offset'] if 'slave_offset' in self.options.keys() else 0.)
