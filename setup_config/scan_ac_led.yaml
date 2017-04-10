@@ -21,8 +21,8 @@ configuration_mode    : burst
 ---
 # Writer configruation
 type                  : writer_configuration
-compression           : zrice
-number_of_trhead      : 5
+compression           : lzorice
+number_of_trhead      : 8
 input                 : tcp://localhost:13581
 ---
 # Camera server configuration

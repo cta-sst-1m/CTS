@@ -7,17 +7,17 @@ output_directory      : None
 # Camera configuration
 type                  : camera_configuration
 trigger_configuration : external
-fadcs                 : [[0,1,2,3,4,5,6,7,8,9],[0,1,2,3,4,5,6,7,8,9],[]]
+fadcs                 : [[],[0,1,2,3,4,5,6,7,8,9],[]]
 ---
 # Writer configruation
 type                  : writer_configuration
-compression           : zrice
-number_of_trhead      : 5
+compression           : lzorice
+number_of_trhead      : 8
 input                 : tcp://localhost:13581
 ---
 # Trigger configuration
 type                  : generator_configuration
-generator_url         : 129.194.50.208
+generator_url         : 129.194.52.22
 rate                  : 1000
 configuration_mode    : continuous
 ---
@@ -27,5 +27,5 @@ type                  : camera_server_configuration
 # Protocol configuration
 type                  : protocol_configuration
 name                  : simple_daq
-number_of_events      : 50000
+number_of_events      : 5000
 

@@ -122,7 +122,8 @@ class CameraServer:
                 list_param += ['-%s%s' % (k, str(getattr(self, k)))]
             else:
                 list_param += ['-%s' % k, str(getattr(self, k))]
-        list_param = ['sudo','/data/software/DAQ/CamerasToACTL/Build.Release/bin/digicam_server'] + list_param
+        list_param = ['sudo', '/tmp/jb/v2-trunk/trunk/Build.Release/bin/digicam_server'] + list_param
+        #list_param = ['sudo','/data/software/DAQ/CamerasToACTL/Build.Release/bin/digicam_server'] + list_param
         str_param = ''
         for p in list_param:
             str_param = str_param + p + ' '
