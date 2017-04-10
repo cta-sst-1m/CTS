@@ -1,4 +1,5 @@
 import sys
+import numpy as np
 
 if sys.version_info[0] == 3:
     import cts_core.geometry as gp
@@ -170,6 +171,50 @@ class Patch():
         """
         self.pixels[idx] = pix
 
+class Cluster_7():
+    """
+    Base class for Cluster of 7 patches representation
+    """
+
+    def __init__(self, _id):
+
+        self.ID = _id
+        self.patchesID = []
+        self.pixelsID = []
+        self.patches = []
+        self.pixels = []
+
+
+    def initialize(self):
+
+        """
+        Initialise function to be called once the patches list have been filled
+        """
+
+        for index, pat in enumerate(self.patches):
+
+            for pix in self.patches[index].pixels:
+
+                self.pixels.append(pix)
+
+
+    def appendPatch(self, pat_id, pat):
+
+        self.patches.append(pat)
+        self.patchesID.append(pat_id)
+
+    def appendPixel(self, pix_id, pix):
+
+        self.pixels.append(pix)
+        self.pixelsID.append(pix_id)
+
+
+
+
+#class Cluster_19():
+
+
+
 
 class Module():
     """
@@ -204,9 +249,10 @@ class Module():
         if len(self.pixels) == 0 or None in self.pixels:
             print('Pixels have not been initiated')
         if len(self.patches) == 0 or None in self.patches:
-            print('Pixels have not been initiated')
+            print('Patches have not been initiated')
         for p in self.pixels:
             self.pixelsID_inModule.append(p.id_inModule)
+            self.pixelsID.append(p.ID)
             self.pixelsID.append(p.ID)
         for p in self.patches:
             self.patchesID_inModule.append(p.id_inModule)
@@ -238,7 +284,7 @@ class Camera():
 
     """
 
-    def __init__(self, _config_file):
+    def __init__(self, _config_file, _config_file_cluster=None):
 
         # Get the configuration from file
         f = open(_config_file, 'r')
@@ -288,17 +334,34 @@ class Camera():
         # Create modules
         self.Modules = [Module(i)
                         for i in range(1, max(_map_dict['module']) + 1)]
+        # Create clusters
+
+        if _config_file_cluster is not None:
+
+            clusters_dict = np.load(_config_file_cluster)
+            patches_in_cluster = clusters_dict['patches_in_cluster']
+            self.Clusters_7 = [Cluster_7(id) for id in range(len(patches_in_cluster))] #TODO chaeck numbering
 
         # Append the pixels to patches and modules and initialisiation functions
         for p in self.Pixels:
             self.Patches[p.patch].appendPixel(p.id_inPatch, p)
             self.Modules[p.module - 1].appendPixel(p.id_inModule, p)
+
         for p in self.Patches:
             p.initialise()
         for p in self.Patches:
             self.Modules[p.module - 1].appendPatch(p.id_inModule, p)
         for i, p in enumerate(self.Modules):
             p.initialise()
+
+        if _config_file_cluster is not None:
+
+            for index, clust_id in enumerate(range(len(self.Clusters_7))):
+                for pat_id in patches_in_cluster[index]:
+
+                    self.Clusters_7[clust_id].appendPatch(pat_id, self.Patches[pat_id])
+
+                self.Clusters_7[clust_id].appendPatch(self.Clusters_7[clust_id].ID, self.Patches[self.Clusters_7[clust_id].ID])
 
         self.list_config = [
             'can_master',
