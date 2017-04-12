@@ -1,0 +1,38 @@
+# Steering
+type                  : steering
+name                  : scan_ac_level
+verbose               : True
+output_directory      : None
+---
+# Camera configuration
+type                  : camera_configuration
+trigger_configuration : external
+fadcs                 : [[0,1,2,3,4,5,6,7,8,9],[],[]]
+---
+# CTS configuration
+type                  : cts_configuration
+cts_angle             : 120.
+---
+# Trigger configuration
+type                  : generator_configuration
+generator_url         : 129.194.50.208
+rate                  : 1000
+configuration_mode    : burst
+---
+# Writer configruation
+type                  : writer_configuration
+compression           : lzorice
+number_of_trhead      : 8
+input                 : tcp://localhost:13581
+---
+# Camera server configuration
+type                  : camera_server_configuration
+---
+# Protocol configuration
+type                  : protocol_configuration
+name                  : ac_led_scan
+
+dc_level              : 0
+mc_events_file        : /data/datasets/CTA/MC/mc_1.npz
+N_mc_events           : 1
+events_per_mc_event   : 3000

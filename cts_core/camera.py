@@ -216,6 +216,56 @@ class Cluster_7():
 
 
 
+class Cluster_7():
+    """
+    Base class for patch representation
+
+    """
+
+    def __init__(self, _id):
+        # Patch ID (software)
+        self.ID = _id
+        # List of Pixel id in patch
+        self.pixelsID = []
+        # List of ids of pixel in module in patch
+        self.pixelsID_inCluster = []
+        # List of pixels
+        self.pixels = [None] * 21
+        # List of Pixel id in patch
+        self.patchesID = []
+        # List of ids of pixel in module in patch
+        self.patchesID_inCluster = []
+        # List of pixels
+        self.patches = [None] * 7
+
+    def initialise(self):
+        """
+        Initialise function to be called once the pixel list have been filled
+        """
+        for p in self.pixels:
+            self.pixelsID_inCluster.append(p.id_inCluster)
+            self.pixelsID.append(p.ID)
+        if set(self.pixelsID_inCluster) == {1, 2, 5}:
+            self.pixelsID_inCluster = [1, 2, 5]
+            self.id_inCluster = 1
+        elif set(self.pixelsID_inCluster) == {3, 4, 7}:
+            self.pixelsID_inCluster = [3, 4, 7]
+            self.id_inCluster = 2
+        elif set(self.pixelsID_inCluster) == {6, 10, 9}:
+            self.pixelsID_inCluster = [6, 10, 9]
+            self.id_inCluster = 3
+        elif set(self.pixelsID_inCluster) == {8, 12, 11}:
+            self.pixelsID_inCluster = [8, 12, 11]
+            self.id_inCluster = 4
+
+
+    def appendPixel(self, idx, pix):
+        """
+        A function to append the pixels to the patch
+        """
+        self.pixels[idx] = pix
+
+
 class Module():
     """
     Base class for module representation
