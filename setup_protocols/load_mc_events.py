@@ -155,21 +155,21 @@ def run(master_fsm):
             pixel_list.append(pix.ID)
 
     log.info('\033[1m\033[91m\t\t-|> Start the DAC level loop\033[0m' )
-    pbar = tqdm(total=N_mc_events)
+    pbar = tqdm(total=len(N_mc_events))
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
     for board in master_fsm.elements['cts_core'].cts.LED_boards:
         master_fsm.elements['cts_core'].cts_client.set_dc_level(board.internal_id, dc_level )
 
     for i in N_mc_events :
-            load_mc_event(mc_events[i], pixel_list, master_fsm, param)
-            timeout = master_fsm.options['protocol_configuration']['events_per_mc_event'] \
-                      / master_fsm.options['generator_configuration']['rate']
-            timeout += 1.
-            if not run_level(master_fsm, timeout):
-                log.error('Failed at level %d' % level)
-                return False
-            pbar.update(1)
+        load_mc_event(mc_events[i], pixel_list, master_fsm, param)
+        timeout = master_fsm.options['protocol_configuration']['events_per_mc_event'] \
+                  / master_fsm.options['generator_configuration']['rate']
+        timeout += 1.
+        if not run_level(master_fsm, timeout):
+            log.error('Failed at event %d' % i)
+            return False
+        pbar.update(1)
 
     # Turn off the AC LEDs
     master_fsm.elements['cts_core'].all_off('DC',0)
