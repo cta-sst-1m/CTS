@@ -15,7 +15,7 @@ cts_angle             : 120.
 ---
 # Trigger configuration
 type                  : generator_configuration
-generator_url         : 129.194.50.208
+generator_url         : 129.194.51.101
 rate                  : 1000
 configuration_mode    : burst
 ---
@@ -33,6 +33,7 @@ type                  : protocol_configuration
 name                  : ac_led_scan
 
 dc_level              : 0
-mc_events_file        : /data/datasets/CTA/MC/mc_1.npz
-N_mc_events           : 1
+mc_events_file        : /data/datasets/mc_1.npz
+N_mc_events           : 4
 events_per_mc_event   : 3000
+led_parameters_file   : /data/datasets/ac_led.npz
