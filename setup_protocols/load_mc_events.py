@@ -105,7 +105,6 @@ def get_patch_DAC(pixels,pixel_list,pe_per_pixel,param):
     sum_param = np.zeros(param.shape[-1],dtype=param.dtype)
     for p in pixels:
         sum_param= sum_param+param[pixel_list.index(p)]
-    dac = 0
     try:
         dac = np.max(np.real((np.poly1d(sum_param) - total_pe).roots))
     except:
