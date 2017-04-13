@@ -1,5 +1,4 @@
 # Steering
-
 type                  : steering
 name                  : load_mc_events
 verbose               : True
@@ -8,7 +7,7 @@ output_directory      : None
 # Camera configuration
 type                  : camera_configuration
 trigger_configuration : external
-fadcs                 : [[0,1,2,3,4,5,6,7,8,9],[0,1,2,3,4,5,6,7,8,9],[0,1,2,3,4,5,6,7,8,9]]
+fadcs                 : [[0,1,2,3,4,5,6,7,8,9],[],[]]
 ---
 # CTS configuration
 type                  : cts_configuration
@@ -17,17 +16,8 @@ cts_angle             : 120.
 # Trigger configuration
 type                  : generator_configuration
 generator_url         : 129.194.51.101
-rate                  : 1000
+rate                  : 1
 configuration_mode    : burst
----
-# Writer configruation
-type                  : writer_configuration
-compression           : lzorice
-number_of_trhead      : 8
-input                 : tcp://localhost:13581
----
-# Camera server configuration
-type                  : camera_server_configuration
 ---
 # Protocol configuration
 type                  : protocol_configuration
@@ -36,5 +26,5 @@ name                  : load_mc_events
 dc_level              : 0
 mc_events_file        : /data/datasets/mc_1.npz
 N_mc_events           : [4]
-events_per_mc_event   : 3000
+events_per_mc_event   : 1000
 led_parameters_file   : /data/datasets/ac_led.npz

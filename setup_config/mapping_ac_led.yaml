@@ -1,7 +1,6 @@
 # Steering
-
 type                  : steering
-name                  : load_mc_events
+name                  : mapping_ac_led
 verbose               : True
 output_directory      : None
 ---
@@ -20,21 +19,8 @@ generator_url         : 129.194.51.101
 rate                  : 1000
 configuration_mode    : burst
 ---
-# Writer configruation
-type                  : writer_configuration
-compression           : lzorice
-number_of_trhead      : 8
-input                 : tcp://localhost:13581
----
-# Camera server configuration
-type                  : camera_server_configuration
----
 # Protocol configuration
 type                  : protocol_configuration
-name                  : load_mc_events
+name                  : ac_led_mapping_scan
+ac_level                : 800
 
-dc_level              : 0
-mc_events_file        : /data/datasets/mc_1.npz
-N_mc_events           : [4]
-events_per_mc_event   : 3000
-led_parameters_file   : /data/datasets/ac_led.npz
