@@ -55,12 +55,13 @@ def run(master_fsm):
 
     log = logging.getLogger(sys.modules['__main__'].__name__)
 
-    # Some preliminary configurations
-    master_fsm.options['generator_configuration']['number_of_pulses'] =  \
-        master_fsm.options['protocol_configuration']['events_per_level']
+    start_pixel = None
+    stop_pixel = None
 
-    master_fsm.options['writer_configuration']['max_evts_per_file'] = \
-        master_fsm.options['protocol_configuration']['events_per_level']*5
+    # Some preliminary configurations
+    master_fsm.options['generator_configuration']['number_of_pulses'] =  1
+
+    if 'writer_configuration' in master_fsm.options : master_fsm.options['writer_configuration']['max_evts_per_file'] = 2000
 
     # Call the FSMs transition to start the run
     if not prepare_run(master_fsm):
@@ -74,13 +75,13 @@ def run(master_fsm):
 
     # Define the progress bar
     log.info('\033[1m\033[91m\t\t-|> Start the AC Mapping loop\033[0m' )
-    pixel_list = list(master_fsm.elements['cts_core'].pixel_to_led['AC'].keys())
-    pbar = tqdm(total=len(pixel_list))
+    pbar = tqdm(total=528)
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
-    for patch in master_fsm.elements['cts_core'].LED_patches:
-        master_fsm.elements['cts_core'].set_ac_level(patch.camera_patch_id, level)
+    for patch in master_fsm.elements['cts_core'].cts.LED_patches:
+        master_fsm.elements['cts_core'].cts_client.set_ac_level(patch.camera_patch_id, ac_level)
     # loop over the pixels
+    pixel_list = list(master_fsm.elements['cts_core'].cts.pixel_to_led['AC'].keys())
     pixel_list.sort()
     for i, pix in enumerate(pixel_list):
         if start_pixel and pix < start_pixel: continue
@@ -93,12 +94,11 @@ def run(master_fsm):
         # turn on this pixel
         master_fsm.elements['cts_core'].cts_client.set_led_status('AC', pixel_list[i], True)
         master_fsm.elements['cts_core'].ac_status[pixel_list[i]] = 1
-        master_fsm.elements['cts_core'].ac_level[pixel_list[i]] = level
-        master_fsm.elements['cts_core'].generator.start_trigger_sequence()
+        master_fsm.elements['cts_core'].ac_level[pixel_list[i]] = ac_level
 
         log.debug('\033[1m\033[91m\t\t-|> Pixel%d\033[0m' % pix)
         if not run_level(master_fsm,0.1):
-            log.error('Failed at level %d'%level)
+            log.error('Failed at Pixel %d'%pix)
             return False
         pbar.update(1)
 

@@ -14,7 +14,7 @@ except ImportError:
 
 
 class Generator:
-    def __init__(self,logger_name ,url = "129.194.52.244", slave_url = None):
+    def __init__(self,logger_name ,url = "129.194.51.101", slave_url = None):
         self.log = logging.getLogger(logger_name+'.generator')
         self.url = url
         self.slave_off = True
