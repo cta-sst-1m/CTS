@@ -101,7 +101,7 @@ def load_mc_event(pixel_values,pixel_list,master_fsm,param):
 def get_patch_DAC(pixels,pixel_list,pe_per_pixel,param):
     dac = 0
     total_pe = np.sum(pe_per_pixel)
-    if total_pe<0.5: return 0
+    if total_pe<0.5: return dac
     sum_param = np.zeros(param.shape[-1],dtype=param.dtype)
     for p in pixels:
         sum_param= sum_param+param[pixel_list.index(p)]
@@ -110,7 +110,7 @@ def get_patch_DAC(pixels,pixel_list,pe_per_pixel,param):
         dac = np.max(np.real((np.poly1d(sum_param) - total_pe).roots))
     except:
         dac = -1
-    if dac < 1e-3: dac == 0
+    if dac < 1e-3: dac = 0
     return int(np.round(dac))
 
 
