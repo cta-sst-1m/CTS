@@ -89,7 +89,7 @@ def load_mc_event(pixel_values,pixel_list,master_fsm,param):
     for patch in master_fsm.elements['cts_core'].cts.LED_patches:
         pe_in_pixels = []
         for pix in patch.leds_camera_pixel_id:
-            pe_in_pixels+=[pixel_values[pix]/4.]
+            pe_in_pixels+=[pixel_values[pix]]
         dac=get_patch_DAC(patch.leds_camera_pixel_id, pixel_list,pe_in_pixels, param)
         master_fsm.elements['cts_core'].cts_client.set_ac_level(patch.camera_patch_id,int( round(dac)))
         pe = np.mean(pe_in_pixels)
