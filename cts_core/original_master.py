@@ -122,6 +122,7 @@ class CTSMaster:
         for board in self.cts.LED_boards:
             self.cts_client.set_dc_level(board.internal_id, level)
         # loop over the pixels
+
         pixel_list = list(self.cts.pixel_to_led['DC'].keys())
         pixel_list.sort()
         for i, pix in enumerate(pixel_list):

@@ -60,7 +60,7 @@ class LED():
         """
         # rotation to apply to the leds
         _rotation = 0. if self.led_board == 1 else (
-            240. if self.led_board == 2 else 140.)
+            240. if self.led_board == 2 else 120.)   ### TO BE CHECK - was 140. for the last
         # shift due to misalignement of the central led boards
         if self.led_board == 2:
             _x += 1.5 * 24.3

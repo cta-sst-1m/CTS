@@ -87,7 +87,10 @@ class MasterFsm(Fysom):
             options['camera_server_configuration']['M']= ''
             options['camera_server_configuration']['N']= ''
             opt ,optN= '',''
+            trigger_readout = []
             for c,fadcs in enumerate( options['camera_configuration']['fadcs']):
+                if 'trigger_trace' in options['camera_server_configuration'].keys():
+                    trigger_readout+=[30+c,33+c,36+c]
                 for fadc in fadcs:
                     options['camera_server_configuration']['N'] +=optN + '%d'%(c*10+fadc)
                     optN = ','
@@ -98,7 +101,11 @@ class MasterFsm(Fysom):
                 for fadc in range(10):
                     if (str(c*10+fadc) in options['camera_server_configuration']['N'].split(',')): continue
                     options['camera_server_configuration']['N'] += optN + '%d' % (c * 10 + fadc)
-
+            opt = ','
+            trigger_readout.sort()
+            for t in trigger_readout:
+                options['camera_server_configuration']['M'] += opt +'%d'%t
+                opt = ','
 
             # now reformat M
             i = 0
@@ -123,6 +130,8 @@ class MasterFsm(Fysom):
                 else:
                     options['camera_server_configuration']['M']+=opt+'%d-%d'%(list_bs[0],list_bs[-1])
                 opt = ','
+            #if 'trigger_trace' in options['camera_server_configuration'].keys():
+            #    options['camera_server_configuration']['M']+=',30-37'
 
             self.elements['camera_server'] = camera_server_fsm.CameraServerFsm(options=options['camera_server_configuration'],
                                           logger_name=logger_name,logger_dir=self.options['steering']['output_directory'])

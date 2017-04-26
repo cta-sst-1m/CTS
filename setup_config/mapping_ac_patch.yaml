@@ -1,6 +1,6 @@
 # Steering
 type                  : steering
-name                  : mapping_ac_led
+name                  : mapping_ac_patch
 verbose               : True
 output_directory      : None
 ---
@@ -11,7 +11,7 @@ fadcs                 : [[0,1,2,3,4,5,6,7,8,9],[0,1,2,3,4,5,6,7,8,9],[0,1,2,3,4,
 ---
 # CTS configuration
 type                  : cts_configuration
-cts_angle             : 240.
+cts_angle             : 120.
 ---
 # Trigger configuration
 type                  : generator_configuration
@@ -31,7 +31,6 @@ trigger_trace         : True
 ---
 # Protocol configuration
 type                  : protocol_configuration
-name                  : ac_led_mapping_scan
-ac_level              : 800
-pixel_list            : [1294,1295,129,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295]
+name                  : ac_patch_mapping_scan
+ac_level              : 600
 

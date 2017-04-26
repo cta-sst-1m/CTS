@@ -75,41 +75,42 @@ def run(master_fsm):
 
     # Define the progress bar
     log.info('\033[1m\033[91m\t\t-|> Start the AC Mapping loop\033[0m' )
+    pbar = tqdm(total=176)
+    tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
     for patch in master_fsm.elements['cts_core'].cts.LED_patches:
         master_fsm.elements['cts_core'].cts_client.set_ac_level(patch.camera_patch_id, ac_level)
 
-    pixel_list = list(master_fsm.elements['cts_core'].cts.pixel_to_led['AC'].keys())
-    pixel_list.sort()
+    patch_list = list(master_fsm.elements['cts_core'].cts.patch_camera_to_patch_led.keys())
+    patch_list.sort()
 
-    if 'pixel_list' in master_fsm.options['protocol_configuration']:
-        pixel_list_2 = []
-        for p in master_fsm.options['protocol_configuration']['pixel_list']:
-            if p in pixel_list:
-                pixel_list_2+=[p]
-        pixel_list = pixel_list_2
-    print(pixel_list)
-    pbar = tqdm(total=len(pixel_list))
-    tqdm_out = TqdmToLogger(log, level=logging.INFO)
-    # loop over the pixels
-    for i, pix in enumerate(pixel_list):
-        if start_pixel and pix < start_pixel: continue
-        if stop_pixel and pix > stop_pixel: continue
+    for i, patch in enumerate(patch_list):
+        ledpatch = master_fsm.elements['cts_core'].cts.LED_patches[master_fsm.elements['cts_core'].cts.patch_camera_to_patch_led[patch]]
         if i > 0:
-            # turn off the previous pixel
-            master_fsm.elements['cts_core'].cts_client.set_led_status('AC', pixel_list[i - 1], False)
-            master_fsm.elements['cts_core'].ac_status[pixel_list[i - 1]] = 0
-            master_fsm.elements['cts_core'].ac_level[pixel_list[i - 1]] = 0
-        # turn on this pixel
-        master_fsm.elements['cts_core'].cts_client.set_led_status('AC', pixel_list[i], True)
-        master_fsm.elements['cts_core'].ac_status[pixel_list[i]] = 1
-        master_fsm.elements['cts_core'].ac_level[pixel_list[i]] = ac_level
-
-        log.debug('\033[1m\033[91m\t\t-|> Pixel%d\033[0m' % pix)
+            # turn off the previous patch
+            ledpatch_prev = master_fsm.elements['cts_core'].cts.LED_patches[
+                master_fsm.elements['cts_core'].cts.patch_camera_to_patch_led[patch_list[i - 1]]]
+            for pix in ledpatch_prev.leds_camera_pixel_id:
+                master_fsm.elements['cts_core'].cts_client.set_led_status('AC', pix, False)
+            # put back the DAC level to 0
+            master_fsm.elements['cts_core'].cts_client.set_ac_level(patch, 0)
+        # turn on the present patch
+        for pix in ledpatch.leds_camera_pixel_id:
+            master_fsm.elements['cts_core'].cts_client.set_led_status('AC', pix, True)
+        # turn on the DAC level
+        master_fsm.elements['cts_core'].cts_client.set_ac_level(patch, ac_level)
+        log.debug('\033[1m\033[91m\t\t-|> Patch%d\033[0m' % patch)
         if not run_level(master_fsm,0.1):
-            log.error('Failed at Pixel %d'%pix)
+            log.error('Failed at Patch %d'%pix)
             return False
         pbar.update(1)
+
+    # turn off last patch
+    for pix in master_fsm.elements['cts_core'].cts.LED_patches[master_fsm.elements['cts_core'].cts.patch_camera_to_patch_led[patch_list[-1]]].leds_camera_pixel_id:
+        master_fsm.elements['cts_core'].cts_client.set_led_status('AC', pix, False)
+    # set back the level to 0
+    for patch in master_fsm.elements['cts_core'].cts.LED_patches:
+        master_fsm.elements['cts_core'].cts_client.set_ac_level(patch.camera_patch_id, 0)
 
     # Turn off the AC LEDs
     master_fsm.elements['cts_core'].all_off('AC')

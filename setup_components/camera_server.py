@@ -115,7 +115,7 @@ class CameraServer:
         list_param = []
         for k, v in self.__dict__.items():
             if type(v).__name__ in ['function', 'Logger', 'dict', 'None']: continue
-            if k in ['camera_server', 'log', 'current', '_final', 'log_thread', 'log_queue', 'stop_event','logger_dir']: continue
+            if k in ['camera_server', 'log', 'current', '_final', 'log_thread', 'log_queue', 'stop_event','logger_dir','trigger_trace']: continue
             if type(v).__name__ == 'bool' and v:
                 list_param += ['-%s' % k]
             elif k in ['N','M']:

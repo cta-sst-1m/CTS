@@ -7,7 +7,7 @@ from tqdm import tqdm
 from setup_fsm.fsm_steps import *
 from utils.logger import TqdmToLogger
 
-protocol_name = 'AC_MAPPING_SCAN'
+protocol_name = 'DC_MAPPING_SCAN'
 
 def prepare_run(master_fsm):
     '''
@@ -65,54 +65,49 @@ def run(master_fsm):
 
     # Call the FSMs transition to start the run
     if not prepare_run(master_fsm):
-        log.error('Failed to prepare the AC LED SCAN run')
+        log.error('Failed to prepare the DC LED SCAN run')
         return False
 
     # Turn on the AC LEDs0
     #master_fsm.elements['cts_core'].all_off('AC')
     # Get the AC LEDs level to run
-    ac_level = master_fsm.options['protocol_configuration']['ac_level']
+    ac_level = master_fsm.options['protocol_configuration']['dc_level']
 
     # Define the progress bar
-    log.info('\033[1m\033[91m\t\t-|> Start the AC Mapping loop\033[0m' )
+    log.info('\033[1m\033[91m\t\t-|> Start the DC Mapping loop\033[0m' )
+    pbar = tqdm(total=528)
+    tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
-    for patch in master_fsm.elements['cts_core'].cts.LED_patches:
-        master_fsm.elements['cts_core'].cts_client.set_ac_level(patch.camera_patch_id, ac_level)
-
-    pixel_list = list(master_fsm.elements['cts_core'].cts.pixel_to_led['AC'].keys())
+    for board in master_fsm.elements['cts_core'].cts.LED_boards:
+        master_fsm.elements['cts_core'].cts_client.set_dc_level(board.internal_id, ac_level)
+    # loop over the pixels
+    pixel_list = list(master_fsm.elements['cts_core'].cts.pixel_to_led['DC'].keys())
     pixel_list.sort()
 
     if 'pixel_list' in master_fsm.options['protocol_configuration']:
-        pixel_list_2 = []
-        for p in master_fsm.options['protocol_configuration']['pixel_list']:
-            if p in pixel_list:
-                pixel_list_2+=[p]
-        pixel_list = pixel_list_2
-    print(pixel_list)
-    pbar = tqdm(total=len(pixel_list))
-    tqdm_out = TqdmToLogger(log, level=logging.INFO)
-    # loop over the pixels
+        pixel_list = master_fsm.options['protocol_configuration']['pixel_list']
+
     for i, pix in enumerate(pixel_list):
         if start_pixel and pix < start_pixel: continue
         if stop_pixel and pix > stop_pixel: continue
         if i > 0:
             # turn off the previous pixel
-            master_fsm.elements['cts_core'].cts_client.set_led_status('AC', pixel_list[i - 1], False)
-            master_fsm.elements['cts_core'].ac_status[pixel_list[i - 1]] = 0
-            master_fsm.elements['cts_core'].ac_level[pixel_list[i - 1]] = 0
+            master_fsm.elements['cts_core'].cts_client.set_led_status('DC', pixel_list[i - 1], False)
+            master_fsm.elements['cts_core'].dc_status[pixel_list[i - 1]] = 0
+            master_fsm.elements['cts_core'].dc_level[pixel_list[i - 1]] = 0
         # turn on this pixel
-        master_fsm.elements['cts_core'].cts_client.set_led_status('AC', pixel_list[i], True)
-        master_fsm.elements['cts_core'].ac_status[pixel_list[i]] = 1
-        master_fsm.elements['cts_core'].ac_level[pixel_list[i]] = ac_level
+        master_fsm.elements['cts_core'].cts_client.set_led_status('DC', pixel_list[i], True)
+        master_fsm.elements['cts_core'].dc_status[pixel_list[i]] = 1
+        master_fsm.elements['cts_core'].dc_level[pixel_list[i]] = ac_level
 
         log.debug('\033[1m\033[91m\t\t-|> Pixel%d\033[0m' % pix)
-        if not run_level(master_fsm,0.1):
+        if not run_level(master_fsm,0.01):
             log.error('Failed at Pixel %d'%pix)
             return False
         pbar.update(1)
 
     # Turn off the AC LEDs
-    master_fsm.elements['cts_core'].all_off('AC')
+    master_fsm.elements['cts_core'].all_off('DC')
 
     # And finalise the run
     if not end_run(master_fsm):

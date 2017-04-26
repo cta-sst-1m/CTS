@@ -1,6 +1,6 @@
 # Steering
 type                  : steering
-name                  : mapping_ac_led
+name                  : mapping_dc_led
 verbose               : True
 output_directory      : None
 ---
@@ -31,7 +31,6 @@ trigger_trace         : True
 ---
 # Protocol configuration
 type                  : protocol_configuration
-name                  : ac_led_mapping_scan
-ac_level              : 800
-pixel_list            : [1294,1295,129,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295,1294,1295]
+name                  : dc_led_mapping_scan
+dc_level              : 800
 
