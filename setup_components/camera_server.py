@@ -67,7 +67,7 @@ class CameraServer:
         # self.T local clock rate
         self.T = -1
         # self.x pixel mapping
-        self.x = '/data/software/DAQ/CamerasToACTL/Cameras/Digicam/digicam_pixels_mapping_V4.txt'
+        self.x = '/data/software/DAQ/CamerasToACTL/Cameras/Digicam/digicam_pixels_mapping_V5.txt'
         # self.F future time margin ???
         self.F = 3000
         # self.i allocate arena???
@@ -122,8 +122,9 @@ class CameraServer:
                 list_param += ['-%s%s' % (k, str(getattr(self, k)))]
             else:
                 list_param += ['-%s' % k, str(getattr(self, k))]
-        list_param = ['sudo', '/tmp/jb/v5/Build.Release/bin/digicam_server'] + list_param
+        #list_param = ['sudo', '/tmp/jb/v5/Build.Release/bin/digicam_server'] + list_param
         #list_param = ['sudo','/data/software/DAQ/CamerasToACTL/Build.Release/bin/digicam_server'] + list_param
+        list_param = ['sudo','/data/software/DAQ/CamerasToACTL/Build.Release/bin/digicam_server_kryz_mapping'] + list_param
         str_param = ''
         for p in list_param:
             str_param = str_param + p + ' '

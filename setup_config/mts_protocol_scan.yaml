@@ -47,15 +47,15 @@ o_light_number_of_events    : 10000
 ---
 # Trigger configuration
 type                  : generator_configuration
-generator_url         : 129.194.52.244
-slave_generator_url   : 129.194.53.100
+generator_url         : 129.194.53.196
+slave_generator_url   : 129.194.53.
 rate                  : 1000
 configuration_mode    : module_test_setup
 ---
 # Writer configruation
 type                  : writer_configuration
-compression           : zrice
-number_of_trhead      : 5
+compression           : lzorice
+number_of_trhead      : 8
 input                 : tcp://localhost:13581
 run_number_in_suffix  : False
 ---

@@ -23,8 +23,8 @@ high_light_number_of_events   : 10000
 ---
 # Trigger configuration
 type                  : generator_configuration
-generator_url         : 129.194.50.104
-slave_generator_url   : 129.194.55.95
+generator_url         : 129.194.53.196
+slave_generator_url   : 129.194.52.39
 rate                  : 1000
 configuration_mode    : module_test_setup
 ---
