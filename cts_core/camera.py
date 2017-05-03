@@ -138,15 +138,15 @@ class Patch():
         # List of pixels
         self.pixels = [None] * 3
         # List of clusters it belong to
-        self.belong_to_clusters7 = []
-        self.belong_to_clusters19 = []
+        self.belong_to_clusters_7 = []
+        self.belong_to_clusters_19 = []
 
     def initialise(self):
         """
         Initialise function to be called once the pixel list have been filled
         """
-        self.belong_to_clusters7 = self.pixels[0].belong_to_clusters7
-        self.belong_to_clusters19 = self.pixels[0].belong_to_clusters19
+        self.belong_to_clusters7 = self.pixels[0].belong_to_clusters_7
+        self.belong_to_clusters19 = self.pixels[0].belong_to_clusters_19
         for p in self.pixels:
             self.pixelsID_inModule.append(p.id_inModule)
             self.pixelsID.append(p.ID)
@@ -298,7 +298,7 @@ class Camera():
             map(list, zip(*[l.split('\n')[0].split('\t') for l in f.readlines()])))
         _map_dict = dict(zip(keys, lines))
         for k in _map_dict.keys():
-            if k.count('[mm]') > 0:
+            if k in ['x_pixel','y_pixel']:
                 _map_dict[k] = [float(x) for x in _map_dict[k]]
             elif k.count('column') > 0:
                 _map_dict[k] = [str(x) for x in _map_dict[k]]
@@ -306,12 +306,31 @@ class Camera():
                 _map_dict[k] = [int(x) for x in _map_dict[k]]
 
         # Sort by pixel
-        for k in filter(lambda x: x != 'pixel_sw', _map_dict.keys()):
+        for k in filter(lambda x: x != 'pixel_sw_id', _map_dict.keys()):
             _map_dict[k] = [v[1]
-                            for v in sorted(zip(_map_dict['pixel_sw'], _map_dict[k]))]
-        # _map_dict['pixel_sw'].sort()
-
+                            for v in sorted(zip(_map_dict['pixel_sw_id'], _map_dict[k]))]
+        # _map_dict['pixel_sw_id'].sort()
         # Create the pixelList
+        self.Pixels = [
+            Pixel(
+                _map_dict['x_pixel'][i],
+                _map_dict['y_pixel'][i],
+                p,
+                _map_dict['pixel_hw_id'][i],
+                _map_dict['pix_in_patch_sw'][i],
+                _map_dict['module'][i],
+                _map_dict['fadc_board'][i],
+                _map_dict['fadc_quad'][i],
+                _map_dict['fadc_chan'][i],
+                _map_dict['can_master'][i],
+                _map_dict['patch_sw_id'][i],
+                _map_dict['can_node'][i],
+                _map_dict['can_master'][i],
+                [_map_dict[c][i] for c in ['cluster_patch_%d' % v for v in range(1, 7)] if _map_dict[c][i] > -0.5],
+                [_map_dict[c][i] for c in ['cluster_patch_%d' % v for v in range(1, 7)] if _map_dict[c][i] > -0.5])
+            for i, p in enumerate(_map_dict['pixel_sw_id'])]
+
+        '''
         self.Pixels = [
             Pixel(
                 _map_dict['x[mm]'][i],
@@ -327,28 +346,29 @@ class Camera():
                 _map_dict['patch_sw'][i],
                 _map_dict['can_node'][i],
                 _map_dict['can_master'][i],
-                [_map_dict[c] for c in ['cluster_patch_%d' % v for v in range(1, 7)] if _map_dict[c] > -0.5]) for i,
-                [],#[_map_dict[c] for c in ['cluster_patch_%d' % v for v in range(1, 19)] if _map_dict[c] > -0.5]) for i,
+                [_map_dict[c][i] for c in ['cluster_patch_%d' % v for v in range(1, 7)] if _map_dict[c][i] > -0.5],
+                []) for i,#[_map_dict[c] for c in ['cluster_patch_%d' % v for v in range(1, 19)] if _map_dict[c] > -0.5]),
                                                 p in enumerate(
                 _map_dict['pixel_sw'])]
+        '''
         # Create patches
-        self.Patches = [Patch(i) for i in range(max(_map_dict['patch_sw']) + 1)]
+        self.Patches = [Patch(i) for i in range(max(_map_dict['patch_sw_id']) + 1)]
         # Create modules
         self.Modules = [Module(i)
                         for i in range(1, max(_map_dict['module']) + 1)]
         # Create clusters 7
-        self.Clusters_7 = [Cluster(id) for i in range(max(_map_dict['patch_sw']) + 1)]
+        self.Clusters_7 = [Cluster(id) for i in range(max(_map_dict['patch_sw_id']) + 1)]
         # Create clusters 19
-        self.Clusters_19 = [Cluster(id) for i in range(max(_map_dict['patch_sw']) + 1)]
+        self.Clusters_19 = [Cluster(id) for i in range(max(_map_dict['patch_sw_id']) + 1)]
 
         # Append the pixels to patches and modules and initialisiation functions
         for p in self.Pixels:
             self.Patches[p.patch].appendPixel(p.id_inPatch, p)
             self.Modules[p.module - 1].appendPixel(p.id_inModule, p)
-            for c in p.belong_to_clusters7 :
+            for c in p.belong_to_clusters_7 :
                 self.Clusters_7[c].appendPixel(p)
                 self.Clusters_7[c].appendPatch(self.Patches[p.patch])
-            for c in p.belong_to_clusters19 :
+            for c in p.belong_to_clusters_19 :
                 self.Clusters_19[c].appendPixel(p)
                 self.Clusters_19[c].appendPatch(self.Patches[p.patch])
 
