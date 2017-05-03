@@ -180,7 +180,10 @@ class Patch():
         """
         A function to append the pixels to the patch
         """
-        self.pixels[idx] = pix
+
+        if idx not in self.pixelsID:
+
+            self.pixels[idx] = pix
 
 
 class Cluster():
@@ -205,15 +208,21 @@ class Cluster():
         """
         A function to append the pixels to the clusters
         """
-        self.pixels += [pix]
-        self.pixelsID += [pix.ID]
+
+        if pix.ID not in self.pixelsID:
+
+            self.pixels += [pix]
+            self.pixelsID += [pix.ID]
 
     def appendPatch(self, patch):
         """
         A function to append the patches to the clusters
         """
-        self.patches += [patch]
-        self.patchesID += [patch.ID]
+
+        if patch.ID not in self.patchesID:
+
+            self.patches += [patch]
+            self.patchesID += [patch.ID]
 
 
 class Module():
@@ -357,9 +366,9 @@ class Camera():
         self.Modules = [Module(i)
                         for i in range(1, max(_map_dict['module']) + 1)]
         # Create clusters 7
-        self.Clusters_7 = [Cluster(id) for i in range(max(_map_dict['patch_sw_id']) + 1)]
+        self.Clusters_7 = [Cluster(i) for i in range(max(_map_dict['patch_sw_id']) + 1)]
         # Create clusters 19
-        self.Clusters_19 = [Cluster(id) for i in range(max(_map_dict['patch_sw_id']) + 1)]
+        self.Clusters_19 = [Cluster(i) for i in range(max(_map_dict['patch_sw_id']) + 1)]
 
         # Append the pixels to patches and modules and initialisiation functions
         for p in self.Pixels:
@@ -371,6 +380,13 @@ class Camera():
             for c in p.belong_to_clusters_19 :
                 self.Clusters_19[c].appendPixel(p)
                 self.Clusters_19[c].appendPatch(self.Patches[p.patch])
+
+        for cluster in self.Clusters_7:
+            self.Clusters_7[cluster.ID].appendPatch(self.Patches[cluster.ID])
+
+        for cluster in self.Clusters_19:
+            self.Clusters_19[cluster.ID].appendPatch(self.Patches[cluster.ID])
+
 
         for p in self.Patches:
             p.initialise()
