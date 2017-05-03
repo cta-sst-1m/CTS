@@ -26,7 +26,7 @@ class CTSMaster:
                                  logfile='test.log' )
         self.log = logging.getLogger(sys.modules['__main__'].__name__)
         self.cts = cameratestsetup.CTS('config/cts_config_' + str(int(angle_cts)) + '.cfg',
-                                       'config/camera_config.cfg', angle=angle_cts, connected=False)
+                                       'config/camera_config_old.cfg', angle=angle_cts, connected=False)
         # Get the CTS OpcUA client
         self.cts_client = cts_client.CTSClient()
         # Get the generator for triggering AC leds and digicam

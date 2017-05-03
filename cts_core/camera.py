@@ -527,5 +527,5 @@ class Camera():
 
 
 if __name__ == '__main__':
-    c = Camera('../data/camera_config.cfg')
+    c = Camera('../data/camera_config_old.cfg')
     c.generate_configfile('configuration_new.txt')

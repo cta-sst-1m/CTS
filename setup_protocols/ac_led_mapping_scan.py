@@ -88,7 +88,6 @@ def run(master_fsm):
             if p in pixel_list:
                 pixel_list_2+=[p]
         pixel_list = pixel_list_2
-    print(pixel_list)
     pbar = tqdm(total=len(pixel_list))
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
     # loop over the pixels

@@ -289,6 +289,6 @@ class CTS():
 
 
 if __name__ == '__main__':
-    c = CTS('../config/cts_config_0.cfg', '../config/camera_config.cfg', angle=0., connected=False)
+    c = CTS('../config/cts_config_120.cfg', '../config/camera_config.cfg', angle=0., connected=False)
     pix_list = c.pixel_to_led['AC'].keys()
     pix_list.sort()
