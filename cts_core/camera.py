@@ -6,6 +6,7 @@ if sys.version_info[0] == 3:
 else:
     import geometry as gp
 
+'''
 fadc_dict = {31: [30, 0, 0, 30, 7, "L", 1, 2], 33: [32, 0, 0, 32, 8, "L", 2, 0],
              34: [33, 0, 0, 33, 8, "L", 2, 1], 27: [26, 0, 1, 26, 6, "L", 0, 2],
              28: [27, 0, 1, 27, 6, "L", 0, 3], 32: [31, 0, 1, 31, 7, "L", 1, 3],
@@ -30,6 +31,7 @@ fadc_dict = {31: [30, 0, 0, 30, 7, "L", 1, 2], 33: [32, 0, 0, 32, 8, "L", 2, 0],
              17: [16, 3, 14, 7, 1, "R", 1, 3], 23: [22, 3, 14, 1, 0, "R", 0, 1],
              24: [23, 3, 14, 0, 0, "R", 0, 0], 13: [12, 3, 15, 11, 2, "R", 2, 3],
              14: [13, 3, 15, 10, 2, "R", 2, 2], 18: [17, 3, 15, 6, 1, "R", 1, 2]}
+'''
 
 
 class Pixel:
@@ -52,7 +54,9 @@ class Pixel:
             _sector,
             _patch,
             _canNode,
-            _canMaster):
+            _canMaster,
+            _cluster7_list,
+            _cluster19_list):
         # Pixel Center
         """
 
@@ -87,18 +91,20 @@ class Pixel:
         # Patch ID
         self.patch = _patch
         # FADC Internal mapping: channel in rj45
-        self.id_inFADC_rj45_channel = fadc_dict[self.id_inFADC][0]
+        #self.id_inFADC_rj45_channel = fadc_dict[self.id_inFADC][0]
         # FADC Internal mapping: module number
-        self.id_inFADC_module = fadc_dict[self.id_inFADC][1]
+        #self.id_inFADC_module = fadc_dict[self.id_inFADC][1]
         # FADC Internal mapping: patch number
-        self.id_inFADC_patch = fadc_dict[self.id_inFADC][2]
-        self.fadcInternalChannel = fadc_dict[self.id_inFADC][3]
-        self.fadcInternalQuad = fadc_dict[self.id_inFADC][4]
+        #self.id_inFADC_patch = fadc_dict[self.id_inFADC][2]
+        #self.fadcInternalChannel = fadc_dict[self.id_inFADC][3]
+        #self.fadcInternalQuad = fadc_dict[self.id_inFADC][4]
         # FADC Internal mapping: quad column
-        self.fadcQuad_column = fadc_dict[self.id_inFADC][5]
-        self.fadcQuad_number = fadc_dict[self.id_inFADC][6]
-        self.fadcQuad_channel = fadc_dict[self.id_inFADC][7]
+        #self.fadcQuad_column = fadc_dict[self.id_inFADC][5]
+        #self.fadcQuad_number = fadc_dict[self.id_inFADC][6]
+        #self.fadcQuad_channel = fadc_dict[self.id_inFADC][7]
 
+        self.belong_to_clusters_7 = _cluster7_list
+        self.belong_to_clusters_19 = _cluster19_list
         # Initialise the rotation to apply to the pixel graphic representation
         rotation = 0.
         if self.sector == 2:
@@ -131,11 +137,16 @@ class Patch():
         self.pixelsID_inModule = []
         # List of pixels
         self.pixels = [None] * 3
+        # List of clusters it belong to
+        self.belong_to_clusters7 = []
+        self.belong_to_clusters19 = []
 
     def initialise(self):
         """
         Initialise function to be called once the pixel list have been filled
         """
+        self.belong_to_clusters7 = self.pixels[0].belong_to_clusters7
+        self.belong_to_clusters19 = self.pixels[0].belong_to_clusters19
         for p in self.pixels:
             self.pixelsID_inModule.append(p.id_inModule)
             self.pixelsID.append(p.ID)
@@ -171,52 +182,8 @@ class Patch():
         """
         self.pixels[idx] = pix
 
-class Cluster_7():
-    """
-    Base class for Cluster of 7 patches representation
-    """
 
-    def __init__(self, _id):
-
-        self.ID = _id
-        self.patchesID = []
-        self.pixelsID = []
-        self.patches = []
-        self.pixels = []
-
-
-    def initialize(self):
-
-        """
-        Initialise function to be called once the patches list have been filled
-        """
-
-        for index, pat in enumerate(self.patches):
-
-            for pix in self.patches[index].pixels:
-
-                self.pixels.append(pix)
-
-
-    def appendPatch(self, pat_id, pat):
-
-        self.patches.append(pat)
-        self.patchesID.append(pat_id)
-
-    def appendPixel(self, pix_id, pix):
-
-        self.pixels.append(pix)
-        self.pixelsID.append(pix_id)
-
-
-
-
-#class Cluster_19():
-
-
-
-
-class Cluster_7():
+class Cluster():
     """
     Base class for patch representation
 
@@ -227,43 +194,26 @@ class Cluster_7():
         self.ID = _id
         # List of Pixel id in patch
         self.pixelsID = []
-        # List of ids of pixel in module in patch
-        self.pixelsID_inCluster = []
         # List of pixels
-        self.pixels = [None] * 21
+        self.pixels = []
         # List of Pixel id in patch
         self.patchesID = []
-        # List of ids of pixel in module in patch
-        self.patchesID_inCluster = []
         # List of pixels
-        self.patches = [None] * 7
+        self.patches = []
 
-    def initialise(self):
+    def appendPixel(self,  pix):
         """
-        Initialise function to be called once the pixel list have been filled
+        A function to append the pixels to the clusters
         """
-        for p in self.pixels:
-            self.pixelsID_inCluster.append(p.id_inCluster)
-            self.pixelsID.append(p.ID)
-        if set(self.pixelsID_inCluster) == {1, 2, 5}:
-            self.pixelsID_inCluster = [1, 2, 5]
-            self.id_inCluster = 1
-        elif set(self.pixelsID_inCluster) == {3, 4, 7}:
-            self.pixelsID_inCluster = [3, 4, 7]
-            self.id_inCluster = 2
-        elif set(self.pixelsID_inCluster) == {6, 10, 9}:
-            self.pixelsID_inCluster = [6, 10, 9]
-            self.id_inCluster = 3
-        elif set(self.pixelsID_inCluster) == {8, 12, 11}:
-            self.pixelsID_inCluster = [8, 12, 11]
-            self.id_inCluster = 4
+        self.pixels += [pix]
+        self.pixelsID += [pix.ID]
 
-
-    def appendPixel(self, idx, pix):
+    def appendPatch(self, patch):
         """
-        A function to append the pixels to the patch
+        A function to append the patches to the clusters
         """
-        self.pixels[idx] = pix
+        self.patches += [patch]
+        self.patchesID += [patch.ID]
 
 
 class Module():
@@ -376,7 +326,9 @@ class Camera():
                 _map_dict['can_master'][i],
                 _map_dict['patch_sw'][i],
                 _map_dict['can_node'][i],
-                _map_dict['can_master'][i]) for i,
+                _map_dict['can_master'][i],
+                [_map_dict[c] for c in ['cluster_patch_%d' % v for v in range(1, 7)] if _map_dict[c] > -0.5]) for i,
+                [],#[_map_dict[c] for c in ['cluster_patch_%d' % v for v in range(1, 19)] if _map_dict[c] > -0.5]) for i,
                                                 p in enumerate(
                 _map_dict['pixel_sw'])]
         # Create patches
@@ -384,34 +336,29 @@ class Camera():
         # Create modules
         self.Modules = [Module(i)
                         for i in range(1, max(_map_dict['module']) + 1)]
-        # Create clusters
-
-        if _config_file_cluster is not None:
-
-            clusters_dict = np.load(_config_file_cluster)
-            patches_in_cluster = clusters_dict['patches_in_cluster']
-            self.Clusters_7 = [Cluster_7(id) for id in range(len(patches_in_cluster))] #TODO chaeck numbering
+        # Create clusters 7
+        self.Clusters_7 = [Cluster(id) for i in range(max(_map_dict['patch_sw']) + 1)]
+        # Create clusters 19
+        self.Clusters_19 = [Cluster(id) for i in range(max(_map_dict['patch_sw']) + 1)]
 
         # Append the pixels to patches and modules and initialisiation functions
         for p in self.Pixels:
             self.Patches[p.patch].appendPixel(p.id_inPatch, p)
             self.Modules[p.module - 1].appendPixel(p.id_inModule, p)
+            for c in p.belong_to_clusters7 :
+                self.Clusters_7[c].appendPixel(p)
+                self.Clusters_7[c].appendPatch(self.Patches[p.patch])
+            for c in p.belong_to_clusters19 :
+                self.Clusters_19[c].appendPixel(p)
+                self.Clusters_19[c].appendPatch(self.Patches[p.patch])
 
         for p in self.Patches:
             p.initialise()
         for p in self.Patches:
             self.Modules[p.module - 1].appendPatch(p.id_inModule, p)
+
         for i, p in enumerate(self.Modules):
             p.initialise()
-
-        if _config_file_cluster is not None:
-
-            for index, clust_id in enumerate(range(len(self.Clusters_7))):
-                for pat_id in patches_in_cluster[index]:
-
-                    self.Clusters_7[clust_id].appendPatch(pat_id, self.Patches[pat_id])
-
-                self.Clusters_7[clust_id].appendPatch(self.Clusters_7[clust_id].ID, self.Patches[self.Clusters_7[clust_id].ID])
 
         self.list_config = [
             'can_master',
@@ -425,10 +372,10 @@ class Camera():
             'pixel_in_fadc_board',
             'x[mm]',
             'y[mm]',
+            'patch_sw',
+            'pixel_in_patch',
             'sector',
             'pixel_in_module_sw',
-            'pixel_in_patch',
-            'patch_sw',
             'pixel_in_fadc_board_rj45',
             'module_in_fadc_board',
             'patch_in_fadc_board',
