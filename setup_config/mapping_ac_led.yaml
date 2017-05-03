@@ -15,7 +15,7 @@ cts_angle             : 120.
 ---
 # Trigger configuration
 type                  : generator_configuration
-generator_url         : 129.194.53.198
+generator_url         : 129.194.53.196
 rate                  : 1000
 configuration_mode    : burst
 ---
