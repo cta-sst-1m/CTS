@@ -145,8 +145,8 @@ class Patch():
         """
         Initialise function to be called once the pixel list have been filled
         """
-        self.belong_to_clusters7 = self.pixels[0].belong_to_clusters_7
-        self.belong_to_clusters19 = self.pixels[0].belong_to_clusters_19
+        self.belong_to_clusters_7 = self.pixels[0].belong_to_clusters_7
+        self.belong_to_clusters_19 = self.pixels[0].belong_to_clusters_19
         for p in self.pixels:
             self.pixelsID_inModule.append(p.id_inModule)
             self.pixelsID.append(p.ID)
@@ -320,11 +320,14 @@ class Camera():
                             for v in sorted(zip(_map_dict['pixel_sw_id'], _map_dict[k]))]
         # _map_dict['pixel_sw_id'].sort()
         # Create the pixelList
+
+        print(_map_dict.keys())
+
         self.Pixels = [
             Pixel(
                 _map_dict['x_pixel'][i],
                 _map_dict['y_pixel'][i],
-                p,
+                i, #TODO check if 'i' or 'p'
                 _map_dict['pixel_hw_id'][i],
                 _map_dict['pix_in_patch_sw'][i],
                 _map_dict['module'][i],
@@ -338,6 +341,8 @@ class Camera():
                 [_map_dict[c][i] for c in ['cluster_patch_%d' % v for v in range(1, 7)] if _map_dict[c][i] > -0.5],
                 [_map_dict[c][i] for c in ['cluster_patch_%d' % v for v in range(1, 7)] if _map_dict[c][i] > -0.5])
             for i, p in enumerate(_map_dict['pixel_sw_id'])]
+
+        print(self.Pixels[1].__dict__)
 
         '''
         self.Pixels = [
@@ -381,6 +386,7 @@ class Camera():
                 self.Clusters_19[c].appendPixel(p)
                 self.Clusters_19[c].appendPatch(self.Patches[p.patch])
 
+        ## Append cluster_id to itself
         for cluster in self.Clusters_7:
             self.Clusters_7[cluster.ID].appendPatch(self.Patches[cluster.ID])
 
