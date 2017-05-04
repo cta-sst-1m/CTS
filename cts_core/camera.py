@@ -321,7 +321,7 @@ class Camera():
         # _map_dict['pixel_sw_id'].sort()
         # Create the pixelList
 
-        print(_map_dict.keys())
+        #print(_map_dict.keys())
 
         self.Pixels = [
             Pixel(
@@ -342,7 +342,7 @@ class Camera():
                 [_map_dict[c][i] for c in ['cluster_patch_%d' % v for v in range(1, 7)] if _map_dict[c][i] > -0.5])
             for i, p in enumerate(_map_dict['pixel_sw_id'])]
 
-        print(self.Pixels[1].__dict__)
+        #print(self.Pixels[1].__dict__)
 
         '''
         self.Pixels = [
