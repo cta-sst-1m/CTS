@@ -32,5 +32,5 @@ trigger_trace         : True
 # Protocol configuration
 type                  : protocol_configuration
 name                  : ac_led_mapping_scan
-ac_level              : 300
+ac_level              : 800
 
