@@ -3,6 +3,7 @@ import logging
 import sys
 import time
 from tqdm import tqdm
+import utils.led_calibration as led_calib
 
 from setup_fsm.fsm_steps import *
 from utils.logger import TqdmToLogger
@@ -71,14 +72,18 @@ def run(master_fsm):
     master_fsm.elements['cts_core'].all_on('AC',0)
     # Get the AC LEDs level to run
     AC_DAC_Levels = master_fsm.options['protocol_configuration']['levels']
+    levels_in_pe = 'levels_in_pe' in master_fsm.options['protocol_configuration'].keys() and master_fsm.options['protocol_configuration']['levels_in_pe']
 
     # Define the progress bar
     log.info('\033[1m\033[91m\t\t-|> Start the AC DAC level loop\033[0m' )
     pbar = tqdm(total=len(AC_DAC_Levels))
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
+    levels_log = []
     for i,level in enumerate(AC_DAC_Levels) :
         for patch in master_fsm.elements['cts_core'].cts.LED_patches:
-            master_fsm.elements['cts_core'].cts_client.set_ac_level(patch.camera_patch_id, level)
+            _level =  led_calib.get_ACPATCH_DAC_byled(patch.internal_id,level) if levels_in_pe else level
+            levels_log.append('pixel patch %d, led patch %d , DAC %d'%(patch.camera_patch_id,patch.internal_id,_level))
+            master_fsm.elements['cts_core'].cts_client.set_ac_level(patch.camera_patch_id, led_calib.get_ACPATCH_DAC_byled(patch.internal_id,level) if levels_in_pe else level)
 
         log.debug('\033[1m\033[91m\t\t-|> Level%d\033[0m' % level)
         timeout = float(master_fsm.options['protocol_configuration']['events_per_level'])\
@@ -88,6 +93,9 @@ def run(master_fsm):
             log.error('Failed at level %d'%level)
             return False
         pbar.update(1)
+
+    for ll in levels_log:
+        log.debug(ll)
 
     # Turn off the AC LEDs
     master_fsm.elements['cts_core'].all_off('AC')

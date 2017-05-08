@@ -90,6 +90,8 @@ class Pixel:
         self.sector = _sector
         # Patch ID
         self.patch = _patch
+        # unif fadc id
+        self.fadc_unique = self.sector << 4 | self.fadc
         # FADC Internal mapping: channel in rj45
         #self.id_inFADC_rj45_channel = fadc_dict[self.id_inFADC][0]
         # FADC Internal mapping: module number
