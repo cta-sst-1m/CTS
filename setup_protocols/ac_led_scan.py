@@ -81,7 +81,7 @@ def run(master_fsm):
     levels_log = []
     patches = master_fsm.elements['cts_core'].cts.LED_patches \
         if 'patches' not in master_fsm.options['protocol_configuration'].keys() \
-        else [ p.internal_id for p in master_fsm.elements['cts_core'].cts.LED_patches
+        else [ p for p in master_fsm.elements['cts_core'].cts.LED_patches
                if p.camera_patch_id in master_fsm.options['protocol_configuration']['patches']]
 
     for i,level in enumerate(AC_DAC_Levels) :
