@@ -79,11 +79,17 @@ def run(master_fsm):
     pbar = tqdm(total=len(AC_DAC_Levels))
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
     levels_log = []
+    patches = master_fsm.elements['cts_core'].cts.LED_patches \
+        if 'patches' not in master_fsm.options['protocol_configuration'].keys() \
+        else [ p.internal_id for p in master_fsm.elements['cts_core'].cts.LED_patches
+               if p.camera_patch_id in master_fsm.options['protocol_configuration']['patches']]
+
     for i,level in enumerate(AC_DAC_Levels) :
-        for patch in master_fsm.elements['cts_core'].cts.LED_patches:
-            _level =  led_calib.get_ACPATCH_DAC_byled(patch.internal_id,level) if levels_in_pe else level
-            levels_log.append('pixel patch %d, led patch %d , DAC %d'%(patch.camera_patch_id,patch.internal_id,_level))
-            master_fsm.elements['cts_core'].cts_client.set_ac_level(patch.camera_patch_id, led_calib.get_ACPATCH_DAC_byled(patch.internal_id,level) if levels_in_pe else level)
+        levels_log.append([])
+        for patch in patches:
+            _level =  led_calib.get_ACPATCH_DAC_byled(level,patch.internal_id) if levels_in_pe else level
+            levels_log[-1].append('pixel patch %d, led patch %d , DAC %d'%(patch.camera_patch_id,patch.internal_id,_level))
+            master_fsm.elements['cts_core'].cts_client.set_ac_level(patch.camera_patch_id, _level if levels_in_pe else level)
 
         log.debug('\033[1m\033[91m\t\t-|> Level%d\033[0m' % level)
         timeout = float(master_fsm.options['protocol_configuration']['events_per_level'])\
@@ -94,8 +100,11 @@ def run(master_fsm):
             return False
         pbar.update(1)
 
-    for ll in levels_log:
-        log.debug(ll)
+    for i,ll in enumerate(levels_log):
+        log.debug('############################## LEVEL %d'%AC_DAC_Levels[i])
+        for l in ll:
+            log.debug(l)
+
 
     # Turn off the AC LEDs
     master_fsm.elements['cts_core'].all_off('AC')

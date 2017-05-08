@@ -26,11 +26,11 @@ class CTSMaster:
                                  logfile='test.log' )
         self.log = logging.getLogger(sys.modules['__main__'].__name__)
         self.cts = cameratestsetup.CTS('config/cts_config_' + str(int(angle_cts)) + '.cfg',
-                                       'config/camera_config_old.cfg', angle=angle_cts, connected=False)
+                                       'config/camera_config.cfg', angle=angle_cts, connected=False)
         # Get the CTS OpcUA client
         self.cts_client = cts_client.CTSClient()
         # Get the generator for triggering AC leds and digicam
-        self.generator = gen.Generator(sys.modules['__main__'].__name__,url="129.194.51.101")
+        self.generator = gen.Generator(sys.modules['__main__'].__name__,url="129.194.53.196")
         self.generator.apply_config('burst')
         # Get the digicam OpcUA client
         self.digicam_client = None
@@ -387,7 +387,7 @@ class CTSMaster:
 
         self.generator.stop_trigger_sequence()
 
-    def turn_on(self, pixel, led_type, level, enable_plot = True, enable_trigger = True):
+    def turn_on(self, pixel, led_type, level, enable_plot = True, enable_trigger = True , iscluster = False):
         """
         turn_on(pixel,led_type,level)
 
@@ -409,7 +409,10 @@ class CTSMaster:
                 self.plot()
 
         if led_type == 'DC':
-            if type(pixel)==type([]):
+            if type(pixel)==type([]) or iscluster:
+                if iscluster:
+                    pixel = self.cts.camera.Clusters_7[pixel].pixelsID
+                    print('Cluster made of',pixel)
                 for pix in pixel:
                     board = self.cts.LEDs[self.cts.pixel_to_led['DC'][pix]].led_board
                     self.cts_client.set_dc_level(board, level)

@@ -314,6 +314,7 @@ class Camera():
             elif k.count('column') > 0:
                 _map_dict[k] = [str(x) for x in _map_dict[k]]
             else:
+
                 _map_dict[k] = [int(x) for x in _map_dict[k]]
 
         # Sort by pixel
@@ -340,8 +341,8 @@ class Camera():
                 _map_dict['patch_sw_id'][i],
                 _map_dict['can_node'][i],
                 _map_dict['can_master'][i],
-                [_map_dict[c][i] for c in ['cluster7_patch_%d' % v for v in range(1, 7)] if _map_dict[c][i] > -0.5],
-                [_map_dict[c][i] for c in ['cluster19_patch_%d' % v for v in range(1, 19)] if _map_dict[c][i] > -0.5])
+                [_map_dict[c][i] for c in ['cluster_patch_%d' % v for v in range(1, 7)] if _map_dict[c][i] > -0.5],
+                [_map_dict[c][i] for c in ['cluster_patch_%d' % v for v in range(1, 7)] if _map_dict[c][i] > -0.5])
             for i, p in enumerate(_map_dict['pixel_sw_id'])]
 
         #print(self.Pixels[1].__dict__)

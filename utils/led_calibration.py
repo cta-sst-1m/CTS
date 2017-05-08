@@ -5,7 +5,7 @@ from cts_core.cameratestsetup import CTS
 ac_led_calib = pickle.load( open('/data/software/CTS/config/ac_led_calib_spline_120.p' , "rb" ) )
 ac_patch_calib = pickle.load( open('/data/software/CTS/config/ac_patch_calib_spline_120.p' , "rb" ) )
 
-
+'''
 f = open('/data/software/CTS/config/dc_led_calib_spline_120.txt')
 coeffs = np.zeros((528,2),dtype = float)
 lines = f.readlines()
@@ -49,6 +49,7 @@ for j in range(1000):
         }
 
 f.close()
+'''
 
 
 # revert by LED and LED Patch
@@ -77,11 +78,11 @@ def get_ACLED_DAC(npe,pixel):
     '''
     log = logging.getLogger(sys.modules['__main__'].__name__)
     if pixel in ac_led_calib.keys():
-        return ac_led_calib[pixel]['DAC'][np.argmin(np.abs(ac_led_calib[pixel]['NPE']-npe))]
+        return int(round(ac_led_calib[pixel]['DAC'][np.argmin(np.abs(ac_led_calib[pixel]['NPE']-npe))]))
     else :
         new_pix = np.argmin(np.abs(np.array(list(ac_led_calib.keys()))-pixel))
         log.debug('replace the calib of pixel',pixel,'by pixel',new_pix)
-        return ac_led_calib[new_pix]['DAC'][np.argmin(np.abs(ac_led_calib[new_pix]['NPE']-npe))]
+        return int(round(ac_led_calib[new_pix]['DAC'][np.argmin(np.abs(ac_led_calib[new_pix]['NPE']-npe))]))
 
 
 def get_ACPATCH_DAC(npe,patch):
@@ -94,11 +95,11 @@ def get_ACPATCH_DAC(npe,patch):
     '''
     log = logging.getLogger(sys.modules['__main__'].__name__)
     if patch in ac_patch_calib.keys():
-        return ac_patch_calib[patch]['DAC'][np.argmin(np.abs(ac_patch_calib[patch]['NPE']-npe))]
+        return int(round(ac_patch_calib[patch]['DAC'][np.argmin(np.abs(ac_patch_calib[patch]['NPE']-npe))]))
     else :
         new_patch = np.argmin(np.abs(np.array(list(ac_patch_calib.keys()))-patch))
         log.debug('replace the calib of patch',patch,'by patch',new_patch)
-        return ac_patch_calib[new_patch]['DAC'][np.argmin(np.abs(ac_patch_calib[new_patch]['NPE']-npe))]
+        return int(round(ac_patch_calib[new_patch]['DAC'][np.argmin(np.abs(ac_patch_calib[new_patch]['NPE']-npe))]))
 
 def get_ACLED_DAC_byled(npe,led):
     '''
@@ -110,11 +111,11 @@ def get_ACLED_DAC_byled(npe,led):
     '''
     log = logging.getLogger(sys.modules['__main__'].__name__)
     if led in ac_led_calib_byled.keys():
-        return ac_led_calib_byled[led]['DAC'][np.argmin(np.abs(ac_led_calib_byled[led]['NPE']-npe))]
+        return int(round(ac_led_calib_byled[led]['DAC'][np.argmin(np.abs(ac_led_calib_byled[led]['NPE']-npe))]))
     else :
         new_led = np.argmin(np.abs(np.array(list(ac_led_calib_byled.keys()))-led))
         log.debug('replace the calib of led',led,'by led',new_led)
-        return ac_led_calib_byled[new_led]['DAC'][np.argmin(np.abs(ac_led_calib_byled[new_led]['NPE']-npe))]
+        return int(round(ac_led_calib_byled[new_led]['DAC'][np.argmin(np.abs(ac_led_calib_byled[new_led]['NPE']-npe))]))
 
 
 def get_ACPATCH_DAC_byled(npe,patch):
@@ -125,12 +126,15 @@ def get_ACPATCH_DAC_byled(npe,patch):
     :return:
     '''
     log = logging.getLogger(sys.modules['__main__'].__name__)
-    if patch in ac_patch_calib_byled.keys():
-        return ac_patch_calib_byled[patch]['DAC'][np.argmin(np.abs(ac_patch_calib_byled[patch]['NPE']-npe))]
+    if patch in ac_patch_calib_byled.keys() and not (patch in [265,277,288,300]):
+        return int(round(ac_patch_calib_byled[patch]['DAC'][np.argmin(np.abs(ac_patch_calib_byled[patch]['NPE']-npe))]))
     else :
-        new_patch = np.argmin(np.abs(np.array(list(ac_patch_calib_byled.keys()))-patch))
-        log.debug('replace the calib of patch',patch,'by patch',new_patch)
-        return ac_patch_calib_byled[new_patch]['DAC'][np.argmin(np.abs(ac_patch_calib_byled[new_patch]['NPE']-npe))]
+        new_patch_key = np.argmin(np.abs(np.array(list(ac_patch_calib_byled.keys()))-patch))
+        new_patch = list(ac_patch_calib_byled.keys())[new_patch_key]
+        if patch in [265,277,288,300]:
+            new_patch = 132
+        log.debug('replace the calib of patch %d by patch %d'%(patch,new_patch))
+        return int(round(ac_patch_calib_byled[new_patch]['DAC'][np.argmin(np.abs(ac_patch_calib_byled[new_patch]['NPE']-npe))]))
 
 
 ## DC
@@ -145,11 +149,11 @@ def get_DCLED_DAC(nsb, pixel):
     '''
     log = logging.getLogger(sys.modules['__main__'].__name__)
     if pixel in dc_led_calib.keys():
-        return dc_led_calib[pixel]['DAC'][np.argmin(np.abs(dc_led_calib[pixel]['NSB'] - nsb))]
+        return int(round(dc_led_calib[pixel]['DAC'][np.argmin(np.abs(dc_led_calib[pixel]['NSB'] - nsb))]))
     else:
         new_pix = np.argmin(np.abs(np.array(list(dc_led_calib.keys())) - pixel))
         log.debug('replace the calib of pixel', pixel, 'by pixel', new_pix)
-        return dc_led_calib[new_pix]['DAC'][np.argmin(np.abs(ac_led_calib[new_pix]['nsb'] - nsb))]
+        return int(round(dc_led_calib[new_pix]['DAC'][np.argmin(np.abs(ac_led_calib[new_pix]['nsb'] - nsb))]))
 
 
 def get_DCPATCH_DAC(nsb, patch):
@@ -162,11 +166,11 @@ def get_DCPATCH_DAC(nsb, patch):
     '''
     log = logging.getLogger(sys.modules['__main__'].__name__)
     if patch in dc_board_calib.keys():
-        return dc_board_calib[patch]['DAC'][np.argmin(np.abs(dc_board_calib[patch]['NSB'] - nsb))]
+        return int(round(dc_board_calib[patch]['DAC'][np.argmin(np.abs(dc_board_calib[patch]['NSB'] - nsb))]))
     else:
         new_patch = np.argmin(np.abs(np.array(list(dc_board_calib.keys())) - patch))
         log.debug('replace the calib of patch', patch, 'by patch', new_patch)
-        return dc_board_calib[new_patch]['DAC'][np.argmin(np.abs(dc_board_calib[new_patch]['NSB'] - nsb))]
+        return int(round(dc_board_calib[new_patch]['DAC'][np.argmin(np.abs(dc_board_calib[new_patch]['NSB'] - nsb))]))
 
 
 def get_DCLED_DAC_byled(nsb, led):
@@ -179,11 +183,11 @@ def get_DCLED_DAC_byled(nsb, led):
     '''
     log = logging.getLogger(sys.modules['__main__'].__name__)
     if led in dc_led_calib_byled.keys():
-        return dc_led_calib_byled[led]['DAC'][np.argmin(np.abs(dc_led_calib_byled[led]['NSB'] - nsb))]
+        return int(round(dc_led_calib_byled[led]['DAC'][np.argmin(np.abs(dc_led_calib_byled[led]['NSB'] - nsb))]))
     else:
         new_led = np.argmin(np.abs(np.array(list(dc_led_calib_byled.keys())) - led))
         log.debug('replace the calib of led', led, 'by led', new_led)
-        return dc_led_calib_byled[new_led]['DAC'][np.argmin(np.abs(dc_led_calib_byled[new_led]['NSB'] - nsb))]
+        return int(round(dc_led_calib_byled[new_led]['DAC'][np.argmin(np.abs(dc_led_calib_byled[new_led]['NSB'] - nsb))]))
 
 
 def get_DCPATCH_DAC_byled(nsb, patch):
@@ -195,8 +199,8 @@ def get_DCPATCH_DAC_byled(nsb, patch):
     '''
     log = logging.getLogger(sys.modules['__main__'].__name__)
     if patch in dc_board_calib_byled.keys():
-        return dc_board_calib_byled[patch]['DAC'][np.argmin(np.abs(dc_board_calib_byled[patch]['NSB'] - nsb))]
+        return int(round(dc_board_calib_byled[patch]['DAC'][np.argmin(np.abs(dc_board_calib_byled[patch]['NSB'] - nsb))]))
     else:
         new_patch = np.argmin(np.abs(np.array(list(dc_board_calib_byled.keys())) - patch))
         log.debug('replace the calib of patch', patch, 'by patch', new_patch)
-        return dc_board_calib_byled[new_patch]['DAC'][np.argmin(np.abs(dc_board_calib_byled[new_patch]['NSB'] - nsb))]
+        return int(round(dc_board_calib_byled[new_patch]['DAC'][np.argmin(np.abs(dc_board_calib_byled[new_patch]['NSB'] - nsb))]))
