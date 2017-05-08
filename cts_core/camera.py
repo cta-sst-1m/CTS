@@ -117,6 +117,15 @@ class Pixel:
         self.Vertices = gp.createPixel(_x, _y, d=24.3, rotation=rotation)
         # Create TGraph out of it
 
+        def __str__(self):
+
+            string = ''
+
+            for key, value in self.__dict__:
+
+                string += '%s : %s \n' %(key, value)
+
+            return string
 
 class Patch():
     """
@@ -187,6 +196,16 @@ class Patch():
 
             self.pixels[idx] = pix
 
+    def __str__(self):
+
+        string = ''
+
+        for key, value in self.__dict__.items():
+            print(key, value)
+            string += '%s : %s \n' %(key, value)
+
+        return string
+
 
 class Cluster():
     """
@@ -225,6 +244,15 @@ class Cluster():
 
             self.patches += [patch]
             self.patchesID += [patch.ID]
+
+    def __str__(self):
+
+        string = ''
+
+        for key, value in self.__dict__:
+            string += '%s : %s \n' %(key, value)
+
+        return string
 
 
 class Module():
@@ -288,6 +316,17 @@ class Module():
         """
         self.patches[idx - 1] = pat
 
+    def __str__(self):
+
+        string = ''
+
+        for key, value in self.__dict__:
+            print(key)
+            print(value)
+            string += '%s : %s \n' %(key, value)
+
+        return string
+
 
 class Camera():
     """
@@ -314,7 +353,6 @@ class Camera():
             elif k.count('column') > 0:
                 _map_dict[k] = [str(x) for x in _map_dict[k]]
             else:
-
                 _map_dict[k] = [int(x) for x in _map_dict[k]]
 
         # Sort by pixel
@@ -341,8 +379,8 @@ class Camera():
                 _map_dict['patch_sw_id'][i],
                 _map_dict['can_node'][i],
                 _map_dict['can_master'][i],
-                [_map_dict[c][i] for c in ['cluster_patch_%d' % v for v in range(1, 7)] if _map_dict[c][i] > -0.5],
-                [_map_dict[c][i] for c in ['cluster_patch_%d' % v for v in range(1, 7)] if _map_dict[c][i] > -0.5])
+                [_map_dict[c][i] for c in ['cluster7_patch_%d' % v for v in range(1, 8)] if _map_dict[c][i] > -0.5],
+                [_map_dict[c][i] for c in ['cluster19_patch_%d' % v for v in range(1, 20)] if _map_dict[c][i] > -0.5])
             for i, p in enumerate(_map_dict['pixel_sw_id'])]
 
         #print(self.Pixels[1].__dict__)
@@ -516,6 +554,37 @@ class Camera():
                 opt = '\t'
             f.write(line + '\n')
         f.close()
+
+    def __str__(self):
+
+        string = 'Pixels info :'
+
+        for pixel in self.Pixels:
+
+            string += str(pixel) + '\n'
+
+        string += '\n Patches info :'
+
+        for patch in self.Patches:
+
+            string += str(patch) + '\n'
+
+        string += '\n Clusters 7 info :'
+
+        for cluster in self.Clusters_7:
+            string += str(cluster) + '\n'
+
+        string += '\n Clusters 19 info :'
+
+        for cluster in self.Clusters_19:
+            string += str(cluster) + '\n'
+
+        string += '\n Modules info :'
+
+        for module in self.Modules:
+            string += str(module) + '\n'
+
+        return string
 
 
 if __name__ == '__main__':
