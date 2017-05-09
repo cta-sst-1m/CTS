@@ -18,7 +18,7 @@ input                 : tcp://localhost:13581
 # Trigger configuration
 type                  : generator_configuration
 generator_url         : 129.194.50.104
-rate                  : 10
+rate                  : 1000
 configuration_mode    : continuous
 ---
 # Camera server configuration
@@ -29,4 +29,5 @@ type                  : protocol_configuration
 name                  : simple_daq
 number_of_events      : 108000
 ac_level              : 300
-
+dc_level              : 200
+levels_in_pe          : True
