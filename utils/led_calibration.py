@@ -94,11 +94,14 @@ def get_ACPATCH_DAC(npe,patch):
     :return:
     '''
     log = logging.getLogger(sys.modules['__main__'].__name__)
-    if patch in ac_patch_calib.keys():
+    if patch in ac_patch_calib.keys() and not (patch in [265,277,288,300]):
         return int(round(ac_patch_calib[patch]['DAC'][np.argmin(np.abs(ac_patch_calib[patch]['NPE']-npe))]))
     else :
-        new_patch = np.argmin(np.abs(np.array(list(ac_patch_calib.keys()))-patch))
-        log.debug('replace the calib of patch',patch,'by patch',new_patch)
+        new_patch_key = np.argmin(np.abs(np.array(list(ac_patch_calib.keys()))-patch))
+        new_patch = list(ac_patch_calib.keys())[new_patch_key]
+        if patch in [265,277,288,300]:
+            new_patch = 132
+        log.debug('replace the calib of patch %d by patch %d'%(patch,new_patch))
         return int(round(ac_patch_calib[new_patch]['DAC'][np.argmin(np.abs(ac_patch_calib[new_patch]['NPE']-npe))]))
 
 def get_ACLED_DAC_byled(npe,led):
@@ -126,13 +129,11 @@ def get_ACPATCH_DAC_byled(npe,patch):
     :return:
     '''
     log = logging.getLogger(sys.modules['__main__'].__name__)
-    if patch in ac_patch_calib_byled.keys() and not (patch in [265,277,288,300]):
+    if patch in ac_patch_calib_byled.keys():
         return int(round(ac_patch_calib_byled[patch]['DAC'][np.argmin(np.abs(ac_patch_calib_byled[patch]['NPE']-npe))]))
     else :
         new_patch_key = np.argmin(np.abs(np.array(list(ac_patch_calib_byled.keys()))-patch))
         new_patch = list(ac_patch_calib_byled.keys())[new_patch_key]
-        if patch in [265,277,288,300]:
-            new_patch = 132
         log.debug('replace the calib of patch %d by patch %d'%(patch,new_patch))
         return int(round(ac_patch_calib_byled[new_patch]['DAC'][np.argmin(np.abs(ac_patch_calib_byled[new_patch]['NPE']-npe))]))
 

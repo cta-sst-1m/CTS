@@ -7,7 +7,7 @@ output_directory      : None
 # Camera configuration
 type                  : camera_configuration
 trigger_configuration : external
-fadcs                 : [[],[0,1,2,3,4,5,6,7,8,9],[]]
+fadcs                 : [[0,1,2,3,4,5,6,7,8,9],[0,1,2,3,4,5,6,7,8,9],[0,1,2,3,4,5,6,7,8,9]]
 ---
 # Writer configruation
 type                  : writer_configuration
@@ -17,12 +17,13 @@ input                 : tcp://localhost:13581
 ---
 # Trigger configuration
 type                  : generator_configuration
-generator_url         : 129.194.52.22
+generator_url         : 129.194.53.196
 rate                  : 1000
 configuration_mode    : continuous
 ---
 # Camera server configuration
 type                  : camera_server_configuration
+trigger_trace         : True
 ---
 # Protocol configuration
 type                  : protocol_configuration
