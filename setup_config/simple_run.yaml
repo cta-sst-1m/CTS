@@ -28,5 +28,5 @@ trigger_trace         : True
 # Protocol configuration
 type                  : protocol_configuration
 name                  : simple_daq
-number_of_events      : 5000
+number_of_events      : 10000
 

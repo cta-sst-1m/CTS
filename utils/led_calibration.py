@@ -5,12 +5,12 @@ from cts_core.cameratestsetup import CTS
 ac_led_calib = pickle.load( open('/data/software/CTS/config/ac_led_calib_spline_120.p' , "rb" ) )
 ac_patch_calib = pickle.load( open('/data/software/CTS/config/ac_patch_calib_spline_120.p' , "rb" ) )
 
-'''
+
 f = open('/data/software/CTS/config/dc_led_calib_spline_120.txt')
 coeffs = np.zeros((528,2),dtype = float)
 lines = f.readlines()
 dc_led_calib = {}
-cts = CTS('/data/software/CTS/config/camera_config_clust.cfg','/data/software/CTS/config/cts_config_120.cfg')
+cts = CTS('/data/software/CTS/config/camera_config.cfg','/data/software/CTS/config/cts_config_120.cfg',angle=120.)
 pixel_list = cts.pixel_to_led.keys()
 pixel_list.sort()
 dc_led_calib_byled = {}
@@ -49,7 +49,7 @@ for j in range(1000):
         }
 
 f.close()
-'''
+
 
 
 # revert by LED and LED Patch
@@ -157,7 +157,7 @@ def get_DCLED_DAC(nsb, pixel):
         return int(round(dc_led_calib[new_pix]['DAC'][np.argmin(np.abs(ac_led_calib[new_pix]['nsb'] - nsb))]))
 
 
-def get_DCBOARD_DAC(nsb, patch):
+def get_DCBOARD_DAC(nsb, fadc_unique):
     '''
     Return the DAC needed to reach nsb in this pixel patch
 
@@ -166,12 +166,11 @@ def get_DCBOARD_DAC(nsb, patch):
     :return:
     '''
     log = logging.getLogger(sys.modules['__main__'].__name__)
-    if patch in dc_board_calib.keys():
-        return int(round(dc_board_calib[patch]['DAC'][np.argmin(np.abs(dc_board_calib[patch]['NSB'] - nsb))]))
+    if fadc_unique in dc_board_calib.keys():
+        return int(round(dc_board_calib[fadc_unique]['DAC'][np.argmin(np.abs(dc_board_calib[fadc_unique]['NSB'] - nsb))]))
     else:
-        new_patch = np.argmin(np.abs(np.array(list(dc_board_calib.keys())) - patch))
-        log.debug('replace the calib of patch', patch, 'by patch', new_patch)
-        return int(round(dc_board_calib[new_patch]['DAC'][np.argmin(np.abs(dc_board_calib[new_patch]['NSB'] - nsb))]))
+        5./0
+        return 'problem'
 
 
 def get_DCLED_DAC_byled(nsb, led):
