@@ -1,13 +1,13 @@
 # Steering
 type                  : steering
-name                  : scan_dc_level
+name                  : trigeff_ac_dc_level
 verbose               : True
 output_directory      : None
 ---
 # Camera configuration
 type                  : camera_configuration
 trigger_configuration : external
-fadcs                 : [[0,1,2,3,4,5,6,7,8,9],[],[]]
+fadcs                 : [[0,1,2,3,4,5,6,7,8,9],[0,1,2,3,4,5,6,7,8,9],[0,1,2,3,4,5,6,7,8,9]]
 ---
 # CTS configuration
 type                  : cts_configuration
@@ -15,7 +15,7 @@ cts_angle             : 120.
 ---
 # Trigger configuration
 type                  : generator_configuration
-generator_url         : 129.194.50.208
+generator_url         : 129.194.53.196
 rate                  : 1000
 configuration_mode    : burst
 ---
@@ -23,15 +23,20 @@ configuration_mode    : burst
 type                  : writer_configuration
 compression           : lzorice
 number_of_trhead      : 8
+A                     : 1000
 input                 : tcp://localhost:13581
 ---
 # Camera server configuration
 type                  : camera_server_configuration
+trigger_trace         : True
 ---
 # Protocol configuration
 type                  : protocol_configuration
-name                  : dc_led_scan
-ac_level              : 0
-levels                : [100,110,120,130,140,150,160,170,180,190,200,210,220,230,240,250,260,270,280,290,300,
-320,340,360,380,400,420,440,460,480,500]
-events_per_level      : 10000
+name                  : ac_dc_led_scan
+ac_levels                : [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 60, 75, 90, 105, 120, 135, 150, 180,
+                       210, 240, 270, 300, 360, 420, 480, 540, 600, 720, 840, 960]
+dc_levels             : [250.e6*48]
+patches               : [192]
+levels_in_pe          : True
+levels_in_nsb          : True
+events_per_level      : 5000
