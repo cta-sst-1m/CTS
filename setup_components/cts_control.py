@@ -29,7 +29,7 @@ class CTSController:
         # Get the CTS mapping
         try :
             self.cts = cameratestsetup.CTS('config/cts_config_' + str(int(self.options['cts_angle'])) + '.cfg',
-                                           'config/camera_config.cfg', angle=float(self.options['cts_angle']), connected=False)
+                                           'config/camera_config_clust.cfg', angle=float(self.options['cts_angle']), connected=False)
         except Exception as inst:
             raise inst
 

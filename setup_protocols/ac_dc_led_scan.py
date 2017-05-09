@@ -9,7 +9,7 @@ from setup_fsm.fsm_steps import *
 from utils.logger import TqdmToLogger
 import utils.led_calibration as led_calib
 
-protocol_name = 'DC_LED_SCAN'
+protocol_name = 'ACDC_LED_SCAN'
 
 def prepare_run(master_fsm):
     '''
@@ -82,6 +82,7 @@ def run(master_fsm):
     levels_in_pe = 'levels_in_pe' in master_fsm.options['protocol_configuration'].keys() and master_fsm.options['protocol_configuration']['levels_in_pe']
     levels_in_nsb = 'levels_in_nsb' in master_fsm.options['protocol_configuration'].keys() and master_fsm.options['protocol_configuration']['levels_in_nsb']
 
+
     log.info('\033[1m\033[91m\t\t-|> Start the DAC level loop\033[0m' )
     pbar = tqdm(total=len(DC_DAC_Levels)*len(AC_DAC_Levels))
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
@@ -112,7 +113,7 @@ def run(master_fsm):
                       / master_fsm.options['generator_configuration']['rate']
             timeout += 1.
             if not run_level(master_fsm, timeout):
-                log.error('Failed at level %d' % level)
+                log.error('Failed at level DC %d AC %d' % (dc_level,ac_level))
                 return False
             pbar.update(1)
 

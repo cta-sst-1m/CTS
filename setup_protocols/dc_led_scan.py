@@ -8,6 +8,9 @@ from tqdm import tqdm
 from setup_fsm.fsm_steps import *
 from utils.logger import TqdmToLogger
 
+
+import utils.led_calibration as led_calib
+
 protocol_name = 'DC_LED_SCAN'
 
 def prepare_run(master_fsm):
@@ -81,14 +84,20 @@ def run(master_fsm):
             master_fsm.elements['cts_core'].cts_client.set_ac_level(patch.camera_patch_id, level)
 
     DC_DAC_Levels = master_fsm.options['protocol_configuration']['levels']
+    levels_in_pe = 'levels_in_pe' in master_fsm.options['protocol_configuration'].keys() and \
+                   master_fsm.options['protocol_configuration']['levels_in_pe']
 
     log.info('\033[1m\033[91m\t\t-|> Start the DAC level loop\033[0m' )
     pbar = tqdm(total=len(DC_DAC_Levels))
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
     for i,level in enumerate(DC_DAC_Levels) :
+        log.debug('\033[1m\033[91m\t\t-|> Level%d\033[0m' % level)
         for board in master_fsm.elements['cts_core'].cts.LED_boards:
-            master_fsm.elements['cts_core'].cts_client.set_dc_level(board.internal_id, level)
+            _level =  led_calib.get_DCBOARD_DAC_byled(patch.internal_id,level*48) if levels_in_pe else level
+            log.debug('pixel board %d, led board %d , DAC %d'%( master_fsm.elements['cts_core'].cts.camera.Pixels[board.leds_camera_pixel_id[0]].fadc_unique,
+                                                                 patch.internal_id,_level))
+            master_fsm.elements['cts_core'].cts_client.set_dc_level(board.internal_id, _level)
         time.sleep(1)
         timeout = master_fsm.options['protocol_configuration']['events_per_level']\
                   /master_fsm.options['generator_configuration']['rate']

@@ -190,7 +190,7 @@ def get_DCLED_DAC_byled(nsb, led):
         return int(round(dc_led_calib_byled[new_led]['DAC'][np.argmin(np.abs(dc_led_calib_byled[new_led]['NSB'] - nsb))]))
 
 
-def get_DCPATCH_DAC_byled(nsb, patch):
+def get_DCBOARD_DAC_byled(nsb, patch):
     '''
     Return the DAC needed to reach nsb in this led patch
     :param nsb:
