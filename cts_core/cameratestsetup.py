@@ -251,8 +251,9 @@ class CTS():
         lines = list(
             map(list, zip(*[l.split('\n')[0].split('\t') for l in f.readlines()])))
         _map_dict = dict(zip(keys, lines))
+        print(_map_dict.keys())
         for k in _map_dict.keys():
-            if k.count('[mm]') > 0:
+            if k.count('[mm]')>0.5:
                 _map_dict[k] = [float(x) for x in _map_dict[k]]
             elif k.count('led_type') > 0:
                 _map_dict[k] = [str(x) for x in _map_dict[k]]
@@ -260,6 +261,7 @@ class CTS():
                 _map_dict[k] = [int(x) for x in _map_dict[k]]
 
         # Sort by LED
+        print()
         for k in filter(lambda x: x != 'led_number', _map_dict.keys()):
             _map_dict[k] = [v[1] for v in sorted(zip(_map_dict['led_number'], _map_dict[k]))]
         _map_dict['led_number'].sort()

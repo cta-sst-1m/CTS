@@ -1,6 +1,6 @@
 # Steering
 type                  : steering
-name                  : calib_dc_level
+name                  : dc_calib_scan
 verbose               : True
 output_directory      : None
 ---
@@ -33,10 +33,10 @@ trigger_trace         : True
 # Protocol configuration
 type                  : protocol_configuration
 name                  : ac_dc_led_scan
-ac_levels             : [0,300]
-dc_levels             : [277,288,295,306,323,333]
+ac_levels             : [450]
+dc_levels             : [0,277,288,295,306,323,333,343,353]
 patches               : [168,180,181,192,204,205,216]
 only_pixels           : [482,517,518,516,552,553,519,555,556,554,589,590,588,624,625,591,627,628,626,661,662]
 levels_in_pe          : True
 levels_in_nsb          : False
-events_per_level      : 10
+events_per_level      : 10000

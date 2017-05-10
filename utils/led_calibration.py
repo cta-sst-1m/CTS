@@ -10,8 +10,8 @@ f = open('/data/software/CTS/config/dc_led_calib_spline_120.txt')
 coeffs = np.zeros((528,2),dtype = float)
 lines = f.readlines()
 dc_led_calib = {}
-cts = CTS('/data/software/CTS/config/camera_config.cfg','/data/software/CTS/config/cts_config_120.cfg',angle=120.)
-pixel_list = cts.pixel_to_led.keys()
+cts = CTS('/data/software/CTS/config/cts_config_120.cfg','/data/software/CTS/config/camera_config.cfg',angle=120.)
+pixel_list = list(cts.pixel_to_led['DC'].keys())
 pixel_list.sort()
 dc_led_calib_byled = {}
 for i,l in enumerate(lines):
@@ -24,8 +24,8 @@ for i,l in enumerate(lines):
         if nsb > 10.e6:
             dc_led_calib[pixel_list[i]]['DAC']=j
             dc_led_calib[pixel_list[i]]['NSB']=nsb
-            dc_led_calib[pixel_list[i]]['LED']=cts.pixel_to_led('DC',pixel_list[i])
-            dc_led_calib_byled[cts.pixel_to_led('DC',pixel_list[i])]={
+            dc_led_calib[pixel_list[i]]['LED']=cts.pixel_to_led['DC'][pixel_list[i]]
+            dc_led_calib_byled[cts.pixel_to_led['DC'][pixel_list[i]]]={
                 'DAC':j,
                 'NSB':nsb
             }
@@ -33,10 +33,13 @@ dc_board_calib = {}
 dc_board_calib_byled = {}
 for j in range(1000):
     for board in cts.LED_boards:
-        nsbs = []
-        for l,led in enumerate(board.leds_internal_id):
-            nsbs.append(dc_led_calib_byled[led])
-        nsb = np.sum(nsbs)
+        nsbs,nsb,counter = 0.,0.,0
+        for l,led in enumerate(board.LEDs):
+            if led.internal_id not in dc_led_calib_byled.keys() : continue
+            nsbs+=dc_led_calib_byled[led.internal_id]['NSB']
+            counter+=1
+        if counter>0.:
+            nsb = nsbs/counter
         dc_board_calib[cts.camera.Pixels[board.leds_camera_pixel_id[0]].fadc_unique] = {
             'LED':board.internal_id,
             'NSB': nsb,
@@ -165,8 +168,11 @@ def get_DCBOARD_DAC(nsb, fadc_unique):
     :param patch:
     :return:
     '''
+    nsb = float(nsb)
     log = logging.getLogger(sys.modules['__main__'].__name__)
     if fadc_unique in dc_board_calib.keys():
+        print(dc_board_calib[fadc_unique])
+
         return int(round(dc_board_calib[fadc_unique]['DAC'][np.argmin(np.abs(dc_board_calib[fadc_unique]['NSB'] - nsb))]))
     else:
         5./0

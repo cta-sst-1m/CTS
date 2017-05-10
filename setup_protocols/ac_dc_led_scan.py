@@ -70,14 +70,22 @@ def run(master_fsm):
         return False
 
 
-
-    # Turn on the DC LEDs
-    master_fsm.elements['cts_core'].all_on('DC',0)
-    master_fsm.elements['cts_core'].all_on('AC',0)
-
-
     DC_DAC_Levels = master_fsm.options['protocol_configuration']['dc_levels']
     AC_DAC_Levels = master_fsm.options['protocol_configuration']['ac_levels']
+
+    if 'only_pixels' not in master_fsm.options['protocol_configuration'].keys():
+    # Turn on the DC LEDs
+        master_fsm.elements['cts_core'].all_on('DC',0)
+        if AC_DAC_Levels != [0]:
+            master_fsm.elements['cts_core'].all_on('AC',0)
+    else:
+        print('########################################################################### Only pixels')
+        for pix in  master_fsm.options['protocol_configuration']['only_pixels']:
+            master_fsm.elements['cts_core'].turn_on(pix,'DC', 0)
+            if AC_DAC_Levels != [0]:
+                master_fsm.elements['cts_core'].turn_on(pix,'AC', 0)
+
+
 
     levels_in_pe = 'levels_in_pe' in master_fsm.options['protocol_configuration'].keys() and master_fsm.options['protocol_configuration']['levels_in_pe']
     levels_in_nsb = 'levels_in_nsb' in master_fsm.options['protocol_configuration'].keys() and master_fsm.options['protocol_configuration']['levels_in_nsb']
@@ -99,7 +107,7 @@ def run(master_fsm):
     levels_log = []
     for i,dc_level in enumerate(DC_DAC_Levels) :
         for board in boards:
-            _dc_level =  led_calib.get_DCBOARD_DAC(dc_level,cts.camera.Pixels[board.leds_camera_pixel_id[0]].fadc_unique) if levels_in_nsb else dc_level
+            _dc_level =  led_calib.get_DCBOARD_DAC(dc_level,master_fsm.elements['cts_core'].cts.camera.Pixels[board.leds_camera_pixel_id[0]].fadc_unique) if levels_in_nsb else dc_level
             master_fsm.elements['cts_core'].cts_client.set_dc_level(board.internal_id, _dc_level if levels_in_pe else dc_level)
 
         for j, ac_level in enumerate(AC_DAC_Levels):
@@ -118,9 +126,9 @@ def run(master_fsm):
             pbar.update(1)
 
     # Turn off the AC LEDs
-    master_fsm.elements['cts_core'].all_off('DC',0)
+    master_fsm.elements['cts_core'].all_off('DC')
     if 'ac_level' in master_fsm.options['protocol_configuration'].keys():
-        master_fsm.elements['cts_core'].all_off('AC', 0)
+        master_fsm.elements['cts_core'].all_off('AC')
 
     # And finalise the run
     if not end_run(master_fsm):
