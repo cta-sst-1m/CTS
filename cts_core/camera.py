@@ -379,8 +379,8 @@ class Camera():
                 _map_dict['patch_sw_id'][i],
                 _map_dict['can_node'][i],
                 _map_dict['can_master'][i],
-                [_map_dict[c][i] for c in ['cluster7_patch_%d' % v for v in range(1, 8)] if _map_dict[c][i] > -0.5],
-                [_map_dict[c][i] for c in ['cluster19_patch_%d' % v for v in range(1, 20)] if _map_dict[c][i] > -0.5])
+                [_map_dict[c][i] for c in ['cluster7_patch_%d' % v for v in range(1, 8)] if _map_dict[c][i] > -0.5] if 'cluster19_patch_1' in _map_dict.keys() else [],
+                [_map_dict[c][i] for c in ['cluster19_patch_%d' % v for v in range(1, 20)] if _map_dict[c][i] > -0.5] if 'cluster19_patch_1' in _map_dict.keys() else [])
             for i, p in enumerate(_map_dict['pixel_sw_id'])]
 
         #print(self.Pixels[1].__dict__)

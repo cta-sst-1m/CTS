@@ -11,7 +11,9 @@ coeffs = np.zeros((528,2),dtype = float)
 lines = f.readlines()
 dc_led_calib = {}
 cts = CTS('/data/software/CTS/config/cts_config_120.cfg','/data/software/CTS/config/camera_config.cfg',angle=120.)
+cts_old = CTS('/data/software/CTS/config/cts_config_120_old.cfg','/data/software/CTS/config/camera_config.cfg',angle=120.)
 pixel_list = list(cts.pixel_to_led['DC'].keys())
+pixel_list_old = list(cts_old.pixel_to_led['DC'].keys())
 pixel_list.sort()
 dc_led_calib_byled = {}
 for i,l in enumerate(lines):
