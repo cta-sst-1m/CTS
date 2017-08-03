@@ -30,7 +30,7 @@ class CTSMaster:
         # Get the CTS OpcUA client
         self.cts_client = cts_client.CTSClient()
         # Get the generator for triggering AC leds and digicam
-        self.generator = gen.Generator(sys.modules['__main__'].__name__,url="129.194.51.39")
+        self.generator = gen.Generator(sys.modules['__main__'].__name__,url="129.194.52.76")
         self.generator.apply_config('burst')
         # Get the digicam OpcUA client
         self.digicam_client = None

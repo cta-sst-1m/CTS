@@ -8,6 +8,7 @@ from tqdm import tqdm
 from setup_fsm.fsm_steps import *
 from utils.logger import TqdmToLogger
 import numpy as np
+import utils.led_calibration as led_calib
 
 protocol_name = 'LOAD_MC_EVENTS'
 
@@ -120,8 +121,8 @@ def run(master_fsm):
     log = logging.getLogger(sys.modules['__main__'].__name__)
 
     # Some preliminary configurations
-    master_fsm.options['generator_configuration']['number_of_pulses'] =  \
-        master_fsm.options['protocol_configuration']['events_per_mc_event']
+    #master_fsm.options['generator_configuration']['number_of_pulses'] =  \
+    #    master_fsm.options['protocol_configuration']['events_per_mc_event']
 
     if 'writer_configuration' in master_fsm.options.keys():
         master_fsm.options['writer_configuration']['max_evts_per_file'] = master_fsm.options['protocol_configuration']['events_per_mc_event']*10
@@ -161,11 +162,16 @@ def run(master_fsm):
     for board in master_fsm.elements['cts_core'].cts.LED_boards:
         master_fsm.elements['cts_core'].cts_client.set_dc_level(board.internal_id, int(dc_level) )
 
+    rate = -1.
+    if 'generator_configuration' in master_fsm.options.keys():
+        rate = master_fsm.options['generator_configuration']['rate']
+    else:
+        rate = master_fsm.options['camera_configuration']['rate']
     for i in N_mc_events:
             load_mc_event(mc_events[i], pixel_list, master_fsm, param)
-            timeout = master_fsm.options['protocol_configuration']['events_per_mc_event'] \
-                      / master_fsm.options['generator_configuration']['rate']
+            timeout = master_fsm.options['protocol_configuration']['events_per_mc_event'] / rate
             timeout += 1.
+            print('######################### Timeout',timeout)
             if not run_level(master_fsm, timeout):
                 log.error('Failed at level %d' % level)
                 return False

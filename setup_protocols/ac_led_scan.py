@@ -86,12 +86,15 @@ def run(master_fsm):
 
     for i,level in enumerate(AC_DAC_Levels) :
         levels_log.append([])
+        list_of_level = ''
         for patch in patches:
             _level =  led_calib.get_ACPATCH_DAC(level,patch.camera_patch_id) if levels_in_pe else level
+            list_of_level+='%d : %d , '%(patch.camera_patch_id,_level)
             levels_log[-1].append('pixel patch %d, led patch %d , DAC %d'%(patch.camera_patch_id,patch.internal_id,_level))
             master_fsm.elements['cts_core'].cts_client.set_ac_level(patch.camera_patch_id, _level if levels_in_pe else level)
 
         log.debug('\033[1m\033[91m\t\t-|> Level%d\033[0m' % level)
+        log.debug(list_of_level)
         timeout = float(master_fsm.options['protocol_configuration']['events_per_level'])\
                   /master_fsm.options['generator_configuration']['rate']
         timeout+=1.

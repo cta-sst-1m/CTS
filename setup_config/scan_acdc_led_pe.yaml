@@ -1,6 +1,6 @@
 # Steering
 type                  : steering
-name                  : load_mc_events
+name                  : scan_ac_level
 verbose               : True
 output_directory      : None
 ---
@@ -31,10 +31,14 @@ trigger_trace         : True
 ---
 # Protocol configuration
 type                  : protocol_configuration
-name                  : load_mc_events
+name                  : ac_dc_led_scan
+ac_levels                : [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 18, 22, 26, 31, 38, 46, 55, 66, 79, 95, 114, 137, 164,
+                         197, 237, 284, 341, 410, 492, 590, 708, 850, 1020, 1224, 1469, 1763, 2116, 2539, 3047, 3657,
+                         4388, 5266, 6319, 7583, 9100, 10920, 13104, 15725, 18870, 22644, 27173, 32608, 39130, 46956,
+                         56347, 67617, 81140, 97368, 116842, 140210, 168252]
+dc_levels                : [0,250,270,290,310,330,350,370,390,410,430,450]
 
-dc_level              : 0
-mc_events_file        : /data/datasets/mc_1.npz
-N_mc_events           : [4,6,8,16,21,33,43,64,79,76,81]
-events_per_mc_event   : 10
-led_parameters_file   : /data/datasets/ac_led.npz
+levels_in_pe          : True
+levels_in_nsb         : False
+events_per_level      : 2000
+events_per_level_check: 100
