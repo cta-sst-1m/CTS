@@ -128,7 +128,7 @@ class CTSMaster:
                  - timeout : the amount of time, in s, to keep the pixels on
                              (float)
         """
-        if n_triggers > 0 :
+        if n_triggers > 0:
             self.generator.configure_trigger(n_pulse=n_triggers)
         # loop over the boards and apply the DAC level
         for board in self.cts.LED_boards:
@@ -164,7 +164,7 @@ class CTSMaster:
         if self.plotting:
             self.plot()
 
-    def loop_over_ac_levels(self, levels=range(100,600,50), timeout=0.05,
+    def loop_over_ac_levels(self, levels=range(100, 600, 50), timeout=0.05,
                             n_triggers=1000, frequency=100):
         """
         loop_over_ac_pixels(level,timeout,trigger,n_trigger)
@@ -196,7 +196,7 @@ class CTSMaster:
         self.all_off('AC')
 
     def loop_over_dc_levels(self, levels=range(100, 600, 50), timeout=0.05,
-                            n_triggers=1000, frequency = 100):
+                            n_triggers=1000, frequency=100):
         """
         loop_over_ac_pixels(level,timeout,trigger,n_trigger)
 
@@ -248,7 +248,7 @@ class CTSMaster:
         self.all_on('DC', 0, trig_sequence=False)
         self.all_on('AC', ac_level, trig_sequence=False)
         # loop over the levels to set the DAC level
-        for i,level in enumerate(levels):
+        for i, level in enumerate(levels):
             print('Setting level', level)
             for board in self.cts.LED_boards:
                 self.cts_client.set_dc_level(board.internal_id, level)
@@ -374,11 +374,13 @@ class CTSMaster:
         """
         loop_over_ac_patches(level,timeout)
 
-        A function to light AC patches one after the other in increasing software patch id
+        A function to light AC patches one after the other in increasing
+        software patch id
 
         Inputs :
                  - level   : the DAC level to apply (int)
-                 - timeout : the amount of time, in s, to keep the patches on (float)
+                 - timeout : the amount of time, in s, to keep the patches on
+                             (float)
                  - n_triggers: number of consecutive triggers
         """
         # configure the trigger
@@ -431,20 +433,22 @@ class CTSMaster:
                - level : the DAC level
         """
         if led_type == 'AC':
-            patch = self.cts.LEDs[self.cts.pixel_to_led['AC'][pixel]].camera_patch_id
+            led_ac = self.cts.pixel_to_led['AC'][pixel]
+            patch = self.cts.LEDs[led_ac].camera_patch_id
             self.cts_client.set_ac_level(patch, level)
             self.cts_client.set_led_status('AC', pixel, True)
             self.ac_level[pixel] = level
             self.ac_status[pixel] = 1
-            if enable_trigger: self.generator.start_trigger_sequence()
+            if enable_trigger:
+                self.generator.start_trigger_sequence()
             if self.plotting and enable_plot:
                 self.plot()
 
         if led_type == 'DC':
-            if type(pixel)==type([]) or iscluster:
+            if isinstance(pixel, list) or iscluster:
                 if iscluster:
                     pixel = self.cts.camera.Clusters_7[pixel].pixelsID
-                    print('Cluster made of',pixel)
+                    print('Cluster made of', pixel)
                 for pix in pixel:
                     led_dc = self.cts.pixel_to_led['DC'][pix]
                     board = self.cts.LEDs[led_dc].led_board
@@ -464,8 +468,8 @@ class CTSMaster:
                 if self.plotting and enable_plot:
                     self.plot()
 
-    def turn_off(self, pixel, led_type, enable_plot = True,
-                 enable_trigger = True):
+    def turn_off(self, pixel, led_type, enable_plot=True,
+                 enable_trigger=True):
         """
         turn_off(pixel,led_type)
 
@@ -477,7 +481,8 @@ class CTSMaster:
                - led_type : the type of led (str could be 'AC' or 'DC')
         """
         if led_type == 'AC':
-            if enable_trigger: self.generator.stop_trigger_sequence()
+            if enable_trigger:
+                self.generator.stop_trigger_sequence()
             led_ac = self.cts.pixel_to_led['AC'][pixel]
             patch = self.cts.LEDs[led_ac].camera_patch_id
             self.cts_client.set_ac_level(patch, 0)
@@ -508,8 +513,9 @@ class CTSMaster:
         """
         for pixel in self.cts.pixel_to_led[led_type].keys():
             self.turn_on(pixel, led_type, level, enable_plot=False,
-                         enable_trigger=False )
-        if trig_sequence : self.generator.start_trigger_sequence()
+                         enable_trigger=False)
+        if trig_sequence:
+            self.generator.start_trigger_sequence()
 
     def all_off(self, led_type):
         """
@@ -526,14 +532,13 @@ class CTSMaster:
         for pixel in self.cts.pixel_to_led[led_type].keys():
             self.turn_off(pixel, led_type, enable_plot=False)
 
-
     def dry_runs(self, n_batch=20, batch_size=1000, freq_pulse=300,
                  timeout=60):
         # first make sure the leds are at 0
         self.reset()
         # then configrue the trigger
         self.generator.configure_trigger(n_pulse=batch_size, freq=freq_pulse)
-        i=0
+        i = 0
         while i < n_batch:
             self.generator.start_trigger_sequence()
             time.sleep(timeout)
@@ -620,7 +625,7 @@ class CTSMaster:
         # AC Logic: turn on all LED
         for pix_AC in self.cts.pixel_to_led['AC'].keys():
             self.cts_client.set_led_status('AC', pix_AC, pix_status[pix_AC])
-        if self.plotting: 
+        if self.plotting:
             self.plot()
 
     def write_mc_event(self, nsb_level=500, evtnum=0,
