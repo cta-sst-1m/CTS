@@ -37,7 +37,7 @@ canSST1M
 Start by running the server
 
 ```
-python ctsopcua/cts_opcua_server.py angle
+python cts_opcua/cts_opcua_server.py angle
 
 ```
 

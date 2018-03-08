@@ -25,9 +25,11 @@ class Generator:
         except Exception as inst:
             raise inst
         try:
-            self.inst = self.rm.open_resource("TCPIP::" + self.url + "::9221::SOCKET")
+            #self.inst = self.rm.open_resource("TCPIP::" + self.url + "::9221::SOCKET")
+            self.inst = self.rm.open_resource("TCPIP::" + self.url + "::4843::SOCKET")
             if hasattr(self, 'slave_url'):
-                self.inst_slave = self.rm.open_resource("TCPIP::" + self.slave_url + "::9221::SOCKET")
+                #self.inst_slave = self.rm.open_resource("TCPIP::" + self.slave_url + "::9221::SOCKET")
+                self.inst_slave = self.rm.open_resource("TCPIP::" + self.slave_url + "::4843::SOCKET")
 
         except Exception as inst:
             raise inst

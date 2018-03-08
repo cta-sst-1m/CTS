@@ -4,8 +4,8 @@ import setup_components.generator as gen
 
 import matplotlib.pyplot as plt
 from ctapipe.io.hessio import hessio_event_source
-from ctapipe.io.camera import CameraGeometry
-from ctapipe.io.camera import find_neighbor_pixels
+from ctapipe.instrument.camera import CameraGeometry
+from ctapipe.instrument.camera import _find_neighbor_pixels as find_neighbor_pixels
 from ctapipe import visualization
 from utils import mcevent
 
@@ -30,7 +30,7 @@ class CTSMaster:
         # Get the CTS OpcUA client
         self.cts_client = cts_client.CTSClient()
         # Get the generator for triggering AC leds and digicam
-        self.generator = gen.Generator(sys.modules['__main__'].__name__,url="129.194.52.76")
+        self.generator = gen.Generator(sys.modules['__main__'].__name__,url="0.0.0.0")  # "129.194.52.76"
         self.generator.apply_config('burst')
         # Get the digicam OpcUA client
         self.digicam_client = None
@@ -76,7 +76,7 @@ class CTSMaster:
         pix_y = list(pix_y)
         pix_id = list(pix_id)
         neighbors_pix = find_neighbor_pixels(pix_x, pix_y,30.)
-        geom = CameraGeometry(0,pix_id, pix_x*u.mm, pix_y*u.mm,np.ones((1296))*400.,neighbors_pix,'hexagonal')
+        geom = CameraGeometry(0,pix_id, pix_x*u.mm, pix_y*u.mm,np.ones((1296))*400.,'hexagonal',neighbors=neighbors_pix)
         plt.figure(0,figsize=(20,6))
         self.plots = []
         plt.subplot(1, 2, 1)
