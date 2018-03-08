@@ -163,7 +163,7 @@ def command(
                 recieveIDs.append(
                     canID(
                         masterID=masterID,
-                        slaveID=canmsg[1]+(slaveID-1)%4,
+                        slaveID=canmsg[1]+(slaveID-1) % 4,
                         broadcastAnswer=False,
                         answer=True,
                         verbose=verbose)
@@ -178,9 +178,9 @@ def command(
                         verbose=verbose))
 
     r = []
-    #empty the response cache
+    # empty the response cache
     flushAnswer(bus)
-    #send messages ans listen to responses
+    # send messages ans listen to responses
     for i, sendID in enumerate(sendIDs):
         data_msg = [msgID]
         data_msg.extend(canmsg)
@@ -199,7 +199,7 @@ def command(
                 resp = bus.recv(1)
                 if resp is None:
                     break
-                if resp.data[0]&0x1f != msgID:
+                if resp.data[0] & 0x1f != msgID:
                     print('WARNING: unexpected message ID:', resp)
                     continue
                 if resp.arbitration_id in to_recieve:
@@ -207,7 +207,7 @@ def command(
                     if verbose:
                         print('recieved:', resp)
                 else:
-                    if not resp.arbitration_id in to_recieve:
+                    if resp.arbitration_id not in to_recieve:
                         print('WARNING: unexpected message source:',
                               resp.arbitration_id,
                               'expected one of:', to_recieve)
@@ -216,8 +216,7 @@ def command(
 
 
 def setAddress(bus, origAdd, modnum):
-    #
-    #disable protection on slave addresses
+    # disable protection on slave addresses
     resp = command(bus, [origAdd],
                    'SetCANAddress', [0x0, 0x07],
                    waitanswer=True,
@@ -228,9 +227,9 @@ def setAddress(bus, origAdd, modnum):
             'got error codes %d while disabling protection' % errors_codes
         )
     resp = command(bus, [origAdd], 'SetCANAddress', [0x1, modnum],
-                  waitanswer=True,
-                  broadcast=False,
-                  broadcastAnswer=False)
+                   waitanswer=True,
+                   broadcast=False,
+                   broadcastAnswer=False)
     if resp[0].data[1] != 0:
         raise ConnectionError(
             'got error code %d while setting new address' % resp[0].data[1]
@@ -239,7 +238,7 @@ def setAddress(bus, origAdd, modnum):
 
 def setBoardAddresses(bus, boardnum):
     # first get the adresses
-    resp = command(bus, range(1,109), 'GetVersion',
+    resp = command(bus, range(1, 109), 'GetVersion',
                    verbose=False, broadcast=True, broadcastAnswer=True)
     addresses = sorted([r.arbitration_id for r in resp])
     if len(addresses) != 4:
@@ -254,7 +253,7 @@ def setBoardAddresses(bus, boardnum):
         setAddress(bus, mod, boardnum * 4 + 1)
     time.sleep(2)
     # check new address
-    resp = command(bus, range(1,109), 'GetVersion',
+    resp = command(bus, range(1, 109), 'GetVersion',
                    verbose=False, broadcast=True, broadcastAnswer=True)
     addresses = sorted([r.arbitration_id for r in resp])
     modules = [toMod(add) for add in addresses]
@@ -324,8 +323,10 @@ def checkLEDStatus(bus, module=None, verbose=False):
         print('=================== LED STATUS =======================')
         for r in res:
             mod = toMod(r.arbitration_id)
-            print('| Module: ', mod, 'DCDC convertor', resdict['M_' + str(mod) + '_DCDC_Status'],
-                  '| AC LED (0-23)', resdict['M_' + str(mod) + '_ACLED_Status'])
+            print('| Module: ', mod, 'DCDC convertor',
+                  resdict['M_' + str(mod) + '_DCDC_Status'],
+                  '| AC LED (0-23)',
+                  resdict['M_' + str(mod) + '_ACLED_Status'])
         print('')
     return resdict
 
@@ -355,12 +356,12 @@ def checkLEDLevel(bus, module=None, verbose=False):
         mod = toMod(r.arbitration_id)
         if mod not in modules:
             modules.append(mod)
-        frame = r.data[0]>>5
+        frame = r.data[0] >> 5
         channels = list(frame*3 + np.array([0, 1, 2]))
-        data_channels = [(r.data[1]<< 8) | r.data[2],
+        data_channels = [(r.data[1] << 8) | r.data[2],
                          (r.data[3] << 8) | r.data[4],
                          (r.data[5] << 8) | r.data[6]]
-        for ch, data in zip(channels,data_channels):
+        for ch, data in zip(channels, data_channels):
             resdict['M_' + str(mod) + '_ACLED_Ch_' + str(ch)] = data
     if verbose:
         print('=================== LED STATUS =======================')
@@ -385,9 +386,11 @@ def setDACLevel(
     bus: the CAN bus (type Protocole)
     level : the required level
     module :  None will broadcast to all module (AC and DC)
-              a module value will send to this module only (0 and 2 are for AC, 1 and 3 for DC)
+              a module value will send to this module only
+              (0 and 2 are for AC, 1 and 3 for DC)
     channel : None will set the same level to all channel (AC and DC)
-              a channel will set the level to this channel (note that for DC only channel 0x0 is available)
+              a channel will set the level to this channel
+              (note that for DC only channel 0x0 is available)
     '''
     if verbose:
         print('Set the DAC led level...')
@@ -504,36 +507,40 @@ def setLED(
         # Then broadcast on channel 8 such that all the module for AC gets set
         if globalCmd is None:
             res = command(
-                bus, range(
-                    1, 109), 'SetLED', [
-                    led_HSB, led_MSB, led_LSB, False], broadcast=True, broadcastAnswer=True)
+                bus, range(1, 109), 'SetLED',
+                [led_HSB, led_MSB, led_LSB, False],
+                broadcast=True, broadcastAnswer=True
+            )
         else:
             res = command(
-                bus, range(
-                    1, 109), 'SetLED', [
-                    led_HSB, led_MSB, led_LSB, globalCmd], broadcast=True, broadcastAnswer=True)
+                bus, range(1, 109), 'SetLED',
+                [led_HSB, led_MSB, led_LSB, globalCmd],
+                broadcast=True, broadcastAnswer=True
+            )
     else:
         if globalCmd is None:
             res = command(
-                bus, [module], 'SetLED', [
-                    led_HSB, led_MSB, led_LSB, False], waitanswer=waitanswer)
+                bus, [module], 'SetLED',
+                [led_HSB, led_MSB, led_LSB, False], waitanswer=waitanswer
+            )
         else:
             ch, board = mod2chboard(module)
-            if globalCmd == 1 and ch%2==1:
+            if globalCmd == 1 and ch % 2 == 1:
                 print('WARNING: enabling DC/DC convertor on Hw addr', ch,
                       'is not allowed so it was disabled')
-                globalCmd=0
+                globalCmd = 0
             res = command(
-                bus, [module], 'SetLED', [
-                    led_HSB, led_MSB, led_LSB, globalCmd], waitanswer=waitanswer)
+                bus, [module], 'SetLED',
+                [led_HSB, led_MSB, led_LSB, globalCmd], waitanswer=waitanswer
+            )
 
     if waitanswer:
-        if module and len(res)==0:
+        if module and len(res) == 0:
             print('WARNING: module', module, 'did not respond')
         for r in res:
             mod = toMod(r.arbitration_id)
             ch, board = mod2chboard(mod)
-            if globalCmd is not None and ch%2 == 0 and r.data[1] != 0:
+            if globalCmd is not None and ch % 2 == 0 and r.data[1] != 0:
                 raise Exception(
                     'Error in setting the LED on board',
                     board, 'on channel', ch

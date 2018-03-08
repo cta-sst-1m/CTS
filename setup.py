@@ -3,11 +3,12 @@ from distutils.core import setup
 setup(
     name='cts',
     version='',
-    packages=['cts_core', 'cts_opcua','cts_can','setup_fsm','setup_components','utils'],
+    packages=['cts_core', 'cts_opcua', 'cts_can', 'setup_fsm',
+              'setup_components', 'utils'],
     url='',
     license='',
     author='cocov',
     author_email='victor.coco@cern.ch',
-    description='', 
+    description='',
     requires=['ctapipe', 'IPython', 'fysom', 'python-can', 'opcua']
 )
