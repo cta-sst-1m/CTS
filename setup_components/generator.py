@@ -14,7 +14,7 @@ except ImportError:
 
 
 class Generator:
-    def __init__(self, logger_name ,url="129.194.51.101", slave_url=None):
+    def __init__(self, logger_name, url="129.194.51.101", slave_url=None):
         self.log = logging.getLogger(logger_name+'.generator')
         self.url = url
         self.slave_off = True
@@ -42,7 +42,7 @@ class Generator:
         :return:
         '''
         self.conf_type = conf_type
-        if  self.conf_type == 'continuous' and not hasattr(self, 'slave_url'):
+        if self.conf_type == 'continuous' and not hasattr(self, 'slave_url'):
             self.inst.write('WAVE PULSE')
             self.inst.write('OUTPUT INVERT')
             self.inst.write('ZLOAD 50')
@@ -67,7 +67,7 @@ class Generator:
             self.inst.write('BST NCYC')
             self.inst.write('BSTCOUNT 1')
             self.inst.write('BSTTRGSRC MAN')
-        elif  hasattr(self, 'slave_url') and \
+        elif hasattr(self, 'slave_url') and \
                 self.conf_type == 'module_test_setup':
             self.inst.write('*RST')
             self.inst.write('WAVE PULSE')
@@ -104,7 +104,7 @@ class Generator:
             self.inst.write('PULSFREQ ' + str(freq))
         return
 
-    def configure_slave(self, amplitude=0 , offset=0):
+    def configure_slave(self, amplitude=0, offset=0):
         self.inst_slave.write('AMPL %0.3f' % amplitude)
         self.inst_slave.write('DCOFFS %0.4f' % offset)
         if amplitude == 0.:
@@ -117,14 +117,13 @@ class Generator:
         if self.conf_type == 'continuous' or self.conf_type == 'burst':
             self.inst.write('*TRG')
         elif self.conf_type == 'module_test_setup':
-            if self.slave_off :
+            if self.slave_off:
                 self.inst_slave.write('OUTPUT OFF')
             else:
                 self.inst_slave.write('OUTPUT ON')
             time.sleep(1.5)
             self.inst.write('OUTPUT ON')
         return
-
 
     def stop_trigger_sequence(self):
         if self.conf_type == 'continuous':
@@ -140,13 +139,12 @@ class Generator:
             self.inst_slave.write('*RST')
         return
 
-
     def close_generator(self):
         self.inst.write('LOCAL')
-        if  hasattr(self,'slave_url') :
+        if hasattr(self, 'slave_url'):
             self.inst_slave.write('LOCAL')
         self.inst.close()
-        if  hasattr(self,'slave_url') :
+        if hasattr(self, 'slave_url'):
             self.inst_slave.close()
         self.rm.close()
         return
