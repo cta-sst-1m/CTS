@@ -29,7 +29,11 @@ python setup.py install
 Start by running the server
 
 ```
-python cts_opcua/cts_opcua_server.py angle
+$ source activate ctapipe
+```
+
+```
+(ctapipe) $ python cts_opcua/cts_opcua_server.py angle
 
 ```
 
@@ -39,11 +43,11 @@ where angle can be 0,120,240
 Then in another console run the client
 
 ```
-source activate ctapipe
+$ source activate ctapipe
 ```
 
 ```
-python CTSControl.py angle
+(ctapipe) $ python CTSControl.py angle
 
 ```
 
