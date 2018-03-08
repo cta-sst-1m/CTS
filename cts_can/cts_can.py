@@ -463,7 +463,7 @@ def setDACLevel(
                     if ch < 2 and r.data[1] != 0:
                         print('ERROR setting DAC on channel', tmp_cmd,
                               'on board', board)
-                    if tmp_cmd==0 and ch == 2 and r.data[1] != 0:
+                    if tmp_cmd == 0 and ch == 2 and r.data[1] != 0:
                         print('ERROR setting DAC on channel', tmp_cmd,
                               'on board', board, 'Hw addr', ch)
     else:
@@ -471,7 +471,8 @@ def setDACLevel(
         if ch == 3:
             print('WARNING, setting DAC level on hw addr 3 is not allowed')
         if ch == 2 and tmp_cmd != 0:
-            print('WARNING, setting DAC level on hw addr 2 is only allowed on channel 0')
+            print('WARNING, setting DAC level on hw addr 2 is ' +
+                  'only allowed on channel 0')
         res = command(
             bus,
             [module],
