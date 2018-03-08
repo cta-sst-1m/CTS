@@ -368,7 +368,8 @@ def checkLEDLevel(bus, module=None, verbose=False):
         for mod in modules:
             print('|-----> Module:', str(mod), )
             for ch in range(8):
-                print('| Ch:', ch, '-', resdict['M_' + str(mod) + '_ACLED_Ch_' + str(ch)], )
+                print('| Ch:', ch, '-',
+                      resdict['M_' + str(mod) + '_ACLED_Ch_' + str(ch)], )
             print('')
     return resdict
 
@@ -411,7 +412,7 @@ def setDACLevel(
             # First broadcast on channel 0 such that the module for DC gets set
             res = command(
                 bus,
-                range(1,109),
+                range(1, 109),
                 'SetDACLevel',
                 [0x0, level_MSB, level_LSB],
                 broadcast=True,
@@ -426,7 +427,8 @@ def setDACLevel(
                     if ch != 3 and r.data[1] != 0:
                         print('ERROR setting DAC on channel', ch,
                               'on board', board, 'Hw addr', ch)
-            # Then broadcast on channel 8 such that all the module for AC gets set
+            # Then broadcast on channel 8 such that all the module for AC
+            # gets set
             res = command(
                 bus, range(1, 109),
                 'SetDACLevel',
@@ -476,9 +478,9 @@ def setDACLevel(
             'SetDACLevel',
             [tmp_cmd, level_MSB, level_LSB],
             waitanswer=waitanswer,
-            verbose = verbose)
+            verbose=verbose)
         if waitanswer:
-            if len(res)==0:
+            if len(res) == 0:
                 print('WARNING, got no answer while setting the DAC level')
             elif res[0].data[1] != 0:
                 raise Exception(
