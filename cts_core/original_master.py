@@ -60,8 +60,6 @@ class CTSMaster:
 
     def initialise_plots(self):
         # first load in a very nasty way the camera geometry
-        filename = '/data/software/CTS/config/randomMC.simtel.gz'
-        # test
         pix_x, pix_y, pix_id = [], [], []
         pixels = self.cts.camera.Pixels
         pixelspresent = list(self.cts.pixel_to_led['DC'].keys())

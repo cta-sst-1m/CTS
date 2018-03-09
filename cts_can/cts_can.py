@@ -121,20 +121,15 @@ def command(
     # type: (object, object, object, object, object, object, object, object, object) -> object
 
     msgID = None
-    if cmdtype == 'Abort':
-        msgID = 0x00
-    elif cmdtype == 'SetCANAddress':
-        msgID = 0x01
-    elif cmdtype == 'SetDACLevel':
-        msgID = 0x02
-    elif cmdtype == 'SetLED':
-        msgID = 0x03
-    elif cmdtype == 'GetLEDandDAC':
-        msgID = 0x04
-    elif cmdtype == 'GetVersion':
-        msgID = 0x1E
-    else:
-        raise Exception('Invalid command type' + cmdtype)
+    cmdtypes = {
+        'Abort': 0x00,
+        'SetCANAddress': 0x01,
+        'SetDACLevel': 0x02,
+        'SetLED': 0x03,
+        'GetLEDandDAC': 0x04,
+        'GetVersion': 0x1E,
+    }
+    msgID = cmdtypes[cmdtype]
 
     sendIDs, recieveIDs = [], []
     if broadcast:
@@ -224,7 +219,7 @@ def setAddress(bus, origAdd, modnum):
                    broadcastAnswer=False)
     if resp[0].data[1] != 0:
         raise ConnectionError(
-            'got error codes %d while disabling protection' % errors_codes
+            'got error code %d while disabling protection' % resp[0].data[1]
         )
     resp = command(bus, [origAdd], 'SetCANAddress', [0x1, modnum],
                    waitanswer=True,
@@ -566,6 +561,7 @@ def flushAnswer(bus, verbose=False):
 
 
 def resetAll(bus, status_dict, cmd_dict):
+    # TODO: check functionality, remove diffK ? loop over diffK insted of over cmd_dict ?
     updateStatus(bus, status_dict)
     for k in cmd_dict.keys():
         if k.count('ACLED_Ch') > 0.5:
@@ -580,7 +576,6 @@ def resetAll(bus, status_dict, cmd_dict):
 
 def initialise_can(cts):
     # First open the device
-
     cts.bus = SocketcanNative_Bus(channel='can0',
                                   receive_own_messages=False,
                                   can_filters=[])
