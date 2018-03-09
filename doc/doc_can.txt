@@ -1,0 +1,45 @@
+with btr1='10000011' (131) and btr2='  110101' (53)
+- sjw (Synchronization Jump Width) = 3 => swj=3
+- brp (Baud Rate Prescaler) = 4 => f_scl=16MHz/2/4=2MHz => tq=500ns
+- tseg1 = 6 & tseg2 = 4 => prop-seg=3 & phase-seg1=3 & phase-seg2=4
+
+0) up can interface with can0_up
+
+1) get version from all modules (to get the list of modules)
+REQ: 
+cansend can0 600#1E
+
+ANS: (watched with "candump can0")
+can0  696   [4]  1E 00 00 00
+can0  697   [4]  1E 00 00 00
+can0  698   [4]  1E 00 00 00
+can0  699   [4]  1E 00 00 00
+
+2) subtrac 0x80 to ANS addresses to get REQ addresses
+HW0 = 696-20 = 616
+HW1 = 697-20 = 617
+HW2 = 698-20 = 618
+HW3 = 699-20 = 619
+
+3) set all DC leds OFF + DC/DC OFF (HW2 only for DC, HW0 for AC)
+REQ:
+cansend can0 618#0300000000
+
+ANS:
+can0  698   [2]  03 00
+
+4) set dac level (HW2 only)
+REQ:
+cansend can0 618#02000200  (ampl = last 2 bytes, from 0x000 to 0x3FF)
+
+ANS:
+can0  698   [2]  02 00
+
+5) set wanted led ON
+REQ: 
+cansend can0 618#03ffffff01 (first half of the LEDs in that case)
+cansend can0 619#03ffffff01 (second half of the LEDs in that case)
+
+ANS:
+can0  698   [2]  03 00
+can0  699   [2]  03 00
