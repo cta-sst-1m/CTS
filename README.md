@@ -5,6 +5,27 @@ In the following you can find quick installation and usage procedure
 
 # Installation
 
+## Create a conda environement
+
+### Install anaconda (if you don't have anaconda)
+
+```
+  wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+  bash miniconda.sh -b -p
+  conda update -q conda
+```
+
+### Create a conda environement
+
+```
+conda env create -f environment.yml
+source activate cts
+```
+## Install requirements
+
+pip install -r requirements.txt
+
+
 build and install python-opcua as in OpcUaCameraSlowControl/python-opcua
 
 build and install python-can as in OpcUaCameraSlowControl/BUS-SST1M
