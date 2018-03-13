@@ -1,5 +1,3 @@
-The full documentation can be found at https://github.com/cta-sst-1m/CTS/wiki
-
 In the following you can find quick installation and usage procedure
 
 
