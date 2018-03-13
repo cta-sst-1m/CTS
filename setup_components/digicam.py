@@ -32,10 +32,9 @@ class DigiCam:
         for key, val in config.items():
             if hasattr(self, key):
                 setattr(self, key, val)
-        send_config_packet()
+        self.send_config_packet()
 
     def send_config_packet(self):
         s = socket(...,...)
         s.connect((self.slow_ip,self.slow_trigger_port))
-        message =
-        s.sendall(message)
+        message = s.sendall(message)
