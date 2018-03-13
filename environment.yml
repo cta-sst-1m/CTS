@@ -1,20 +1,25 @@
-name: digicampipe
+name: cts
 channels:
 - defaults
 dependencies:
 - python=3.5.4
 - astropy
 - fysom
+- inspect
 - ipython
 - logging
 - matplotlib
 - numpy
 - opcua
+- pickle
+- pytest
 - python-can
 - threading
 - socket
 - subprocess
+- tqdm
 - queue
+- visa
 - yaml
 
 

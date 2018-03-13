@@ -1,4 +1,3 @@
-
 from subprocess import Popen, PIPE, STDOUT
 import time,os,sys
 from utils import logger
@@ -37,4 +36,4 @@ class DigiCam:
     def send_config_packet(self):
         s = socket(...,...)
         s.connect((self.slow_ip,self.slow_trigger_port))
-        message = s.sendall(message)
+        message = s.sendall(message) # TODO Fix that!
