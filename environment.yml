@@ -10,7 +10,6 @@ dependencies:
 - astropy
 - fysom
 - ipython
-- logging
 - matplotlib
 - numpy
 - pytest
