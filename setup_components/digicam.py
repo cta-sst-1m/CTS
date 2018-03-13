@@ -1,5 +1,7 @@
 from subprocess import Popen, PIPE, STDOUT
-import time, os, sys
+import time
+import os
+import sys
 from utils import logger
 import logging
 from threading import Thread, Event
