@@ -8,7 +8,6 @@ channels:
 dependencies:
 - python=3.5.4
 - astropy
-- fysom
 - ipython
 - matplotlib
 - numpy
@@ -21,3 +20,4 @@ dependencies:
   - sphinx-automodapi
   - opcua
   - python-can
+  - fysom
