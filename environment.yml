@@ -1,20 +1,20 @@
 name: cts
 
 channels:
-- defaults
-- conda-forge
-- auto
+  - defaults
+  - conda-forge
+  - auto
 
 dependencies:
-- python=3.5.4
-- astropy
-- ipython
-- matplotlib
-- numpy
-- pytest
-- tqdm
-- pyvisa
-- yaml
+  - python=3.5.4
+  - astropy
+  - ipython
+  - matplotlib
+  - numpy
+  - pytest
+  - tqdm
+  - pyvisa
+  - yaml
 
 - pip:
   - sphinx-automodapi
