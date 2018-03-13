@@ -19,6 +19,5 @@ dependencies:
 
 - pip:
   - sphinx-automodapi
-  - python-can
   - opcua
   - python-can
