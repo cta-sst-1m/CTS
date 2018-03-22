@@ -10,5 +10,5 @@ setup(
     author='cocov',
     author_email='victor.coco@cern.ch',
     description='',
-    requires=['ctapipe', 'IPython', 'fysom', 'python-can', 'opcua']
+    requires=['ctapipe', 'IPython', 'fysom', 'opcua']
 )
