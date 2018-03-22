@@ -118,8 +118,6 @@ def command(
         broadcastAnswer=False,
         masterID=0b110,
         verbose=False):
-    # type: (object, object, object, object, object, object, object, object, object) -> object
-
     msgID = None
     cmdtypes = {
         'Abort': 0x00,
@@ -279,9 +277,9 @@ def setBoardAddresses(bus, boardnum):
     resp = command(bus, slaveID, 'GetVersion',
                    verbose=False, broadcast=True, broadcastAnswer=True)
     if resp[0].arbitration_id == 0x6ff:
-        # The board is uninitialized 
+        # The board is uninitialized
         setAddress(bus, 126, modnum)
-    else:    
+    else:
         addresses = sorted([r.arbitration_id for r in resp])
         if len(addresses) != 4:
             raise ConnectionAbortedError(
@@ -606,20 +604,6 @@ def flushAnswer(bus, verbose=False):
         if verbose:
             print(resp)
 
-"""
-# never used
-def resetAll(bus, status_dict, cmd_dict):
-    updateStatus(bus, status_dict)
-    for k in cmd_dict.keys():
-        if k.count('ACLED_Ch') > 0.5:
-            cmd_dict[k] = 0
-        elif k.count('DCDC') > 0.5:
-            cmd_dict[k] = 'OFF'
-        elif k.count('ACLED_Status') > 0.5:
-            cmd_dict[k] = ['OFF'] * 24
-    diffK = DictDiffer(status_dict, cmd_dict) # unused diffK
-    applyDict(bus, status_dict, cmd_dict)
-"""
 
 def initialise_can(cts):
     # First open the device

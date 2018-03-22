@@ -101,6 +101,7 @@ class CTSMaster:
         self.plots[-1].image = np.multiply(self.dc_status, self.dc_level)
         self.plots[-1].axes.set_xlim([-500, 500])
         self.plots[-1].axes.set_ylim([-500, 500])
+
     # Helper functions
     def update(self):
         self.cts_client.update()

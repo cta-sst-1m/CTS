@@ -4,10 +4,7 @@ from matplotlib.patches import RegularPolygon
 from matplotlib.collections import PatchCollection
 from cts_core.camera import Camera
 
-# print("[{0}]".format(", ".join("{0:.2f}".format(i) for i in y)))
-# print("[{0}]".format(", ".join("{0:.2f}".format(i) for i in x)))
-# print(np.mean(np.diff(np.unique(np.sort(x)))))
-# print(np.mean(np.diff(np.unique(np.sort(y)))))
+
 class LED(object):
     def __init__(self, id, x, y, angle=0,
                  radius_hex=12.15, board=None, sector=None):
@@ -93,6 +90,7 @@ class CTS_board(object):
             verticalalignment='center'
         )
 
+
 class CTS_sector(object):
     def __init__(self, id, board_ids, angle=0):
         """
@@ -139,7 +137,7 @@ class CTS_sector(object):
             )
 
     def get_leds(self):
-        leds=[]
+        leds = []
         for board in self.boards:
             leds.extend(board.leds)
         return leds
@@ -187,7 +185,7 @@ class CTS:
             ))
 
     def get_leds(self):
-        leds=[]
+        leds = []
         for sector in self.sectors:
             leds.extend(sector.get_leds())
         return leds
@@ -212,7 +210,7 @@ class CTS:
                 pixels_xy[closest_px, :] - np.array([led.x, led.y])
             )
             assert dist_pixel_led < 0.1  # make sure offset is small
-            led_patch = int(np.floor(i%48 / 3)) + (led.board - 1) * 16
+            led_patch = int(np.floor(i % 48 / 3)) + (led.board - 1) * 16
             led_id_in_patch = i % 3
             print('AC', i, led_patch, led.board - 1, led.id, led_id_in_patch,
                   '{0:.2f}'.format(led.x), '{0:.2f}'.format(led.y),
