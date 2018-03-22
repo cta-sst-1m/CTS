@@ -1,11 +1,14 @@
-
 from subprocess import Popen, PIPE, STDOUT
-import time,os,sys
+import time
+import os
+import sys
 from utils import logger
 import logging
-from threading import Thread,Event
+from threading import Thread, Event
 from queue import Queue, Empty
 from socket import socket
+
+
 class DigiCam:
 
     def __init__(self, log_location):
@@ -25,17 +28,17 @@ class DigiCam:
 
     def trigger_configuration(self, config):
         """
-        Config is a dictionnary whose key correspond to the private members of the ZFitsWriter
+        Config is a dictionnary whose key correspond to the private
+        members of the ZFitsWriter
         :param config:
         :return:
         """
         for key, val in config.items():
             if hasattr(self, key):
                 setattr(self, key, val)
-        send_config_packet()
+        self.send_config_packet()
 
     def send_config_packet(self):
-        s = socket(...,...)
-        s.connect((self.slow_ip,self.slow_trigger_port))
-        message =
-        s.sendall(message)
+        s = socket(..., ...)
+        s.connect((self.slow_ip, self.slow_trigger_port))
+        message = s.sendall(message)  # TODO Fix that!
