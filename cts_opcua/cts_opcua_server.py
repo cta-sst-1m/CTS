@@ -4,6 +4,7 @@ import os
 import time
 
 from opcua.ua.uatypes import NodeId
+from opcua import ua, uamethod, Server
 
 import cts_core.cameratestsetup as camtestsetup
 import cts_can.cts_can as com
@@ -48,8 +49,8 @@ class CTSServer:
         angle_str = str(int(angle_cts))
         self.cts = camtestsetup.CTS(
             current_dir + '/../config/cts_config_' + angle_str + '.cfg',
-            current_dir + '/../config/camera_config.cfg', 
-            angle = angle_cts, connected = True
+            current_dir + '/../config/camera_config.cfg',
+            angle=angle_cts, connected=True
         )
         com.initialise_can(self.cts)
 
@@ -58,18 +59,18 @@ class CTSServer:
         self.logger = logging.getLogger("opcua.address_space")
         self.logger.setLevel(logging.DEBUG)
 
-
-        self.server.set_endpoint("opc.tcp://0.0.0.0:4843/cameratestsetup/server/")
+        self.server.set_endpoint("opc.tcp://0.0.0.0:4843" +
+                                 "/cameratestsetup/server/")
         self.server.set_server_name("Camera Test Setup OpcUa Server")
 
         # setup our own namespace
-        #uri = "http://isdc.unige.ch/"
-        #idx = self.server.register_namespace(uri)
+        # uri = "http://isdc.unige.ch/"
+        # idx = self.server.register_namespace(uri)
 
         # get Objects node, this is where we should put our custom stuff
         self.objects = self.server.get_objects_node()
 
-        ## create the ua structure
+        # create the ua structure
         create_opcua_structure(self.cts, self.objects)
 
         # starting!
@@ -77,13 +78,8 @@ class CTSServer:
         self.server.start()
 
 
-
 def mod2r(m):
     return (m + 1 & 0b1111111) | (0b1101 << 7)
-
-
-
-from opcua import ua, uamethod, Server
 
 
 def element_to_array(val):
@@ -127,50 +123,123 @@ def create_opcua_structure(_cts, _parent_node):
     '''
     Populating the OPC adress space
     '''
-    setattr(_cts, 'main_folder', _parent_node.add_folder(NodeId('CTS', 0), "CTS"))
-    setattr(_cts, 'time', _cts.main_folder.add_variable(NodeId('CTS.time', 1), "time", int(time.time())))
-    setattr(_cts, 'DCfolder', _cts.main_folder.add_folder(NodeId('CTS.DC', 2), "DCLED_Control"))
-    setattr(_cts, 'ACfolder', _cts.main_folder.add_folder(NodeId('CTS.AC', 3), "ACLED_Control"))
+    setattr(_cts,
+            'main_folder', _parent_node.add_folder(NodeId('CTS', 0), "CTS"))
+    setattr(_cts,
+            'time', _cts.main_folder.add_variable(NodeId('CTS.time', 1),
+                                                  "time", int(time.time())))
+    setattr(_cts,
+            'DCfolder', _cts.main_folder.add_folder(NodeId('CTS.DC', 2),
+                                                    "DCLED_Control"))
+    setattr(_cts,
+            'ACfolder', _cts.main_folder.add_folder(NodeId('CTS.AC', 3),
+                                                    "ACLED_Control"))
 
     for board in _cts.LED_boards:
         setattr(board, 'node_name', 'CTS.DC.Board%d' % (board.internal_id))
         setattr(board, 'opcua_main_node',
-                _cts.main_folder.add_folder(NodeId(board.node_name, 2), board.node_name))
-        setattr(board, 'opcua_dc_dac',
-                board.opcua_main_node.add_variable(NodeId(board.node_name + ".DC_DAC"), "DC_DAC", 0))
-        setattr(board, 'opcua_dc_dcdc',
-                board.opcua_main_node.add_variable(NodeId(board.node_name + ".DC_DCDC"), "DC_DCDC", 0))
-        setattr(board, 'opcua_ac_dcdc',
-                board.opcua_main_node.add_variable(NodeId(board.node_name + ".AC_DCDC"), "AC_DCDC", 0))
-        setattr(board, 'opcua_dc_dcdc_module',
-                board.opcua_main_node.add_property(NodeId(board.node_name + "._DC_DCDCmodule"),
-                                                   "_DC_DCDCmodule",
-                                                   board.LEDs[0].can_dcdc_module))
-        setattr(board, 'opcua_ac_dcdc_module',
-                board.opcua_main_node.add_property(NodeId(board.node_name + "._AC_DCDCmodule"),
-                                                   "_AC_DCDCmodule",
-                                                   _cts.LEDs[
-                                                       board.LEDs[0].internal_id - 48 * 11].can_dcdc_module))
-        setattr(board, 'opcua_dc_dac_module',
-                board.opcua_main_node.add_property(NodeId(board.node_name + "._DACmodule"), "_DACmodule",
-                                                   board.LEDs[0].can_dac_module))
-        setattr(board, 'opcua_dc_dac_channel',
-                board.opcua_main_node.add_property(NodeId(board.node_name + "._DACchannel"), "_DACchannel",
-                                                   board.LEDs[0].can_dac_channel))
+                _cts.main_folder.add_folder(NodeId(board.node_name, 2),
+                                            board.node_name))
+        setattr(
+            board,
+            'opcua_dc_dac', board.opcua_main_node.add_variable(
+                NodeId(board.node_name + ".DC_DAC"),
+                "DC_DAC",
+                0
+            )
+        )
+        setattr(
+            board,
+            'opcua_dc_dcdc', board.opcua_main_node.add_variable(
+                NodeId(board.node_name + ".DC_DCDC"),
+                "DC_DCDC",
+                0
+            )
+        )
+        setattr(
+            board,
+            'opcua_ac_dcdc',
+            board.opcua_main_node.add_variable(
+                NodeId(board.node_name + ".AC_DCDC"),
+                "AC_DCDC",
+                0
+            )
+        )
+        setattr(
+            board,
+            'opcua_dc_dcdc_module',
+            board.opcua_main_node.add_property(
+                NodeId(board.node_name + "._DC_DCDCmodule"),
+                "_DC_DCDCmodule",
+                board.LEDs[0].can_dcdc_module
+            )
+        )
+        setattr(
+            board,
+            'opcua_ac_dcdc_module',
+            board.opcua_main_node.add_property(
+                NodeId(board.node_name + "._AC_DCDCmodule"),
+                "_AC_DCDCmodule",
+                _cts.LEDs[board.LEDs[0].internal_id - 48 * 11].can_dcdc_module
+            )
+        )
+        setattr(
+            board,
+            'opcua_dc_dac_module',
+            board.opcua_main_node.add_property(
+                NodeId(board.node_name + "._DACmodule"),
+                "_DACmodule",
+                board.LEDs[0].can_dac_module
+            )
+        )
+        setattr(
+            board,
+            'opcua_dc_dac_channel',
+            board.opcua_main_node.add_property(
+                NodeId(board.node_name + "._DACchannel"),
+                "_DACchannel",
+                board.LEDs[0].can_dac_channel
+            )
+        )
         for led in board.LEDs:
             init_led_node(led, board.opcua_main_node)
     for patch in _cts.LED_patches:
         setattr(patch, 'node_name', 'CTS.AC.Patch%d' % (patch.camera_patch_id))
-        setattr(patch, 'opcua_main_node',
-                _cts.main_folder.add_folder(NodeId(patch.node_name, 2), patch.node_name))
-        setattr(patch, 'opcua_ac_dac',
-                patch.opcua_main_node.add_variable(NodeId(patch.node_name + ".AC_DAC"), "AC_DAC", 0))
-        setattr(patch, 'opcua_ac_dac_module',
-                patch.opcua_main_node.add_property(NodeId(patch.node_name + "._DACmodule"), "_DACmodule",
-                                                   patch.LEDs[0].can_dac_module))
-        setattr(patch, 'opcua_ac_dac_channel',
-                patch.opcua_main_node.add_property(NodeId(patch.node_name + "._DACchannel"), "_DACchannel",
-                                                   patch.LEDs[0].can_dac_channel))
+        setattr(
+            patch,
+            'opcua_main_node',
+            _cts.main_folder.add_folder(
+                NodeId(patch.node_name, 2),
+                patch.node_name
+            )
+        )
+        setattr(
+            patch,
+            'opcua_ac_dac',
+            patch.opcua_main_node.add_variable(
+                NodeId(patch.node_name + ".AC_DAC"),
+                "AC_DAC",
+                0
+            )
+        )
+        setattr(
+            patch,
+            'opcua_ac_dac_module',
+            patch.opcua_main_node.add_property(
+                NodeId(patch.node_name + "._DACmodule"),
+                "_DACmodule",
+                patch.LEDs[0].can_dac_module
+            )
+        )
+        setattr(
+            patch,
+            'opcua_ac_dac_channel',
+            patch.opcua_main_node.add_property(
+                NodeId(patch.node_name + "._DACchannel"),
+                "_DACchannel",
+                patch.LEDs[0].can_dac_channel
+            )
+        )
         for led in patch.LEDs:
             init_led_node(led, patch.opcua_main_node)
 
@@ -182,22 +251,66 @@ def create_opcua_structure(_cts, _parent_node):
     status = arg_bool("Status", "Status: True(1) or False(0)")
     level = arg_int("DACLevel", "DAC level: int")
     outarg = arg_string("Result", "Result")
-    setattr(_cts, 'set_dc_level',
-            _cts.main_folder.add_method(NodeId('CTS.set_dc_level', 4), 'set_dc_level', setDC_Level,
-                                        [board, level],
-                                        [outarg]))
-    setattr(_cts, 'set_ac_level',
-            _cts.main_folder.add_method(NodeId('CTS.set_ac_level', 5), 'set_ac_level', setAC_Level,
-                                        [board, level],
-                                        [outarg]))
-    setattr(_cts, 'set_led_status',
-            _cts.main_folder.add_method(NodeId('CTS.set_led_status', 6), 'set_led_status', setLED_Status,
-                                        [led_type, led, status], [outarg]))
-    setattr(_cts, 'update_LEDparameters',
-            _cts.main_folder.add_method(NodeId('CTS.update_LEDparameters', 7), 'update_LEDparameters',
-                                        update_LEDparameters))
-    setattr(_cts, 'DCDC_ON', _cts.main_folder.add_method(NodeId('CTS.DCDC_ON', 8), 'DCDC_ON', DCDC_ON))
-    setattr(_cts, 'DCDC_OFF', _cts.main_folder.add_method(NodeId('CTS.DCDC_OFF', 9), 'DCDC_OFF', DCDC_OFF))
+    setattr(
+        _cts,
+        'set_dc_level',
+        _cts.main_folder.add_method(
+            NodeId('CTS.set_dc_level', 4),
+            'set_dc_level',
+            setDC_Level,
+            [board, level],
+            [outarg]
+        )
+    )
+    setattr(
+        _cts,
+        'set_ac_level',
+        _cts.main_folder.add_method(
+            NodeId('CTS.set_ac_level', 5),
+            'set_ac_level',
+            setAC_Level,
+            [board, level],
+            [outarg]
+        )
+    )
+    setattr(
+        _cts,
+        'set_led_status',
+        _cts.main_folder.add_method(
+            NodeId('CTS.set_led_status', 6),
+            'set_led_status',
+            setLED_Status,
+            [led_type, led, status],
+            [outarg]
+        )
+    )
+    setattr(
+        _cts,
+        'update_LEDparameters',
+        _cts.main_folder.add_method(
+            NodeId('CTS.update_LEDparameters', 7),
+            'update_LEDparameters',
+            update_LEDparameters
+        )
+    )
+    setattr(
+        _cts,
+        'DCDC_ON',
+        _cts.main_folder.add_method(
+            NodeId('CTS.DCDC_ON', 8),
+            'DCDC_ON',
+            DCDC_ON
+        )
+    )
+    setattr(
+        _cts,
+        'DCDC_OFF',
+        _cts.main_folder.add_method(
+            NodeId('CTS.DCDC_OFF', 9),
+            'DCDC_OFF',
+            DCDC_OFF
+        )
+    )
 
 
 def update_opcua_structure(_cts):
