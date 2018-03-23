@@ -384,8 +384,9 @@ def update_opcua_structure(_cts):
     for patch in _cts.LED_patches:
         frame = int(patch.opcua_ac_dac_channel.get_value() / 3)
         channel = patch.opcua_ac_dac_channel.get_value() % 3 * 2 + 1
-        patch.opcua_ac_dac.set_value(res[mod2r(patch.opcua_ac_dac_module.get_value())][frame][channel] << 8 |
-                                     res[mod2r(patch.opcua_ac_dac_module.get_value())][frame][channel + 1] << 8)
+        r = mod2r(patch.opcua_ac_dac_module.get_value())
+        patch.opcua_ac_dac.set_value(
+            res[r][frame][channel] << 8 | res[r][frame][channel + 1] << 8)
 
 
 def init_led_node(led, _parent_node):
@@ -482,6 +483,7 @@ def init_led_node(led, _parent_node):
 
 ctsserver = None
 
+
 @uamethod
 def setDC_Level(parent, board_number, level):
     ctsserver.cts.LED_boards[board_number].opcua_dc_dac.set_value(level)
@@ -524,13 +526,13 @@ def setAC_Level(parent, patch_number, level):
 @uamethod
 def setLED_Status(parent, led_type, led_number, status):
     res = None
-    ## Get the LED value, ie, for this given module the value of all the leds
+    # Get the LED value, ie, for this given module the value of all the leds
     led_internal_id = ctsserver.cts.pixel_to_led[led_type][led_number]
-    module = ctsserver.cts.LEDs[led_internal_id].opcua_status_module.get_value()
+    mod = ctsserver.cts.LEDs[led_internal_id].opcua_status_module.get_value()
     board = ctsserver.cts.LEDs[led_internal_id].led_board
     led = 0x0
     leds_internal_id = \
-        ctsserver.cts.status_modules_to_leds_intenal_id[led_type][module]
+        ctsserver.cts.status_modules_to_leds_intenal_id[led_type][mod]
     for l_id in leds_internal_id:
         opcid = ctsserver.cts.LEDs[l_id].camera_pixel_id
         led_status = int(ctsserver.cts.LEDs[l_id].opcua_status.get_value())
@@ -550,7 +552,7 @@ def setLED_Status(parent, led_type, led_number, status):
 
     res = com.command(
         ctsserver.cts.bus,
-        [module],
+        [mod],
         'SetLED',
         [led_HSB, led_MSB, led_LSB, globalCmd],
         waitanswer=False
@@ -579,11 +581,10 @@ def DCDC_OFF(parent):
         board.opcua_ac_dcdc.set_value(True)
 
 
-
 if __name__ == "__main__":
-    ctsserver =  CTSServer(float(sys.argv[1]))
+    ctsserver = CTSServer(float(sys.argv[1]))
     ready = True
-    print ('---|> The server have been started')
+    print('---|> The server have been started')
 
     try:
         while True:
