@@ -46,7 +46,7 @@ class CTSServer:
         self.server = Server()
         current_dir = os.path.dirname(os.path.realpath(__file__))
         
-        self.cts = camtestsetup.CTS(current_dir + 'config/cts_config_' + str(int(angle_cts)) + '.cfg',
+        self.cts = camtestsetup.CTS(current_dir + '/config/cts_config_' + str(int(angle_cts)) + '.cfg',
                            'config/camera_config.cfg', angle = angle_cts, connected = True)
 
         com.initialise_can(self.cts)
