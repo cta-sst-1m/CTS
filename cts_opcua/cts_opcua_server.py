@@ -480,7 +480,7 @@ def setDC_Level(parent, board_number, level):
         [m],
         'SetDACLevel',
         [c, level_MSB, level_LSB],
-        waitanswer=False
+        waitanswer=True
     )
     return 'done setting DC level=' + str(level) + ' to module ' + str(m) + \
            ' channel ' + str (c) + ', res=' + str(res)
@@ -503,7 +503,7 @@ def setAC_Level(parent, patch_number, level):
         [m],
         'SetDACLevel',
         [c, level_MSB, level_LSB],
-        waitanswer=False,
+        waitanswer=True,
         verbose=False
     )
     return 'done setting lvl=' + str(level) + 'to module ' + str(m) + \
@@ -542,7 +542,7 @@ def setLED_Status(parent, led_type, led_number, status):
         [mod],
         'SetLED',
         [led_HSB, led_MSB, led_LSB, globalCmd],
-        waitanswer=False
+        waitanswer=True
     )
     return 'done setting leds=' + str(led) + 'to module ' + str(mod) + \
            'with DCDC=' + str(globalCmd) + ', res=' + str(res)
