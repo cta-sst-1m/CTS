@@ -481,7 +481,7 @@ def setDC_Level(parent, board_number, level):
         [m, level_MSB, level_LSB],
         waitanswer=False
     )
-    return 'done'
+    return 'done setting DC level=' + str(level) + 'to board ' + str(m)
 
 
 @uamethod
@@ -502,7 +502,7 @@ def setAC_Level(parent, patch_number, level):
         waitanswer=False,
         verbose=False
     )
-    return 'done'
+    return 'done setting lvl=' + str(level) + 'to patch ' + str(led_patch.internal_id)
 
 
 @uamethod
@@ -539,14 +539,15 @@ def setLED_Status(parent, led_type, led_number, status):
         [led_HSB, led_MSB, led_LSB, globalCmd],
         waitanswer=False
     )
-    return 'done'
+    return 'done setting leds=' + str(led) + 'to module ' + str(mod) + \
+           'with DCDC=' + str(globalCmd)
 
 
 @uamethod
 def update_LEDparameters(parent):
     com.flushAnswer(ctsserver.cts.bus)
     update_opcua_structure(ctsserver.cts)
-    return 'done'
+    return 'done updating LED parameters'
 
 
 if __name__ == "__main__":
