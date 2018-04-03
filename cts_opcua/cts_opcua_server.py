@@ -474,14 +474,16 @@ def setDC_Level(parent, board_number, level):
     level_LSB = level & 0xFF
     level_MSB = (level & 0x300) >> 8
     m = ctsserver.cts.LED_boards[board_number].opcua_dc_dac_module.get_value()
+    c = ctsserver.cts.LED_boards[board_number].opcua_dc_dac_channel.get_value()
     res = com.command(
         ctsserver.cts.bus,
         [m],
         'SetDACLevel',
-        [m, level_MSB, level_LSB],
+        [c, level_MSB, level_LSB],
         waitanswer=False
     )
-    return 'done setting DC level=' + str(level) + 'to board ' + str(m)
+    return 'done setting DC level=' + str(level) + ' to module ' + str(m) + \
+           ' channel ' + str (c) + ', res=' + res
 
 
 @uamethod
@@ -494,15 +496,18 @@ def setAC_Level(parent, patch_number, level):
         ctsserver.cts.patch_camera_to_patch_led[patch_number]
     led_patch = ctsserver.cts.LED_patches[patch_internal_number]
     led_patch.opcua_ac_dac.set_value(level)
+    m = led_patch.opcua_ac_dac_module.get_value()
+    c = led_patch.opcua_ac_dac_channel.get_value()
     res = com.command(
         ctsserver.cts.bus,
-        [led_patch.opcua_ac_dac_module.get_value()],
+        [m],
         'SetDACLevel',
-        [led_patch.opcua_ac_dac_channel.get_value(), level_MSB, level_LSB],
+        [c, level_MSB, level_LSB],
         waitanswer=False,
         verbose=False
     )
-    return 'done setting lvl=' + str(level) + 'to patch ' + str(led_patch.internal_id)
+    return 'done setting lvl=' + str(level) + 'to module ' + str(m) + \
+           ' channel ' + str (c) + ', res=' + res
 
 
 @uamethod
@@ -540,7 +545,7 @@ def setLED_Status(parent, led_type, led_number, status):
         waitanswer=False
     )
     return 'done setting leds=' + str(led) + 'to module ' + str(mod) + \
-           'with DCDC=' + str(globalCmd)
+           'with DCDC=' + str(globalCmd) + ', res=' + res
 
 
 @uamethod
