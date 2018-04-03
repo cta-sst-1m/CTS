@@ -119,6 +119,28 @@ class CTSClient():
         return self.client.get_objects_node().get_child(["0:CTS"]).call_method(
             self._function_list['update_LEDparameters'])
 
+    def _dcdc_on(self):
+        """
+        _dcdc_on()
+
+        Interface to the DCDC_ON() function of the OpcUa server which sets to ON the DCDC of all AC and DC in all board.
+        Note that it only writes in the corresponding datapoint and only gets written in the hardware when set_led_status
+        is called
+
+        """
+        return self.client.get_objects_node().get_child(["0:CTS"]).call_method(self._function_list['DCDC_ON'])
+
+    def _dcdc_off(self):
+        """
+        _dcdc_off()
+
+        Interface to the DCDC_OFF() function of the OpcUa server which sets to OFF the DCDC of all AC and DC in all
+        board. Note that it only writes in the corresponding datapoint and only gets written in the hardware when
+        set_led_status is called
+
+        """
+        return self.client.get_objects_node().get_child(["0:CTS"]).call_method(self._function_list['DCDC_OFF'])
+
 
 if __name__ == "__main__":
     ctsclient = CTSClient()
