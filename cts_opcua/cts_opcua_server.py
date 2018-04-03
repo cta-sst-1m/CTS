@@ -269,7 +269,7 @@ def create_opcua_structure(_cts, _parent_node):
             NodeId('CTS.set_ac_level', 2),
             'set_ac_level',
             setAC_Level,
-            [board, level],
+            [patch, level],
             [outarg]
         )
     )
