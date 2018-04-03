@@ -255,7 +255,7 @@ def create_opcua_structure(_cts, _parent_node):
         _cts,
         'set_dc_level',
         _cts.main_folder.add_method(
-            NodeId('CTS.set_dc_level', 4),
+            NodeId('CTS.set_dc_level', 2),
             'set_dc_level',
             setDC_Level,
             [board, level],
@@ -266,7 +266,7 @@ def create_opcua_structure(_cts, _parent_node):
         _cts,
         'set_ac_level',
         _cts.main_folder.add_method(
-            NodeId('CTS.set_ac_level', 5),
+            NodeId('CTS.set_ac_level', 2),
             'set_ac_level',
             setAC_Level,
             [board, level],
@@ -277,7 +277,7 @@ def create_opcua_structure(_cts, _parent_node):
         _cts,
         'set_led_status',
         _cts.main_folder.add_method(
-            NodeId('CTS.set_led_status', 6),
+            NodeId('CTS.set_led_status', 2),
             'set_led_status',
             setLED_Status,
             [led_type, led, status],
@@ -288,7 +288,7 @@ def create_opcua_structure(_cts, _parent_node):
         _cts,
         'update_LEDparameters',
         _cts.main_folder.add_method(
-            NodeId('CTS.update_LEDparameters', 7),
+            NodeId('CTS.update_LEDparameters', 2),
             'update_LEDparameters',
             update_LEDparameters
         )
@@ -297,7 +297,7 @@ def create_opcua_structure(_cts, _parent_node):
         _cts,
         'DCDC_ON',
         _cts.main_folder.add_method(
-            NodeId('CTS.DCDC_ON', 8),
+            NodeId('CTS.DCDC_ON', 2),
             'DCDC_ON',
             DCDC_ON
         )
@@ -306,7 +306,7 @@ def create_opcua_structure(_cts, _parent_node):
         _cts,
         'DCDC_OFF',
         _cts.main_folder.add_method(
-            NodeId('CTS.DCDC_OFF', 9),
+            NodeId('CTS.DCDC_OFF', 2),
             'DCDC_OFF',
             DCDC_OFF
         )
@@ -570,6 +570,7 @@ def update_LEDparameters(parent):
 @uamethod
 def DCDC_ON(parent):
     for board in ctsserver.cts.LED_boards:
+        print("set DCDC on for board", board.internal_id)
         board.opcua_dc_dcdc.set_value(True)
         board.opcua_ac_dcdc.set_value(False)
 
@@ -577,6 +578,7 @@ def DCDC_ON(parent):
 @uamethod
 def DCDC_OFF(parent):
     for board in ctsserver.cts.LED_boards:
+        print("set DCDC off for board", board.internal_id)
         board.opcua_dc_dcdc.set_value(False)
         board.opcua_ac_dcdc.set_value(True)
 
