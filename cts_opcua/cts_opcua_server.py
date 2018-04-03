@@ -138,7 +138,7 @@ def create_opcua_structure(_cts, _parent_node):
     for board in _cts.LED_boards:
         setattr(board, 'node_name', 'CTS.DC.Board%d' % (board.internal_id))
         setattr(board, 'opcua_main_node',
-                _cts.main_folder.add_folder(NodeId(board.node_name, 2),
+                _cts.DCfolder.add_folder(NodeId(board.node_name, 2),
                                             board.node_name))
         setattr(
             board,
@@ -208,7 +208,7 @@ def create_opcua_structure(_cts, _parent_node):
         setattr(
             patch,
             'opcua_main_node',
-            _cts.main_folder.add_folder(
+            _cts.ACfolder.add_folder(
                 NodeId(patch.node_name, 2),
                 patch.node_name
             )
@@ -483,7 +483,7 @@ def setDC_Level(parent, board_number, level):
         waitanswer=False
     )
     return 'done setting DC level=' + str(level) + ' to module ' + str(m) + \
-           ' channel ' + str (c) + ', res=' + res
+           ' channel ' + str (c) + ', res=' + str(res)
 
 
 @uamethod
@@ -507,7 +507,7 @@ def setAC_Level(parent, patch_number, level):
         verbose=False
     )
     return 'done setting lvl=' + str(level) + 'to module ' + str(m) + \
-           ' channel ' + str (c) + ', res=' + res
+           ' channel ' + str (c) + ', res=' + str(res)
 
 
 @uamethod
@@ -545,7 +545,7 @@ def setLED_Status(parent, led_type, led_number, status):
         waitanswer=False
     )
     return 'done setting leds=' + str(led) + 'to module ' + str(mod) + \
-           'with DCDC=' + str(globalCmd) + ', res=' + res
+           'with DCDC=' + str(globalCmd) + ', res=' + str(res)
 
 
 @uamethod
