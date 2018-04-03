@@ -293,24 +293,6 @@ def create_opcua_structure(_cts, _parent_node):
             update_LEDparameters
         )
     )
-    setattr(
-        _cts,
-        'DCDC_ON',
-        _cts.main_folder.add_method(
-            NodeId('CTS.DCDC_ON', 2),
-            'DCDC_ON',
-            DCDC_ON
-        )
-    )
-    setattr(
-        _cts,
-        'DCDC_OFF',
-        _cts.main_folder.add_method(
-            NodeId('CTS.DCDC_OFF', 2),
-            'DCDC_OFF',
-            DCDC_OFF
-        )
-    )
 
 
 def update_opcua_structure(_cts):
@@ -565,22 +547,6 @@ def update_LEDparameters(parent):
     com.flushAnswer(ctsserver.cts.bus)
     update_opcua_structure(ctsserver.cts)
     return 'done'
-
-
-@uamethod
-def DCDC_ON(parent):
-    for board in ctsserver.cts.LED_boards:
-        print("set DCDC on for board", board.internal_id)
-        board.opcua_dc_dcdc.set_value(True)
-        board.opcua_ac_dcdc.set_value(False)
-
-
-@uamethod
-def DCDC_OFF(parent):
-    for board in ctsserver.cts.LED_boards:
-        print("set DCDC off for board", board.internal_id)
-        board.opcua_dc_dcdc.set_value(False)
-        board.opcua_ac_dcdc.set_value(True)
 
 
 if __name__ == "__main__":
