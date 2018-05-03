@@ -24,7 +24,7 @@ class CTSClient():
         """
 
         self._function_list = {}
-        self.client = Client("opc.tcp://0.0.0.0:4843/cameratestsetup/server/", timeout=10000)
+        self.client = Client("opc.tcp://129.194.51.113:4843/cameratestsetup/server/", timeout=10000)
         self.client_on()
 
 
@@ -73,11 +73,10 @@ class CTSClient():
         which allows to set the DAC level of all DC LED in a LED board
 
         Input :
-               - board : led board number (int 0-10)
+               - board : led board number (int 0-26)
                - level : DAC level (int 0-1023)
         """
-        return self.client.get_objects_node().get_child(["0:CTS"]).call_method(self._function_list['set_dc_level'],
-                                                                               board, level)
+        return self.client.get_objects_node().get_child(["0:CTS"]).call_method(self._function_list['set_dc_level'], board, level)
 
     def set_ac_level(self, patch, level):
         """
@@ -90,8 +89,7 @@ class CTSClient():
                - board : patch number (int as in camera)
                - level : DAC level (int 0-1023)
         """
-        return self.client.get_objects_node().get_child(["0:CTS"]).call_method(self._function_list['set_ac_level'],
-                                                                               patch, level)
+        return self.client.get_objects_node().get_child(["0:CTS"]).call_method(self._function_list['set_ac_level'], patch, level)
 
     def set_led_status(self, ledtype, pixel, status):
         """
@@ -107,6 +105,18 @@ class CTSClient():
         """
         return self.client.get_objects_node().get_child(["0:CTS"]).call_method(self._function_list['set_led_status'],
                                                                                ledtype, pixel, status)
+
+    def all_on(self, led_type, level):
+        """
+        Switch on all pixels of the given type and set them to level.
+        Warning, due to hardware glich, it is necessary to set AC every time DC is set !
+        Input :
+               - ledtype : type of led (str 'AC' or 'DC')
+               - level   : pixel number (int as in camera)
+        """
+        return self.client.get_objects_node().get_child(["0:CTS"]).call_method(self._function_list['all_on'],
+                                                                               ledtype, level)
+
 
     def update(self):
         """

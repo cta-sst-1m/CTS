@@ -247,9 +247,9 @@ def create_opcua_structure(_cts, _parent_node):
     board = arg_int("Board", "LED Board id")
     patch = arg_int("Patch", "LED Patch id")
     led = arg_int("LED", "LED id")
-    led_type = arg_int("LEDType", "LED type")
+    led_type = arg_string("LEDType", "LED type (\"AC\" or \"DC\")")
     status = arg_bool("Status", "Status: True(1) or False(0)")
-    level = arg_int("DACLevel", "DAC level: int")
+    level = arg_int("DACLevel", "DAC level: int (from 0 to 1023)")
     outarg = arg_string("Result", "Result")
     setattr(
         _cts,
@@ -281,6 +281,17 @@ def create_opcua_structure(_cts, _parent_node):
             'set_led_status',
             setLED_Status,
             [led_type, led, status],
+            [outarg]
+        )
+    )
+    setattr(
+        _cts,
+        'all_on',
+        _cts.main_folder.add_method(
+            NodeId('CTS.all_on', 2),
+            'all_on',
+            all_on,
+            [led_type, level],
             [outarg]
         )
     )
@@ -498,7 +509,7 @@ def setDC_Level(parent, board_number, level):
         [m],
         'SetDACLevel',
         [c, level_MSB, level_LSB],
-        waitanswer=True
+        waitanswer=False
     )
     return 'done setting DC level=' + str(level) + ' to module ' + str(m) + \
            ' channel ' + str (c) + ', res=' + str(res)
@@ -521,7 +532,7 @@ def setAC_Level(parent, patch_number, level):
         [m],
         'SetDACLevel',
         [c, level_MSB, level_LSB],
-        waitanswer=True,
+        waitanswer=False,
         verbose=False
     )
     return 'done setting lvl=' + str(level) + 'to module ' + str(m) + \
@@ -540,13 +551,13 @@ def setLED_Status(parent, led_type, led_number, status):
         ctsserver.cts.status_modules_to_leds_intenal_id[led_type][mod]
     for l_id in leds_internal_id:
         opcid = ctsserver.cts.LEDs[l_id].camera_pixel_id
-        led_status = int(ctsserver.cts.LEDs[l_id].opcua_status.get_value())
-        value = led_status if opcid != led_number else int(status)
         if opcid == led_number:
             ctsserver.cts.LEDs[l_id].opcua_status.set_value(int(status))
         led_status = int(ctsserver.cts.LEDs[l_id].opcua_status.get_value())
-        mask = value << led_status
+        mask = led_status << ctsserver.cts.LEDs[l_id].id_in_led_board
+        print('mask:', mask)
         led |= mask
+    print('led:', led)
 
     dc_dcdc = ctsserver.cts.LED_boards[board].opcua_dc_dcdc.get_value()
     ac_dcdc = ctsserver.cts.LED_boards[board].opcua_ac_dcdc.get_value()
@@ -560,10 +571,27 @@ def setLED_Status(parent, led_type, led_number, status):
         [mod],
         'SetLED',
         [led_HSB, led_MSB, led_LSB, globalCmd],
-        waitanswer=True
+        waitanswer=False
     )
     return 'done setting leds=' + str(led) + 'to module ' + str(mod) + \
            'with DCDC=' + str(globalCmd) + ', res=' + str(res)
+
+
+@uamethod
+def all_on(parent, led_type, level):
+    #switch on all led of led_type
+    #run again with AC leds after changing DC leds level.
+    if led_type == 'DC':
+        globalCmd = 1
+        channel= 0
+    elif led_type == 'AC':
+        globalCmd = 0
+        channel = 8
+    else:
+        return 'ERROR, led_type must be "AC" or "DC"'
+    res = com.setLED(ctsserver.cts.bus, globalCmd=globalCmd, waitanswer=False)
+    res = com.setDACLevel(ctsserver.cts.bus, level, waitanswer=False, channel)
+    return 'success'
 
 
 @uamethod

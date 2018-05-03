@@ -1,3 +1,5 @@
+# from __future__ import print_function
+
 import matplotlib.pyplot as plt
 from utils import mcevent
 from opcua import ua
@@ -31,11 +33,6 @@ class CTSMaster:
             'config/camera_config.cfg', angle=angle_cts, connected=False)
         # Get the CTS OpcUA client
         self.cts_client = cts_client.CTSClient()
-        # Get the generator for triggering AC leds and digicam
-        self.generator = gen.Generator(
-            sys.modules['__main__'].__name__, url="0.0.0.0"  # "129.194.52.76"
-        )
-        self.generator.apply_config('burst')
         # Get the digicam OpcUA client
         self.digicam_client = None
         # Prepare plots
@@ -134,8 +131,6 @@ class CTSMaster:
                  - timeout : the amount of time, in s, to keep the pixels on
                              (float)
         """
-        if n_triggers > 0:
-            self.generator.configure_trigger(n_pulse=n_triggers)
         # loop over the boards and apply the DAC level
         for board in self.cts.LED_boards:
             self.cts_client.set_dc_level(board.internal_id, level)
@@ -155,8 +150,6 @@ class CTSMaster:
             self.cts_client.set_led_status('DC', pixel_list[i], True)
             self.dc_status[pixel_list[i]] = 1
             self.dc_level[pixel_list[i]] = level
-            if n_triggers > 0:
-                self.generator.start_trigger_sequence()
             if self.plotting:
                 self.plot()
             time.sleep(timeout)
@@ -185,8 +178,6 @@ class CTSMaster:
                  - n_trigger : number of consecutive trigger for AC (int)
                  - frequency: frequency of the trigger (float)
         """
-        # Initialise the trigger
-        self.generator.configure_trigger(n_pulse=n_triggers, freq=frequency)
         # set all led to ON
         self.all_on('AC', 0)
         # loop over the levels to set the DAC level
@@ -194,10 +185,7 @@ class CTSMaster:
             print('Setting level', level)
             for patch in self.cts.LED_patches:
                 self.cts_client.set_ac_level(patch.camera_patch_id, level)
-            self.generator.start_trigger_sequence()
             time.sleep(timeout)
-        # put back the default trigger configruation
-        self.generator.stop_trigger_sequence()
         # put all leds to 0
         self.all_off('AC')
 
@@ -216,8 +204,6 @@ class CTSMaster:
                  - n_trigger : number of consecutive trigger for AC (int)
                  - frequency: frequency of the trigger (float)
         """
-        # Initialise the trigger
-        self.generator.configure_trigger(n_pulse=n_triggers, freq=frequency)
         # set all led to ON
         self.all_on('DC', 0)
         # loop over the levels to set the DAC level
@@ -225,10 +211,7 @@ class CTSMaster:
             print('Setting level', level)
             for board in self.cts.LED_boards:
                 self.cts_client.set_dc_level(board.internal_id, level)
-            self.generator.start_trigger_sequence()
             time.sleep(timeout)
-        # put back the default trigger configruation
-        self.generator.stop_trigger_sequence()
         # put all leds to 0
         self.all_off('DC')
 
@@ -248,8 +231,6 @@ class CTSMaster:
                  - n_trigger : number of consecutive trigger for AC (int)
                  - frequency: frequency of the trigger (float)
         """
-        # Initialise the trigger
-        self.generator.configure_trigger(n_pulse=n_triggers, freq=frequency)
         # set all led to ON
         self.all_on('DC', 0, trig_sequence=False)
         self.all_on('AC', ac_level, trig_sequence=False)
@@ -258,16 +239,12 @@ class CTSMaster:
             print('Setting level', level)
             for board in self.cts.LED_boards:
                 self.cts_client.set_dc_level(board.internal_id, level)
-            self.generator.start_trigger_sequence()
             time.sleep(timeout)
-        # put back the default trigger configruation
-        self.generator.stop_trigger_sequence()
         # put all leds to 0
         self.all_off('DC')
         self.all_off('AC')
 
-    def loop_over_ac_pixels(self, level, timeout=0.05, n_triggers=10,
-                            frequency=1000, start_pixel=None,
+    def loop_over_ac_pixels(self, level, timeout=0.05, start_pixel=None,
                             stop_pixel=None):
         """
         loop_over_ac_pixels(level,timeout,trigger,n_trigger)
@@ -284,8 +261,6 @@ class CTSMaster:
                  - start_pixel : the first pixel of the sequence
                  - stop_pixel : the last pixel of the sequence
         """
-        # Initialise the trigger
-        self.generator.configure_trigger(n_pulse=n_triggers, freq=frequency)
         # loop over the patches to set the DAC level
         for patch in self.cts.LED_patches:
             self.cts_client.set_ac_level(patch.camera_patch_id, level)
@@ -307,7 +282,6 @@ class CTSMaster:
             self.cts_client.set_led_status('AC', pixel_list[i], True)
             self.ac_status[pixel_list[i]] = 1
             self.ac_level[pixel_list[i]] = level
-            self.generator.start_trigger_sequence()
             if self.plotting:
                 self.plot()
             time.sleep(timeout)
@@ -318,8 +292,6 @@ class CTSMaster:
         for patch in self.cts.LED_patches:
             self.cts_client.set_ac_level(patch.camera_patch_id, 0)
             self.ac_level[pixel_list[-1]] = level
-        # put back the default trigger configruation
-        self.generator.stop_trigger_sequence()
 
     def loop_over_dc_patches(self, level, timeout=0.5):
         """
@@ -389,8 +361,6 @@ class CTSMaster:
                              (float)
                  - n_triggers: number of consecutive triggers
         """
-        # configure the trigger
-        self.generator.configure_trigger(n_pulse=n_triggers)
         # loop over the patches
         patch_list = list(self.cts.patch_camera_to_patch_led.keys())
         patch_list.sort()
@@ -411,7 +381,6 @@ class CTSMaster:
                 self.cts_client.set_led_status('AC', pix, True)
             # turn on the DAC level
             self.cts_client.set_ac_level(patch, level)
-            self.generator.start_trigger_sequence()
             time.sleep(timeout)
 
         # turn off last patch
@@ -421,8 +390,6 @@ class CTSMaster:
         # set back the level to 0
         for patch in self.cts.LED_patches:
             self.cts_client.set_ac_level(patch.camera_patch_id, 0)
-
-        self.generator.stop_trigger_sequence()
 
     def turn_on(self, pixel, led_type, level, enable_plot=True,
                 enable_trigger=True, iscluster=False):
@@ -445,8 +412,6 @@ class CTSMaster:
             self.cts_client.set_led_status('AC', pixel, True)
             self.ac_level[pixel] = level
             self.ac_status[pixel] = 1
-            if enable_trigger:
-                self.generator.start_trigger_sequence()
             if self.plotting and enable_plot:
                 self.plot()
 
@@ -487,8 +452,6 @@ class CTSMaster:
                - led_type : the type of led (str could be 'AC' or 'DC')
         """
         if led_type == 'AC':
-            if enable_trigger:
-                self.generator.stop_trigger_sequence()
             led_ac = self.cts.pixel_to_led['AC'][pixel]
             patch = self.cts.LEDs[led_ac].camera_patch_id
             self.cts_client.set_ac_level(patch, 0)
@@ -520,8 +483,6 @@ class CTSMaster:
         for pixel in self.cts.pixel_to_led[led_type].keys():
             self.turn_on(pixel, led_type, level, enable_plot=False,
                          enable_trigger=False)
-        if trig_sequence:
-            self.generator.start_trigger_sequence()
 
     def all_off(self, led_type):
         """
@@ -534,7 +495,6 @@ class CTSMaster:
               - level    : the DAC level (int)
 
         """
-        self.generator.stop_trigger_sequence()
         for pixel in self.cts.pixel_to_led[led_type].keys():
             self.turn_off(pixel, led_type, enable_plot=False)
 
@@ -542,11 +502,8 @@ class CTSMaster:
                  timeout=60):
         # first make sure the leds are at 0
         self.reset()
-        # then configrue the trigger
-        self.generator.configure_trigger(n_pulse=batch_size, freq=freq_pulse)
         i = 0
         while i < n_batch:
-            self.generator.start_trigger_sequence()
             time.sleep(timeout)
 
     def print_status(self):
@@ -660,11 +617,8 @@ class CTSMaster:
                       filename='/home/sterody/Documents/CTS/' +
                                'OpcUaCameraTestSetup/data/gamma_0.csv',
                       n_triggers=1000):
-        self.generator.configure_trigger(n_trigger=n_triggers)
         for i in range(nevent):
             self.write_mc_event(nsb_level, i, filename)
-            # TODO Start run
-            self.generator.start_trigger_sequence()
             time.sleep(1.)
 
     def plot(self):
