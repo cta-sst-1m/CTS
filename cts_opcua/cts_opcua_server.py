@@ -554,8 +554,11 @@ def setLED_Status(parent, led_type, led_number, status):
         if opcid == led_number:
             ctsserver.cts.LEDs[l_id].opcua_status.set_value(int(status))
         led_status = int(ctsserver.cts.LEDs[l_id].opcua_status.get_value())
-        mask = led_status << ctsserver.cts.LEDs[l_id].id_in_led_board
-        print('mask:', mask)
+        id_in_controler = ctsserver.cts.LEDs[l_id].id_in_led_board % 24
+        mask = led_status << id_in_controler
+        print('led:', l_id, 'opcua led id:', opcid,
+              'id in board:',ctsserver.cts.LEDs[l_id].id_in_led_board,
+              'led_status:', led_status, "mask:", mask)
         led |= mask
     print('led:', led)
 
@@ -589,8 +592,8 @@ def all_on(parent, led_type, level):
         channel = 8
     else:
         return 'ERROR, led_type must be "AC" or "DC"'
-    res = com.setLED(ctsserver.cts.bus, globalCmd=globalCmd, waitanswer=False)
-    res = com.setDACLevel(ctsserver.cts.bus, level, waitanswer=False, channel)
+    res = com.setDACLevel(ctsserver.cts.bus, level, module=None, channel=channel, waitanswer=False)
+    res = com.setLED(ctsserver.cts.bus, module=None, globalCmd=globalCmd, waitanswer=False)
     return 'success'
 
 
@@ -618,7 +621,11 @@ def DCDC_OFF(parent):
 
 
 if __name__ == "__main__":
-    ctsserver = CTSServer(float(sys.argv[1]))
+    if len(sys.argv) < 2:
+        angle = 0.
+    else:
+        angle = float(sys.argv[1])
+    ctsserver = CTSServer(angle)
     ready = True
     print('---|> The server have been started')
 
