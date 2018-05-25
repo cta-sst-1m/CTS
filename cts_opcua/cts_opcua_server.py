@@ -134,7 +134,7 @@ def create_opcua_structure(_cts, _parent_node):
     setattr(_cts,
             'ACfolder', _cts.main_folder.add_folder(NodeId('CTS.AC', 3),
                                                     "ACLED_Control"))
-
+    
     for board in _cts.LED_boards:
         setattr(board, 'node_name', 'CTS.DC.Board%d' % (board.internal_id))
         setattr(board, 'opcua_main_node',
@@ -250,6 +250,8 @@ def create_opcua_structure(_cts, _parent_node):
     led_type = arg_string("LEDType", "LED type (\"AC\" or \"DC\")")
     status = arg_bool("Status", "Status: True(1) or False(0)")
     level = arg_int("DACLevel", "DAC level: int (from 0 to 1023)")
+    level_DC = arg_int("DACLevel", "DAC level for DC LEDs: int (from 0 to 1023)")
+    level_AC = arg_int("DACLevel", "DAC level for AC LEDs: int (from 0 to 1023)")
     outarg = arg_string("Result", "Result")
     setattr(
         _cts,
@@ -292,6 +294,40 @@ def create_opcua_structure(_cts, _parent_node):
             'all_on',
             all_on,
             [led_type, level],
+            [outarg]
+        )
+    )
+    setattr(
+        _cts,
+        'set_DAC_all_DC',
+        _cts.main_folder.add_method(
+            NodeId('CTS.set_DAC_all_DC', 2),
+            'set_DAC_all_DC',
+            set_DAC_all_DC,
+            [level_DC],
+            [outarg]
+        )
+    )
+    setattr(
+        _cts,
+        'set_DAC_all',
+        _cts.main_folder.add_method(
+            NodeId('CTS.set_DAC_all', 2),
+            'set_DAC_all',
+            set_DAC_all,
+            [level_AC, level_DC],
+            [outarg]
+        )
+    )
+    #switch_all(on=True)
+    setattr(
+        _cts,
+        'switch_all',
+        _cts.main_folder.add_method(
+            NodeId('CTS.switch_all', 2),
+            'switch_all',
+            switch_all,
+            [status],
             [outarg]
         )
     )
@@ -595,6 +631,48 @@ def all_on(parent, led_type, level):
     res = com.setDACLevel(ctsserver.cts.bus, level, module=None, channel=channel, waitanswer=False)
     res = com.setLED(ctsserver.cts.bus, module=None, globalCmd=globalCmd, waitanswer=False)
     return 'success'
+
+
+@uamethod
+def set_DAC_all_DC(parent, level_DC):
+    # DC: channel 0 for half board, other channels invalid
+    res = com.setDACLevel(ctsserver.cts.bus, level_DC, module=None, channel=0, waitanswer=False)
+    time.sleep(1)
+
+
+@uamethod
+def set_DAC_all(parent, level_AC, level_DC):
+    # DC: channel 0 for half board, other channels invalid
+    res = com.setDACLevel(ctsserver.cts.bus, level_DC, module=None, channel=0, waitanswer=False)
+    time.sleep(.1)
+    # AC: channel 8 for half board, other channels to specify a patch
+    # as channel 8 invalid for DC leds, their ADC values will not be changed.
+    res = com.setDACLevel(ctsserver.cts.bus, level_AC, module=None, channel=8, waitanswer=False)
+    time.sleep(.1)
+
+
+@uamethod
+def switch_all(parent, status=True):
+    if status:  # on
+        led_mask = 0xFFFFFF
+    else:  # off
+        led_mask = 0x000000
+    for module in range(1, 109):
+        hw_add =  (module - 1) % 4
+        if hw_add == 0:
+            # 0 is on for AC
+            res = com.setLED(ctsserver.cts.bus, module=module, led_mask = led_mask, globalCmd=0, waitanswer=False)
+        elif hw_add == 1:
+            # globalCmd = 1 rejected on Hw_add = 1
+            res = com.setLED(ctsserver.cts.bus, module=module, led_mask = led_mask, globalCmd=0, waitanswer=False)
+        elif hw_add == 2:
+            # 1 is on for AC
+            res = com.setLED(ctsserver.cts.bus, module=module, led_mask = led_mask, globalCmd=1, waitanswer=False)
+        elif hw_add == 3:
+            # globalCmd = 1 rejected on Hw_add = 3
+            res = com.setLED(ctsserver.cts.bus, module=module, led_mask = led_mask, globalCmd=0, waitanswer=False)
+        print(res)
+        time.sleep(.1)
 
 
 @uamethod

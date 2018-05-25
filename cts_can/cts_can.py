@@ -450,6 +450,7 @@ def setDACLevel(
         # Set a single value everywhere
         if tmp_cmd == 8:
             # First broadcast on channel 0 such that the module for DC gets set
+            """
             res = command(
                 bus,
                 range(1, 109),
@@ -467,6 +468,7 @@ def setDACLevel(
                     if ch != 3 and r.data[1] != 0:
                         print('ERROR setting DAC on channel', ch,
                               'on board', board, 'Hw addr', ch)
+            """
             # Then broadcast on channel 8 such that all the module for AC
             # gets set
             res = command(
