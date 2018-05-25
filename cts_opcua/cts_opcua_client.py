@@ -106,7 +106,7 @@ class CTSClient():
         return self.client.get_objects_node().get_child(["0:CTS"]).call_method(self._function_list['set_led_status'],
                                                                                ledtype, pixel, status)
 
-    def all_on(self, led_type, level):
+    def all_on(self, ledtype, level):
         """
         Switch on all pixels of the given type and set them to level.
         Warning, due to hardware glich, it is necessary to set AC every time DC is set !

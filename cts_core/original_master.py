@@ -110,12 +110,8 @@ class CTSMaster:
         A function to put back all led to 0
 
         """
-        plotting = True if self.plotting else False
-        self.plotting = False
-        for led_type in ['AC', 'DC']:
-            for pixel in self.cts.pixel_to_led[led_type].keys():
-                self.turn_off(pixel, led_type)
-        self.plotting = True if plotting else False
+        self.cts_client.all_on('DC', 0)
+        self.cts_client.all_on('AC', 0)
 
     def loop_over_dc_pixels(self, level, timeout=0.1,  n_triggers=-1,
                             start_pixel=None):
@@ -272,12 +268,12 @@ class CTSMaster:
                 continue
             if stop_pixel and pix > stop_pixel:
                 continue
-            if i > 0:
+            if i > 1:
                 # turn off the previous pixel
                 self.cts_client.set_led_status('AC', pixel_list[i - 1], False)
                 self.ac_status[pixel_list[i - 1]] = 0
                 self.ac_level[pixel_list[i - 1]] = 0
-            time.sleep(timeout)
+            #time.sleep(timeout)
             # turn on this pixel
             self.cts_client.set_led_status('AC', pixel_list[i], True)
             self.ac_status[pixel_list[i]] = 1
@@ -412,10 +408,7 @@ class CTSMaster:
             self.cts_client.set_led_status('AC', pixel, True)
             self.ac_level[pixel] = level
             self.ac_status[pixel] = 1
-            if self.plotting and enable_plot:
-                self.plot()
-
-        if led_type == 'DC':
+        elif led_type == 'DC':
             if isinstance(pixel, list) or iscluster:
                 if iscluster:
                     pixel = self.cts.camera.Clusters_7[pixel].pixelsID
@@ -427,8 +420,6 @@ class CTSMaster:
                     self.cts_client.set_led_status('DC', pix, True)
                     self.dc_level[pix] = level
                     self.dc_status[pix] = 1
-                    if self.plotting and enable_plot:
-                        self.plot()
             else:
                 led_dc = self.cts.pixel_to_led['DC'][pixel]
                 board = self.cts.LEDs[led_dc].led_board
@@ -436,8 +427,8 @@ class CTSMaster:
                 self.cts_client.set_led_status('DC', pixel, True)
                 self.dc_level[pixel] = level
                 self.dc_status[pixel] = 1
-                if self.plotting and enable_plot:
-                    self.plot()
+        if self.plotting and enable_plot:
+            self.plot()
 
     def turn_off(self, pixel, led_type, enable_plot=True,
                  enable_trigger=True):
@@ -456,20 +447,18 @@ class CTSMaster:
             patch = self.cts.LEDs[led_ac].camera_patch_id
             self.cts_client.set_ac_level(patch, 0)
             self.cts_client.set_led_status('AC', pixel, False)
-            self.dc_level[pixel] = 0
-            self.dc_status[pixel] = 0
-            if self.plotting and enable_plot:
-                self.plot()
-        if led_type == 'DC':
+            self.ac_level[pixel] = 0
+            self.ac_status[pixel] = 0
+        elif led_type == 'DC':
             board = self.cts.LEDs[self.cts.pixel_to_led['DC'][pixel]].led_board
             self.cts_client.set_dc_level(board, 0)
             self.cts_client.set_led_status('DC', pixel, False)
             self.dc_level[pixel] = 0
             self.dc_status[pixel] = 0
-            if self.plotting and enable_plot:
-                self.plot()
+        if self.plotting and enable_plot:
+            self.plot()
 
-    def all_on(self, led_type, level, trig_sequence=True):
+    def all_on(self, led_type, level):
         """
         all_on(led_type,level)
 
@@ -480,9 +469,16 @@ class CTSMaster:
               - level    : the DAC level (int)
 
         """
-        for pixel in self.cts.pixel_to_led[led_type].keys():
-            self.turn_on(pixel, led_type, level, enable_plot=False,
-                         enable_trigger=False)
+        self.cts_client.all_on(led_type, level)
+        if led_type == 'AC':
+            self.ac_level = np.ones(1296, dtype=int)
+            self.ac_status = np.ones(1296, dtype=int)
+        elif led_type == 'DC':
+            self.dc_status = np.ones(1296, dtype=int)
+            self.dc_level = np.ones(1296, dtype=int)
+        else:
+            print('LED type should be "AC" or "DC"')
+
 
     def all_off(self, led_type):
         """
@@ -495,8 +491,15 @@ class CTSMaster:
               - level    : the DAC level (int)
 
         """
-        for pixel in self.cts.pixel_to_led[led_type].keys():
-            self.turn_off(pixel, led_type, enable_plot=False)
+        self.cts_client.all_on(led_type, 0)
+        if led_type == 'AC':
+            self.ac_level = np.zeros(1296, dtype=int)
+            self.ac_status = np.ones(1296, dtype=int)
+        elif led_type == 'DC':
+            self.dc_level = np.zeros(1296, dtype=int)
+            self.dc_status = np.ones(1296, dtype=int)
+        else:
+            print('LED type should be "AC" or "DC"')
 
     def dry_runs(self, n_batch=20, batch_size=1000, freq_pulse=300,
                  timeout=60):
@@ -518,7 +521,7 @@ class CTSMaster:
         To force a reading of the values in the hardware first call update()
         which will update the datapoints with results of can request
         """
-        pixel_list = list(self.cts.pixel_to_led['DC'].keys())
+        pixel_list = list(self.cts.pixel_to_led['AC'].keys())
         pixel_list.sort()
         print('============================================== Status')
         for pix in pixel_list:
