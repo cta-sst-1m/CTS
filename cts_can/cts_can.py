@@ -125,6 +125,7 @@ def command(
         'SetDACLevel': 0x02,
         'SetLED': 0x03,
         'GetLEDandDAC': 0x04,
+        'SetDACOffset': 0x05,
         'GetVersion': 0x1E,
     }
     msgID = cmdtypes[cmdtype]
@@ -428,7 +429,7 @@ def setDACLevel(
     level : the required level
     module :  None will broadcast to all module (AC and DC)
               a module value will send to this module only
-              (0 and 2 are for AC, 1 and 3 for DC)
+              (uControlers 0 and 1 are for AC, 2 for DC)
     channel : None will set the same level to all channel (AC and DC)
               a channel will set the level to this channel
               (note that for DC only channel 0x0 is available)
@@ -530,16 +531,128 @@ def setDACLevel(
                 )
 
 
+def setDACOffset(
+        bus,
+        offset,
+        module=None,
+        channel=None,
+        verbose=False,
+        waitanswer=True):
+    '''
+    Change the DAC led offset
+
+    bus: the CAN bus (type Protocole)
+    offset : the required offset
+    module :  None will broadcast to all module (AC and DC)
+              a module value will send to this module only
+              (uControlers 0 and 1 are for AC, 2 for DC)
+    channel : None will set the same offset to all channel (AC and DC)
+              a channel will set the offset to this channel
+              (note that for DC only channel 0x0 is available)
+    '''
+    if verbose:
+        print('Set the DAC led level...')
+    res = None
+    tmp_cmd = 0x8
+    # print level
+    offset &= 0x3FF
+    offset_LSB = offset & 0xFF
+    offset_MSB = (offset & 0x300) >> 8
+    # print offset_LSB,offset_MSB
+    # print offset,(offset_MSB << 8) | offset_LSB
+
+    if channel is not None:
+        tmp_cmd = channel
+    if not module:
+        # Set a single value everywhere
+        if tmp_cmd == 8:
+            # First broadcast on channel 0 such that the module for DC gets set
+            res = command(
+                bus,
+                range(1, 109),
+                'SetDACOffsetl',
+                [0x0, offset_MSB, offset_LSB],
+                broadcast=True,
+                broadcastAnswer=True,
+                waitanswer=waitanswer,
+                verbose=verbose
+            )
+            if waitanswer:
+                for r in res:
+                    mod = toMod(r.arbitration_id)
+                    ch, board = mod2chboard(mod)
+                    if ch != 3 and r.data[1] != 0:
+                        print('ERROR setting DAC on channel', ch,
+                              'on board', board, 'Hw addr', ch)
+            # Then broadcast on channel 8 such that all the module for AC
+            # gets set
+            res = command(
+                bus, range(1, 109),
+                'SetDACOffset',
+                [tmp_cmd, offset_MSB, offset_LSB],
+                broadcast=True,
+                broadcastAnswer=True,
+                waitanswer=waitanswer,
+                verbose=verbose
+            )
+            if waitanswer:
+                for r in res:
+                    mod = toMod(r.arbitration_id)
+                    ch, board = mod2chboard(mod)
+                    if ch < 2 and r.data[1] != 0:
+                        print('ERROR setting DAC on channel', tmp_cmd,
+                              'on board', board, 'Hw addr', ch)
+        else:
+            res = command(
+                bus,
+                range(1, 109),
+                'SetDACOffset',
+                [tmp_cmd, offset_MSB, offset_LSB],
+                broadcast=True,
+                broadcastAnswer=True,
+                waitanswer=waitanswer,
+                verbose=verbose
+            )
+            if waitanswer:
+                for r in res:
+                    mod = toMod(r.arbitration_id)
+                    ch, board = mod2chboard(mod)
+                    if ch < 2 and r.data[1] != 0:
+                        print('ERROR setting DAC offset on channel', tmp_cmd,
+                              'on board', board)
+                    if tmp_cmd == 0 and ch == 2 and r.data[1] != 0:
+                        print('ERROR setting DAC offset on channel', tmp_cmd,
+                              'on board', board, 'Hw addr', ch)
+    else:
+        ch, board = mod2chboard(module)
+        if ch == 3:
+            print('WARNING, setting DAC offset on hw addr 3 is not allowed')
+        if ch == 2 and tmp_cmd != 0:
+            print('WARNING, setting DAC offset on hw addr 2 is ' +
+                  'only allowed on channel 0')
+        res = command(
+            bus,
+            [module],
+            'SetDACOffset',
+            [tmp_cmd, offset_MSB, offset_LSB],
+            waitanswer=waitanswer,
+            verbose=verbose)
+        if waitanswer:
+            if len(res) == 0:
+                print('WARNING, got no answer while setting the DAC offset')
+            elif res[0].data[1] != 0:
+                raise Exception(
+                    'Error setting the DAC offset, code=',
+                    res[0].data[1]
+                )
+
+
 def setLED(
         bus,
         module=None,
         led_mask=None,
         globalCmd=None,
-        verbose=False,
         waitanswer=True):
-    if verbose:
-        print('Set the LED ON/OFF...')
-        print('Set the LED ON/OFF...')
     res = None
     if led_mask is None:
         led_mask = 0xFFFFFF
@@ -576,7 +689,6 @@ def setLED(
                 bus, [module], 'SetLED',
                 [led_HSB, led_MSB, led_LSB, globalCmd], waitanswer=waitanswer
             )
-
     if waitanswer:
         if module and len(res) == 0:
             print('WARNING: module', module, 'did not respond')
