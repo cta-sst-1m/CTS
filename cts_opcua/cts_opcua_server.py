@@ -149,7 +149,7 @@ def create_opcua_variables(_cts, _parent_node):
         _cts.DAC_AC.add_variable(
             NodeId('CTS.DAC.AC.patches', 2),
             "patches",
-            np.zeros([432,], dtype=int).tolist()
+            np.zeros([432,], dtype=np.int32).tolist()
         )
     )
     setattr(
@@ -158,7 +158,7 @@ def create_opcua_variables(_cts, _parent_node):
         _cts.DAC_DC.add_variable(
             NodeId('CTS.DAC.DC.boards', 2),
             "boards",
-            np.zeros([27,], dtype=int).tolist()
+            np.zeros([27,], dtype=np.int32).tolist()
         )
     )
     setattr(
@@ -167,7 +167,7 @@ def create_opcua_variables(_cts, _parent_node):
         _cts.DACoffset_AC.add_variable(
             NodeId('CTS.DACoffset.AC.patches', 2),
             "patches",
-            np.zeros([432,], dtype=int).tolist()
+            np.zeros([432,], dtype=np.int32).tolist()
         )
     )
     setattr(
@@ -176,7 +176,7 @@ def create_opcua_variables(_cts, _parent_node):
         _cts.DACoffset_DC.add_variable(
             NodeId('CTS.DACoffset.DC.boards', 2),
             "boards",
-            np.zeros([27,], dtype=int).tolist()
+            np.zeros([27,], dtype=np.int32).tolist()
         )
     )
     setattr(
@@ -204,18 +204,18 @@ def create_opcua_mapping(_cts):
     setattr(_cts,
             'mapping', _cts.main_folder.add_folder(NodeId('CTS.mapping', 2),
                                                     "mapping"))
-    pixels_to_patches = np.zeros([1296,], dtype=int)
+    pixels_to_patches = np.zeros([1296,], dtype=np.int32)
     # 423 patches * 3 LEDs each
-    patches_to_pixels = np.zeros([432, 3], dtype=int)
-    pixels_to_halfBoards = np.zeros([1296,], dtype=int)
+    patches_to_pixels = np.zeros([432, 3], dtype=np.int32)
+    pixels_to_halfBoards = np.zeros([1296,], dtype=np.int32)
     # 54 half boards * 24 LEDs each
-    halfBoards_to_pixels = np.zeros([54, 24], dtype=int)
-    pixels_to_boards = np.zeros([1296,], dtype=int)
+    halfBoards_to_pixels = np.zeros([54, 24], dtype=np.int32)
+    pixels_to_boards = np.zeros([1296,], dtype=np.int32)
     # 27 boards * 48 LEDs each
-    boards_to_pixels = np.zeros([27, 48], dtype=int)
-    patches_to_halfBoards = np.zeros([432,], dtype=int)
+    boards_to_pixels = np.zeros([27, 48], dtype=np.int32)
+    patches_to_halfBoards = np.zeros([432,], dtype=np.int32)
     # 54 half boards * 8 patches each
-    halfBoards_to_patches = np.zeros([54, 8], dtype=int)
+    halfBoards_to_patches = np.zeros([54, 8], dtype=np.int32)
     for led in _cts.LEDs:
         pixel = led.camera_pixel_id
         patch = led.led_patch

@@ -126,6 +126,7 @@ def command(
         'SetLED': 0x03,
         'GetLEDandDAC': 0x04,
         'SetDACOffset': 0x05,
+        'GetDACOffset': 0x06,
         'GetVersion': 0x1E,
     }
     msgID = cmdtypes[cmdtype]
@@ -570,7 +571,7 @@ def setDACOffset(
             res = command(
                 bus,
                 range(1, 109),
-                'SetDACOffsetl',
+                'SetDACOffset',
                 [0x0, offset_MSB, offset_LSB],
                 broadcast=True,
                 broadcastAnswer=True,
