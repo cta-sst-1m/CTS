@@ -1,0 +1,71 @@
+/**
+ * copyright (C) 2016, SST1M, CTA collaboration
+ *
+ * Vitalii Sliusar    09.09.2016      Created
+ * Yves Renier        15.03.2018      Adapted for CTS
+ **/
+
+
+#ifndef _CTA_CSC_IDL_
+#define _CTA_CSC_IDL_
+
+#include <baci.idl>
+#include <enumpropMACRO.idl>
+#include <acscomponent.idl>
+
+
+#pragma prefix "cta"
+
+module ctsarraycontrolsystemsst {
+  interface CTSArrayControlSystem:ACS::CharacteristicComponent {
+    /**
+    * CTS functions
+    **/
+    //low level functions
+    long set_board_DC_DAC(in long inBoard, in long inLevel);
+    long set_patch_AC_DAC(in long inPatch, in long inLevel);
+    long set_board_DC_offset(in long inBoard, in long inOffset);
+    long set_patch_AC_offset(in long inPatch, in long inOffset);
+    long set_halfBoard_AC_DAC(in long inHalfBoard, in long inLevel);
+    long set_halfBoard_AC_offset(in long inHalfBoard, in long inOffset);
+    long set_leds_AC_in_halfBoard_status(in long inHalfBoard, in long inHalfBoardStatus);
+    long set_leds_DC_in_halfBoard_status(in long inHalfBoard, in long inHalfBoardStatus);
+    // broadcasted functions
+    long set_all_DAC(in long inLevelDC, in long inLevelAC);
+    long set_all_offset(in long inOffsetDC, in long inOffsetAC);
+    // Functions with arrays
+    long set_patches_AC_DAC(in string inPatchesLevel);
+    long set_boards_DC_DAC(in string inBoardsLevel);
+    long set_patches_AC_offset(in string inPatchesOffset);
+    long set_boards_DC_offset(in string inBoardsOffset);
+    long set_pixels_DC_status(in string inPixelsSatuts);
+    long set_pixels_AC_status(in string inPixelsSatuts);
+    long set_pixels_AC_DAC(in string inPixelsLevel);
+    long set_pixels_DC_DAC(in string inPixelsLevel);
+    long set_pixels_AC_offset(in string inPixelsOffset);
+    long set_pixels_DC_offset(in string inPixelsOffset);
+    /**
+    * CTS variables
+    **/
+    readonly attribute ACS::ROlongLong opcuaTime;
+    //Properties describing CTS status
+    readonly attribute ACS::ROlongSeq patches_AC_DAC;
+    readonly attribute ACS::ROlongSeq boards_DC_DAC;
+    readonly attribute ACS::ROlongSeq patches_AC_offset;
+    readonly attribute ACS::ROlongSeq boards_DC_offset;
+    readonly attribute ACS::ROlongSeq pixels_AC_status;
+    readonly attribute ACS::ROlongSeq pixels_DC_status;
+    //Properties describing mapping
+    readonly attribute ACS::ROlongSeq pixels_to_patches;
+    readonly attribute ACS::ROlongSeq pixels_to_halfBoards;
+    readonly attribute ACS::ROlongSeq pixels_to_boards;
+    readonly attribute ACS::ROlongSeq patches_to_halfBoards;
+    /* 2D arrays, not working in ACS ?
+    readonly attribute ACS::ROlongSeq patches_to_pixels;
+    readonly attribute ACS::ROlongSeq halfBoards_to_pixels;
+    readonly attribute ACS::ROlongSeq boards_to_pixels;
+    readonly attribute ACS::ROlongSeq halfBoards_to_patches;
+    */
+  };
+};
+#endif

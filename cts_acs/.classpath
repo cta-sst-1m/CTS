@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="lib" path="lib"/>
+	<classpathentry kind="src" path="src"/>
+
+	<classpathentry kind="lib" path="lib/CTSArrayControlSystem.jar"/>
+	<classpathentry kind="lib" path="lib/CTSArrayControlSystemImpl.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang3-3.4.jar"/>
+
+	<classpathentry kind="lib" path="/alma/ACS/ACSSW/lib/acsContainerServices.jar"/>
+	<classpathentry kind="lib" path="/alma/ACS/ACSSW/lib/acscomponent.jar"/>
+	<classpathentry kind="lib" path="/alma/ACS/ACSSW/lib/jcont.jar"/>
+	<classpathentry kind="lib" path="/alma/ACS/ACSSW/lib/jbaci.jar"/>
+	<classpathentry kind="lib" path="/alma/ACS/ACSSW/lib/baci.jar"/>
+	<classpathentry kind="lib" path="/alma/ACS/ACSSW/lib/core.jar"/>
+	<classpathentry kind="lib" path="/alma/ACS/ACSSW/lib/acscommon.jar"/>
+	<classpathentry kind="lib" path="/alma/ACS/ACSSW/lib/acsjlog.jar"/>
+	<classpathentry kind="lib" path="/alma/ACS/ACSSW/lib/JavaContainerError.jar"/>
+	<classpathentry kind="lib" path="/alma/ACS/ACSSW/lib/maciErrType.jar"/>
+	<classpathentry kind="lib" path="/alma/ACS/ACSSW/lib/acserrj.jar"/>
+	<classpathentry kind="lib" path="/alma/ACS/ACSSW/lib/acserr.jar"/>
+	<classpathentry kind="lib" path="/alma/ACS/ACSSW/lib/acsAlarmClients.jar"/>
+	<classpathentry kind="lib" path="/alma/ACS/ACSSW/lib/acsASsources.jar"/>
+	<classpathentry kind="lib" path="/alma/ACS/ACSSW/lib/acsErrTypeAlarmSourceFactory.jar"/>
+	<classpathentry kind="lib" path="/home/ctauser/INTROOT/lib/jacorb-omgapi.jar"/>
+
+	<classpathentry kind="lib" path="/home/ctauser/INTROOT/lib/json-simple.jar"/>
+	<classpathentry kind="lib" path="/home/ctauser/INTROOT/lib/log4j-1.2.17.jar"/>
+	<classpathentry kind="lib" path="/home/ctauser/INTROOT/lib/Opc.Ua.Stack.jar"/>
+	<classpathentry kind="lib" path="/home/ctauser/INTROOT/lib/OpcUaDataAccessACS.jar"/>
+	<classpathentry kind="lib" path="/home/ctauser/INTROOT/lib/Prosys-OPC-UA-Java-SDK-Client-Server-Binary.jar"/>
+
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.8.0_45"/>
+</classpath>

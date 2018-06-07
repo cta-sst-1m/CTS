@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xs:schema xmlns="urn:schemas-cosylab-com:CTSArrayControlSystem:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0"
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    attributeFormDefault="unqualified"
+	elementFormDefault="qualified"
+    targetNamespace="urn:schemas-cosylab-com:CTSArrayControlSystem:1.0"
+>
+  <xs:import namespace="urn:schemas-cosylab-com:CDB:1.0" schemaLocation="CDB.xsd"/>
+  <xs:import namespace="urn:schemas-cosylab-com:BACI:1.0" schemaLocation="BACI.xsd"/>
+
+  <xs:complexType name="CTSArrayControlSystemType">
+    <xs:sequence>
+      <xs:element name="opcuaTime" type="baci:ROlong"/>
+      <xs:element name="patches_AC_DAC" type="baci:ROlongSeq"/>
+      <xs:element name="boards_DC_DAC" type="baci:ROlongSeq"/>
+      <xs:element name="patches_AC_offset" type="baci:ROlongSeq"/>
+      <xs:element name="boards_DC_offset" type="baci:ROlongSeq"/>
+      <xs:element name="pixels_AC_status" type="baci:ROlongSeq"/>
+      <xs:element name="pixels_DC_status" type="baci:ROlongSeq"/>
+
+      <xs:element name="pixels_to_patches" type="baci:ROlongSeq"/>
+      <xs:element name="pixels_to_halfBoards" type="baci:ROlongSeq"/>
+      <xs:element name="pixels_to_boards" type="baci:ROlongSeq"/>
+      <xs:element name="patches_to_halfBoards" type="baci:ROlongSeq"/>
+      <!-- 2D array, not working in ACS ?
+      <xs:element name="patches_to_pixels" type="baci:ROlongSeq"/>
+      <xs:element name="halfBoards_to_pixels" type="baci:ROlongSeq"/>
+      <xs:element name="boards_to_pixels" type="baci:ROlongSeq"/>
+      <xs:element name="halfBoards_to_patches" type="baci:ROlongSeq"/>
+      -->
+    </xs:sequence>
+
+    <xs:attribute name="opc_uri" type="xs:string" use="optional"/>
+
+    <xs:attribute name="opcuaTime_var" type="xs:string" use="optional"/>
+    <xs:attribute name="boards_DC_DAC_var" type="xs:string" use="optional"/>
+    <xs:attribute name="patches_AC_DAC_var" type="xs:string" use="optional"/>
+    <xs:attribute name="patches_AC_offset_var" type="xs:string" use="optional"/>
+    <xs:attribute name="boards_DC_offset_var" type="xs:string" use="optional"/>
+    <xs:attribute name="pixels_AC_status_var" type="xs:string" use="optional"/>
+    <xs:attribute name="pixels_DC_status_var" type="xs:string" use="optional"/>
+
+    <xs:attribute name="pixels_to_patches_var" type="xs:string" use="optional"/>
+    <xs:attribute name="pixels_to_halfBoards_var" type="xs:string" use="optional"/>
+    <xs:attribute name="pixels_to_boards_var" type="xs:string" use="optional"/>
+    <xs:attribute name="patches_to_halfBoards_var" type="xs:string" use="optional"/>
+    <!-- 2D array, not working in ACS ?
+    <xs:attribute name="patches_to_pixels_var" type="xs:string" use="optional"/>
+    <xs:attribute name="halfBoards_to_pixels_var" type="xs:string" use="optional"/>
+    <xs:attribute name="boards_to_pixels_var" type="xs:string" use="optional"/>
+    <xs:attribute name="halfBoards_to_patches_var" type="xs:string" use="optional"/>
+    -->
+    <xs:attribute name="Methods_CTS_DAC_var" type="xs:string" use="optional"/>
+    <xs:attribute name="Methods_CTS_DAC_AC_var" type="xs:string" use="optional"/>
+    <xs:attribute name="Methods_CTS_DAC_DC_var" type="xs:string" use="optional"/>
+    <xs:attribute name="Methods_CTS_DACoffset_var" type="xs:string" use="optional"/>
+    <xs:attribute name="Methods_CTS_DACoffset_AC_var" type="xs:string" use="optional"/>
+    <xs:attribute name="Methods_CTS_DACoffset_DC_var" type="xs:string" use="optional"/>
+    <xs:attribute name="Methods_CTS_status_AC_var" type="xs:string" use="optional"/>
+    <xs:attribute name="Methods_CTS_status_DC_var" type="xs:string" use="optional"/>
+  </xs:complexType>
+  <xs:element name="CTSArrayControlSystem" type="CTSArrayControlSystemType"/>
+</xs:schema>

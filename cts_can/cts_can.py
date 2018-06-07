@@ -118,8 +118,6 @@ def command(
         broadcastAnswer=False,
         masterID=0b110,
         verbose=False):
-    # type: (object, object, object, object, object, object, object, object, object) -> object
-
     msgID = None
     cmdtypes = {
         'Abort': 0x00,
@@ -127,6 +125,8 @@ def command(
         'SetDACLevel': 0x02,
         'SetLED': 0x03,
         'GetLEDandDAC': 0x04,
+        'SetDACOffset': 0x05,
+        'GetDACOffset': 0x06,
         'GetVersion': 0x1E,
     }
     msgID = cmdtypes[cmdtype]
@@ -155,14 +155,54 @@ def command(
                     broadcastAnswer=broadcastAnswer,
                     verbose=verbose))
             if cmdtype == 'SetCANAddress' and canmsg[0] == 0x01:
-                recieveIDs.append(
-                    canID(
-                        masterID=masterID,
-                        slaveID=canmsg[1]+(slaveID-1) % 4,
-                        broadcastAnswer=False,
-                        answer=True,
-                        verbose=verbose)
-                    )
+                if slaveID != 126:
+                    recieveIDs.append([
+                        canID(
+                            masterID=masterID,
+                            slaveID=canmsg[1]+(slaveID-1) % 4,
+                            broadcastAnswer=False,
+                            answer=True,
+                            verbose=verbose),
+                        canID(
+                            masterID=masterID,
+                            slaveID=slaveID,
+                            broadcastAnswer=broadcastAnswer,
+                            answer=True,
+                            verbose=verbose)
+                    ])
+                else:
+                    recieveIDs.append([
+                        canID(
+                            masterID=masterID,
+                            slaveID=canmsg[1],
+                            broadcastAnswer=False,
+                            answer=True,
+                            verbose=verbose),
+                        canID(
+                            masterID=masterID,
+                            slaveID=canmsg[1]+1,
+                            broadcastAnswer=False,
+                            answer=True,
+                            verbose=verbose),
+                        canID(
+                            masterID=masterID,
+                            slaveID=canmsg[1]+2,
+                            broadcastAnswer=False,
+                            answer=True,
+                            verbose=verbose),
+                        canID(
+                            masterID=masterID,
+                            slaveID=canmsg[1]+3,
+                            broadcastAnswer=False,
+                            answer=True,
+                            verbose=verbose),
+                        canID(
+                            masterID=masterID,
+                            slaveID=slaveID,
+                            broadcastAnswer=broadcastAnswer,
+                            answer=True,
+                            verbose=verbose)
+                    ])
             else:
                 recieveIDs.append(
                     canID(
@@ -232,23 +272,30 @@ def setAddress(bus, origAdd, modnum):
 
 
 def setBoardAddresses(bus, boardnum):
-    # first get the adresses
-    resp = command(bus, range(1, 109), 'GetVersion',
+    modnum = (boardnum - 1) * 4 + 1
+    # get the adresses
+    slaveID = list(range(1, 109))
+    slaveID.append(126)
+    resp = command(bus, slaveID, 'GetVersion',
                    verbose=False, broadcast=True, broadcastAnswer=True)
-    addresses = sorted([r.arbitration_id for r in resp])
-    if len(addresses) != 4:
-        raise ConnectionAbortedError(
-            'found %d adresses when expected 4.' +
-            'Are several cards attached to CAN ?'
-        )
-    modules = [toMod(add) for add in addresses]
-    print('Original adresses:', addresses, ', modules:', modules)
-    # change the addresses
-    for mod in modules:
-        setAddress(bus, mod, boardnum * 4 + 1)
-    time.sleep(2)
+    if resp[0].arbitration_id == 0x6ff:
+        # The board is uninitialized
+        setAddress(bus, 126, modnum)
+    else:
+        addresses = sorted([r.arbitration_id for r in resp])
+        if len(addresses) != 4:
+            raise ConnectionAbortedError(
+                'found %d adresses when expected 4.' % len(addresses) +
+                'Are several cards attached to CAN ?'
+            )
+        modules = [toMod(add) for add in addresses]
+        print('Original adresses:', addresses, ', modules:', modules)
+        # change the addresses
+        for mod in modules:
+            setAddress(bus, mod, modnum)
+    time.sleep(0.1)
     # check new address
-    resp = command(bus, range(1, 109), 'GetVersion',
+    resp = command(bus, slaveID, 'GetVersion',
                    verbose=False, broadcast=True, broadcastAnswer=True)
     addresses = sorted([r.arbitration_id for r in resp])
     modules = [toMod(add) for add in addresses]
@@ -383,7 +430,7 @@ def setDACLevel(
     level : the required level
     module :  None will broadcast to all module (AC and DC)
               a module value will send to this module only
-              (0 and 2 are for AC, 1 and 3 for DC)
+              (uControlers 0 and 1 are for AC, 2 for DC)
     channel : None will set the same level to all channel (AC and DC)
               a channel will set the level to this channel
               (note that for DC only channel 0x0 is available)
@@ -485,16 +532,128 @@ def setDACLevel(
                 )
 
 
+def setDACOffset(
+        bus,
+        offset,
+        module=None,
+        channel=None,
+        verbose=False,
+        waitanswer=True):
+    '''
+    Change the DAC led offset
+
+    bus: the CAN bus (type Protocole)
+    offset : the required offset
+    module :  None will broadcast to all module (AC and DC)
+              a module value will send to this module only
+              (uControlers 0 and 1 are for AC, 2 for DC)
+    channel : None will set the same offset to all channel (AC and DC)
+              a channel will set the offset to this channel
+              (note that for DC only channel 0x0 is available)
+    '''
+    if verbose:
+        print('Set the DAC led level...')
+    res = None
+    tmp_cmd = 0x8
+    # print level
+    offset &= 0x3FF
+    offset_LSB = offset & 0xFF
+    offset_MSB = (offset & 0x300) >> 8
+    # print offset_LSB,offset_MSB
+    # print offset,(offset_MSB << 8) | offset_LSB
+
+    if channel is not None:
+        tmp_cmd = channel
+    if not module:
+        # Set a single value everywhere
+        if tmp_cmd == 8:
+            # First broadcast on channel 0 such that the module for DC gets set
+            res = command(
+                bus,
+                range(1, 109),
+                'SetDACOffset',
+                [0x0, offset_MSB, offset_LSB],
+                broadcast=True,
+                broadcastAnswer=True,
+                waitanswer=waitanswer,
+                verbose=verbose
+            )
+            if waitanswer:
+                for r in res:
+                    mod = toMod(r.arbitration_id)
+                    ch, board = mod2chboard(mod)
+                    if ch != 3 and r.data[1] != 0:
+                        print('ERROR setting DAC on channel', ch,
+                              'on board', board, 'Hw addr', ch)
+            # Then broadcast on channel 8 such that all the module for AC
+            # gets set
+            res = command(
+                bus, range(1, 109),
+                'SetDACOffset',
+                [tmp_cmd, offset_MSB, offset_LSB],
+                broadcast=True,
+                broadcastAnswer=True,
+                waitanswer=waitanswer,
+                verbose=verbose
+            )
+            if waitanswer:
+                for r in res:
+                    mod = toMod(r.arbitration_id)
+                    ch, board = mod2chboard(mod)
+                    if ch < 2 and r.data[1] != 0:
+                        print('ERROR setting DAC on channel', tmp_cmd,
+                              'on board', board, 'Hw addr', ch)
+        else:
+            res = command(
+                bus,
+                range(1, 109),
+                'SetDACOffset',
+                [tmp_cmd, offset_MSB, offset_LSB],
+                broadcast=True,
+                broadcastAnswer=True,
+                waitanswer=waitanswer,
+                verbose=verbose
+            )
+            if waitanswer:
+                for r in res:
+                    mod = toMod(r.arbitration_id)
+                    ch, board = mod2chboard(mod)
+                    if ch < 2 and r.data[1] != 0:
+                        print('ERROR setting DAC offset on channel', tmp_cmd,
+                              'on board', board)
+                    if tmp_cmd == 0 and ch == 2 and r.data[1] != 0:
+                        print('ERROR setting DAC offset on channel', tmp_cmd,
+                              'on board', board, 'Hw addr', ch)
+    else:
+        ch, board = mod2chboard(module)
+        if ch == 3:
+            print('WARNING, setting DAC offset on hw addr 3 is not allowed')
+        if ch == 2 and tmp_cmd != 0:
+            print('WARNING, setting DAC offset on hw addr 2 is ' +
+                  'only allowed on channel 0')
+        res = command(
+            bus,
+            [module],
+            'SetDACOffset',
+            [tmp_cmd, offset_MSB, offset_LSB],
+            waitanswer=waitanswer,
+            verbose=verbose)
+        if waitanswer:
+            if len(res) == 0:
+                print('WARNING, got no answer while setting the DAC offset')
+            elif res[0].data[1] != 0:
+                raise Exception(
+                    'Error setting the DAC offset, code=',
+                    res[0].data[1]
+                )
+
+
 def setLED(
         bus,
         module=None,
         led_mask=None,
         globalCmd=None,
-        verbose=False,
         waitanswer=True):
-    if verbose:
-        print('Set the LED ON/OFF...')
-        print('Set the LED ON/OFF...')
     res = None
     if led_mask is None:
         led_mask = 0xFFFFFF
@@ -531,7 +690,6 @@ def setLED(
                 bus, [module], 'SetLED',
                 [led_HSB, led_MSB, led_LSB, globalCmd], waitanswer=waitanswer
             )
-
     if waitanswer:
         if module and len(res) == 0:
             print('WARNING: module', module, 'did not respond')
@@ -559,20 +717,6 @@ def flushAnswer(bus, verbose=False):
         if verbose:
             print(resp)
 
-"""
-# never used
-def resetAll(bus, status_dict, cmd_dict):
-    updateStatus(bus, status_dict)
-    for k in cmd_dict.keys():
-        if k.count('ACLED_Ch') > 0.5:
-            cmd_dict[k] = 0
-        elif k.count('DCDC') > 0.5:
-            cmd_dict[k] = 'OFF'
-        elif k.count('ACLED_Status') > 0.5:
-            cmd_dict[k] = ['OFF'] * 24
-    diffK = DictDiffer(status_dict, cmd_dict) # unused diffK
-    applyDict(bus, status_dict, cmd_dict)
-"""
 
 def initialise_can(cts):
     # First open the device

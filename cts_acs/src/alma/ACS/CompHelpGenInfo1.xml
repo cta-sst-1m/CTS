@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ComponentHelperInfo
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    outputRootDirectory="." xsi:type="ComponentHelperInfo">
+    <ComponentInterface
+        corbaRepositoryId="IDL:cta/ctsarraycontrolsystemsst/CTSArrayControlSystem:1.0"
+        idlPackage="cta.ctsarraycontrolsystemsst" componentClassName="CTSArrayControlSystem"/>
+    <ComponentInterface
+        corbaRepositoryId="IDL:alma/ACS/CharacteristicComponent:1.0"
+        idlPackage="alma.ACS" componentClassName="CharacteristicComponent"/>
+</ComponentHelperInfo>
