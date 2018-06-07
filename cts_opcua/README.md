@@ -118,9 +118,9 @@ As the [DAC](#dac-folder) folder, but showing the DAC offset levels instead of D
    
 ## `status` folder
 ### `AC` folder
-  * `status`: addr="ns=2, s=CTS.status.AC.status", type="list of 1296 bools", Node containing status (True: ON, False: OFF) 
+ * `status`: addr="ns=2, s=CTS.status.AC.status", type="list of 1296 bools", Node containing status (True: ON, False: OFF) 
     of AC LEDs for each camera pixel.
-  * `set_leds_in_halfBoard(halfBoard, staus)`: 
+ * `set_leds_in_halfBoard(halfBoard, status)`: 
  
     addr="ns=2, s=CTS.status.AC.set_leds_in_halfBoard"
     
@@ -130,6 +130,17 @@ As the [DAC](#dac-folder) folder, but showing the DAC offset levels instead of D
   
     * halfBoard: type=int, LED half-board number, from 0 to 53.
     * status: type=int, in binary, each bit of status represent the status of a LED in the given half-board. For example:
-        *status=0 means all LEDs are off
-        *status=4(=0b000000000000000000000100) means all LEDs are off except the 3rd.
-        *status=16777215(=0b11111111111111111111111111)  means all LEDs are on.
+        * status=0 means all LEDs are off
+        * status=4(=0b000000000000000000000100) means all LEDs are off except the 3rd.
+        * status=16777215(=0b11111111111111111111111111)  means all LEDs are on.
+ * `set_pixels(status_json)`: 
+ 
+    addr="ns=2, s=CTS.status.AC.set_pixels"
+    
+    Function to set the status of all AC LEDs.
+    
+    Parameters:
+     
+    * levels_json: type=string, JSON encoded list of 1296 DAC AC status(0: OFF, 1: ON), one per camera pixels.
+### `DC` folder
+ same as [AC folder](#ac-folder) but with status of the AC LEDs instead of DC LEDs.
