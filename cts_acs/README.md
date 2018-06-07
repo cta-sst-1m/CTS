@@ -8,6 +8,7 @@ An implementation of the Alma Control System (ACS) for the Camera Test setup (CT
 
 ## compilation    
 run the activate_ACS bash function:
+
     1. Start the environment with:
         source ./activate_ACS.sh
     
@@ -24,13 +25,12 @@ run the activate_ACS bash function:
 To create an entry for your component in the Configuration Database,
 copy the line below into a new entry in the file $ACS_CDB/MACI/Components/Components.xml:
 ```
-<_ Name="CTSArrayControlSystem"              Code="cta.ctsarraycontrolsystemsst.CTSArrayControlSystemImpl.CTSArrayControlSystemComponentHelper"              Type="IDL:cta/ctsarraycontrolsystemsst/CTSArrayControlSystem:1.0" Container="ctsContainer" ImplLang="java" />
+<_ Name="CTSArrayControlSystem"  Code="cta.ctsarraycontrolsystemsst.CTSArrayControlSystemImpl.CTSArrayControlSystemComponentHelper" Type="IDL:cta/ctsarraycontrolsystemsst/CTSArrayControlSystem:1.0" Container="ctsContainer" ImplLang="java"/>
 ```
 
 ## Use the container
-Start `acscommandcenter` and ensure `ctsContainer` is in the container list (add if it is not).
-Ensure CTS OpcUa server is running (see [../README.md](../README.md)).
-Start the `ctsContainer` by clicking the green arrow on the right.
+* Start `acscommandcenter`
+* Ensure `ctsContainer` is in the container list (add if it is not).
+* Ensure CTS OpcUa server is running (see [../README.md](../README.md)).
+* Start the `ctsContainer` by clicking the green arrow on the right.
 The CTS can now be controled by ACS script or using an ACS client (`objexp` for example).
-
-
