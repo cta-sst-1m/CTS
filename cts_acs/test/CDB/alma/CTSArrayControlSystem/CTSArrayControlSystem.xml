@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+   - Configuration for the CTS
+   -
+   - Author: renier
+   -
+   - History:
+   -	2018-03-15: created
+  -->
+<CTSArrayControlSystem
+    xmlns="urn:schemas-cosylab-com:CTSArrayControlSystem:1.0"
+    xmlns:baci="urn:schemas-cosylab-com:BACI:1.0" 
+    xmlns:cdb="urn:schemas-cosylab-com:CDB:1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    opc_uri="opc.tcp://129.194.51.113:4843/cameraslowcontrol/server/"
+
+    opcuaTime_var="ns=2;s=CTS.time"
+    patches_AC_DAC_var="ns=2;s=CTS.DAC.AC.patches"
+    boards_DC_DAC_var="ns=2;s=CTS.DAC.DC.boards"
+    patches_AC_offset_var="ns=2;s=CTS.DACoffset.AC.patches"
+    boards_DC_offset_var="ns=2;s=CTS.DACoffset.DC.boards"
+    pixels_AC_status_var="ns=2;s=CTS.status.AC.pixels"
+    pixels_DC_status_var="ns=2;s=CTS.status.DC.pixels"
+
+    pixels_to_patches_var="ns=2;s=CTS.mapping.pixels_to_patches"
+    pixels_to_halfBoards_var="ns=2;s=CTS.mapping.pixels_to_halfBoards"
+    pixels_to_boards_var="ns=2;s=CTS.mapping.pixels_to_boards"
+    patches_to_halfBoards_var="ns=2;s=CTS.mapping.patches_to_halfBoards"
+
+    Methods_CTS_DAC_var="ns=2;s=CTS.DAC"
+    Methods_CTS_DAC_AC_var="ns=2;s=CTS.DAC.AC"
+    Methods_CTS_DAC_DC_var="ns=2;s=CTS.DAC.DC"
+    Methods_CTS_DACoffset_var="ns=2;s=CTS.DACoffset"
+    Methods_CTS_DACoffset_AC_var="ns=2;s=CTS.DACoffset.AC"
+    Methods_CTS_DACoffset_DC_var="ns=2;s=CTS.DACoffset.DC"
+    Methods_CTS_status_AC_var="ns=2;s=CTS.status.AC"
+    Methods_CTS_status_DC_var="ns=2;s=CTS.status.DC"
+>
+    <!-- 2D mapping, not working in ACS ?
+    patches_to_pixels_var="ns=2;s=CTS.mapping.patches_to_pixels"
+    halfBoards_to_pixels_var="ns=2;s=CTS.mapping.halfBoards_to_pixels"
+    boards_to_pixels_var="ns=2;s=CTS.mapping.boards_to_pixels"
+    halfBoards_to_patches_var="ns=2;s=CTS.mapping.halfBoards_to_patches"
+    -->
+
+    <opcuaTime description="OPC UA server Unix timestamp" units="s" min_timer_trig="1" graph_min="0" graph_max="100" min_step="1"/>
+    <patches_AC_DAC description="ADC values for all AC patches" units="LSB" min_timer_trig="1" graph_min="0" graph_max="1023" min_step="1"/>
+    <boards_DC_DAC description="ADC values for all DC boards" units="LSB" min_timer_trig="1" graph_min="0" graph_max="1023" min_step="1"/>
+    <patches_AC_offset description="ADC offset values for all AC patches" units="LSB" min_timer_trig="1" graph_min="0" graph_max="1023" min_step="1"/>
+    <boards_DC_offset description="ADC offset values for all DC boards" units="LSB" min_timer_trig="1" graph_min="0" graph_max="1023" min_step="1"/>
+    <pixels_AC_status description="status of AC LEDs for all pixels" units="none" min_timer_trig="1" graph_min="0" graph_max="1" min_step="1"/>
+    <pixels_DC_status description="status of DC LEDs for all pixels" units="none" min_timer_trig="1" graph_min="0" graph_max="1" min_step="1"/>
+
+    <pixels_to_patches description="LED patch for each pixel" units="none" min_timer_trig="1" graph_min="0" graph_max="431" min_step="1"/>
+    <pixels_to_halfBoards description="LED half board for each pixel" units="none" min_timer_trig="1" graph_min="0" graph_max="53" min_step="1"/>
+    <pixels_to_boards description="LED board for each pixel" units="none" min_timer_trig="1" graph_min="0" graph_max="26" min_step="1"/>
+    <patches_to_halfBoards description="LED half board for each LED patch" units="none" min_timer_trig="1" graph_min="53" graph_max="100" min_step="1"/>
+    <!-- 2D mapping, not working in ACS ?
+    <patches_to_pixels description="pixels for each LED patch" units="none" min_timer_trig="1" graph_min="0" graph_max="1295" min_step="1"/>
+    <halfBoards_to_pixels description="pixels for each LED half board" units="none" min_timer_trig="1" graph_min="0" graph_max="1295" min_step="1"/>
+    <boards_to_pixels description="pixels for each LED board" units="none" min_timer_trig="1" graph_min="0" graph_max="1295" min_step="1"/>
+    <halfBoards_to_patches description="LED patches for each half board" units="none" min_timer_trig="1" graph_min="431" graph_max="100" min_step="1"/>
+    -->
+</CTSArrayControlSystem>

@@ -1,7 +1,14 @@
 .~lock*
 *.egg-info/
 build/
-*.pyc
 __pycache__/
-*.log
 .idea/
+.project
+cts_acs/object/
+idl/CTSArrayControlSystem.idl
+lib/*
+*.pyc
+*.log
+*.a
+*.so
+
