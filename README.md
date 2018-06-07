@@ -59,6 +59,7 @@ $ source activate ctapipe
 where angle can be 0, 120 or 240.
 
 You can now control the CTS with any OpcUa client compatible with methods.
+The structure of the OpcUa server is discribed in [cts_opcua/README.md](cts_opcua/README.md) 
 
 ## CTS ACS component
 Once the OpcUa server is running, an ICS interface is available as well.
