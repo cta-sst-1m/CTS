@@ -4,7 +4,7 @@ An implementation of the Alma Control System (ACS) for the Camera Test setup (CT
 # Instalation
 ## requirements
 * ACS must be installed (that is the case on SST1M_server and PDP_server).
-* the OpcUa server must be running while the 
+* the OpcUa server must be running before starting the ACS container.
 
 ## Specify the address of the OpcUa server
 edit the `CTS/cts_acs/test/CDB/alma/CTSArrayControlSystem/CTSArrayControlSystem.xml` file.
@@ -15,7 +15,7 @@ change the line `opc_uri="opc.tcp://?:?/cameraslowcontrol/server/"` replacing ? 
 run the activate_ACS bash function:
 
     1. Start the environment with:
-        source ./activate_ACS.sh
+        activate_ACS
     
     2. go into the src/ folder with:
         cd src
