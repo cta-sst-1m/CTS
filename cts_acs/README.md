@@ -15,7 +15,7 @@ change the line `opc_uri="opc.tcp://?:?/cameraslowcontrol/server/"` replacing ? 
 run the activate_ACS bash function:
 
     1. Start the environment with:
-        source ./activate_ACS.sh
+        activate_ACS
     
     2. go into the src/ folder with:
         cd src
