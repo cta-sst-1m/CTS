@@ -3,7 +3,8 @@ An implementation of the Alma Control System (ACS) for the Camera Test setup (CT
 
 # Instalation
 ## requirements
-ACS must be installed (that is the case on SST1M_server and PDP_server).
+* ACS must be installed (that is the case on SST1M_server and PDP_server).
+* the OpcUa server must be running while the 
 
 ## compilation    
 run the activate_ACS bash function:
@@ -21,12 +22,15 @@ run the activate_ACS bash function:
 
 ## Add component to the Configuration Database
 To create an entry for your component in the Configuration Database,
-copy the line below into a new entry in the file $ACS_CDB/MACI/Components/Components.xml
-and modify the instance name of the component and the container:
+copy the line below into a new entry in the file $ACS_CDB/MACI/Components/Components.xml:
+```
+<_ Name="CTSArrayControlSystem"              Code="cta.ctsarraycontrolsystemsst.CTSArrayControlSystemImpl.CTSArrayControlSystemComponentHelper"              Type="IDL:cta/ctsarraycontrolsystemsst/CTSArrayControlSystem:1.0" Container="ctsContainer" ImplLang="java" />
+```
 
-`Name="CHARACTERISTICCOMPONENT_1" Code="alma.ACS.CharacteristicComponentImpl.CharacteristicComponentComponentHelper" Type="IDL:alma/ACS/CharacteristicComponent:1.0" Container="frodoContainer" ImplLang="java"`
-
-## connect to the server
-check with `acscommandcenter` and `objexp` that all looks ok.
+## Use the container
+Start `acscommandcenter` and ensure `ctsContainer` is in the container list (add if it is not).
+Ensure CTS OpcUa server is running (see [../README.md](../README.md)).
+Start the `ctsContainer` by clicking the green arrow on the right.
+The CTS can now be controled by ACS script or using an ACS client (`objexp` for example).
 
 
