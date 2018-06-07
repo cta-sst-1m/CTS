@@ -143,4 +143,4 @@ As the [DAC](#dac-folder) folder, but showing the DAC offset levels instead of D
      
     * levels_json: type=string, JSON encoded list of 1296 DAC AC status(0: OFF, 1: ON), one per camera pixels.
 ### `DC` folder
- same as [AC folder](#ac-folder) but with status of the AC LEDs instead of DC LEDs.
+ same as [AC folder](#ac-folder-1) but with status of the AC LEDs instead of DC LEDs.
