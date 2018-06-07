@@ -62,4 +62,4 @@ You can now control the CTS with any OpcUa client compatible with methods.
 
 ## CTS ACS component
 Once the OpcUa server is running, an ICS interface is available as well.
-see cts_acs/README.md for more details.
+see [cts_acs/README.md](cts_acs/README.md) for more details.
