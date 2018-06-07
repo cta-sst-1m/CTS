@@ -56,24 +56,10 @@ $ source activate ctapipe
 
 ```
 
-where angle can be 0,120,240
+where angle can be 0, 120 or 240.
 
-## CTS Control
-Then in another console run the client
+You can now control the CTS with any OpcUa client compatible with methods.
 
-```
-$ source activate ctapipe
-```
-
-```
-(ctapipe) $ python CTSControl.py angle
-
-```
-
-when launching the client the various functionnalities are detailed
-
-or the more advanced
-
-```
-python RunManager.py -y theyamlfile
-```
+## CTS ACS component
+Once the OpcUa server is running, an ICS interface is available as well.
+see cts_acs/README.md for more details.
