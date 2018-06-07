@@ -7,7 +7,8 @@ An implementation of the Alma Control System (ACS) for the Camera Test setup (CT
 * the OpcUa server must be running while the 
 
 ## Specify the address of the OpcUa server
-edit the `CTS/cts_acs/test/CDB/alma/CTSArrayControlSystem/CTSArrayControlSystem.xml` file
+edit the `CTS/cts_acs/test/CDB/alma/CTSArrayControlSystem/CTSArrayControlSystem.xml` file.
+
 change the line `opc_uri="opc.tcp://?:?/cameraslowcontrol/server/"` replacing ? with the IP address and the port of the CTS OpcUa server.
 
 ## compilation    
