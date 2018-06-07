@@ -107,7 +107,72 @@ The CTS can now be controled by ACS script or using an ACS client (`objexp` for 
     parameters:
     
     * inHalfBoard: index of the LED half-board (int, between 0 and 53)
-    * inHalfBoardStatus: in binary, each bit of inHalfBoardStatus represents the status of a LED in the given half-board (int, between 0 and 16777215). For example:
+    * inHalfBoardStatus: in binary, each bit of inHalfBoardStatus represents the status of a AC LED in the given half-board (int, between 0 and 16777215). For example:
         * inHalfBoardStatus=0 means all LEDs are off
         * inHalfBoardStatus=4(=0b000000000000000000000100) means all LEDs are off except the 3rd.
         * inHalfBoardStatus=16777215(=0b11111111111111111111111111)  means all LEDs are on.
+* set_leds_DC_in_halfBoard_status(inHalfBoard, inHalfBoardStatus): function to set the AC LED status for the given LED half-board. 
+
+    parameters:
+    
+    * inHalfBoard: index of the LED half-board (int, between 0 and 53)
+    * inHalfBoardStatus: in binary, each bit of inHalfBoardStatus represents the status of a DC LED in the given half-board (int, between 0 and 16777215). For example:
+        * inHalfBoardStatus=0 means all LEDs are off
+        * inHalfBoardStatus=4(=0b000000000000000000000100) means all LEDs are off except the 3rd.
+        * inHalfBoardStatus=16777215(=0b11111111111111111111111111)  means all LEDs are on.
+* set_patch_AC_DAC(inPatch, inLevel): function to set the DAC level for the AC LEDs of the given patch.
+
+    parameters:
+    
+    * inPatch: index of the LED patch (int, between 0 and 431)
+    * inLevel: DAC level of the AC LEDs (int, between 0 and 1023)
+* set_patch_AC_offset(inPatch, inOffset): function to set the DAC offset for the AC LEDs of the given patch.
+
+    parameters:
+    
+    * inPatch: index of the LED patch (int, between 0 and 431)
+    * inOffset: DAC offset of the AC LEDs (int, between 0 and 1023)
+* set_patches_AC_DAC(inPatchesLevel): function to set the AC DAC values for all LED patches.
+
+    parameters:
+    
+    * inBoardsLevel: JSON encoded list of 432 AC DAC levels (int, between 0 and 1023), one for each LED patch.
+* set_patches_AC_offset(inPatchesOffset): function to set the AC DAC offsets for all LED patches.
+
+    parameters:
+    
+    * inBoardsOffset: JSON encoded list of 432 AC DAC offsets (int, between 0 and 1023), one for each LED patch.
+* set_pixels_AC_DAC(inPixelsLevel): function to set the AC DAC values for all LED pixels. Values for the 3 LEDs of each pach are averaged. 
+Quite slow (~1 min) if the values are different for each patch. 
+Optimized to set DAC values for the half board if all patches of the half board have the same values.
+
+    parameters:
+    
+    * inPixelsLevel: JSON encoded list of 1296 AC DAC levels (int, between 0 and 1023), one for each camera pixel.
+* set_pixels_AC_offset(inPixelsOffset): function to set the AC DAC offsets for all LED pixels. Values for the 3 LEDs of each pach are averaged. 
+Quite slow (~1 min) if the offsets are different for each patch. 
+Optimized to set DAC offsets for the half board if all offsets of the half board have the same values.
+
+    parameters:
+    
+    * inPixelsOffset: JSON encoded list of 1296 AC DAC offsets (int, between 0 and 1023), one for each camera pixel.
+* set_pixels_AC_status(inPixelsStatus): function to set the status of AC LED for each camera pixel.
+
+    parameters:
+    
+    * inPixelsStatus: JSON encoded list of 1296 AC LED status (bool), one for each camera pixel.
+* set_pixels_DC_DAC(inPixelsLevel): function to set the DC DAC values for all LED pixels. Values for the 48 LEDs of each board are averaged. 
+
+    parameters:
+    
+    * inPixelsLevel: JSON encoded list of 1296 DC DAC levels (int, between 0 and 1023), one for each camera pixel.
+* set_pixels_DC_offset(inPixelsOffset): function to set the DC DAC offsets for all LED pixels. Values for the 48 LEDs of each board are averaged. 
+
+    parameters:
+    
+    * inPixelsOffset: JSON encoded list of 1296 DC DAC offsets (int, between 0 and 1023), one for each camera pixel.
+* set_pixels_DC_status(inPixelsStatus): function to set the status of DC LED for each camera pixel.
+
+    parameters:
+    
+    * inPixelsStatus: JSON encoded list of 1296 DC LED status (bool), one for each camera pixel.
