@@ -4,7 +4,7 @@ An implementation of the Alma Control System (ACS) for the Camera Test setup (CT
 # Instalation
 ## requirements
 * ACS must be installed (that is the case on SST1M_server and PDP_server).
-* the OpcUa server must be running while the 
+* the OpcUa server must be running before starting the ACS container.
 
 ## Specify the address of the OpcUa server
 edit the `CTS/cts_acs/test/CDB/alma/CTSArrayControlSystem/CTSArrayControlSystem.xml` file.
