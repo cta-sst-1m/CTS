@@ -115,7 +115,7 @@ def create_opcua_structure(_cts, _parent_node):
     create_opcua_variables(_cts, _parent_node)
     create_opcua_mapping(_cts)
     create_opcua_functions(_cts)
-    
+
 
 def create_opcua_variables(_cts, _parent_node):
     setattr(_cts,
@@ -129,7 +129,7 @@ def create_opcua_variables(_cts, _parent_node):
             'DAC_AC', _cts.DAC.add_folder(NodeId('CTS.DAC.AC', 2), "AC"))
     setattr(_cts,
             'DAC_DC', _cts.DAC.add_folder(NodeId('CTS.DAC.DC', 2), "DC"))
-    setattr(_cts,'DACoffset',
+    setattr(_cts, 'DACoffset',
             _cts.main_folder.add_folder(NodeId('CTS.DACoffset', 2),
                                         "DACoffset"))
     setattr(_cts, 'DACoffset_AC',
@@ -149,7 +149,7 @@ def create_opcua_variables(_cts, _parent_node):
         _cts.DAC_AC.add_variable(
             NodeId('CTS.DAC.AC.patches', 2),
             "patches",
-            np.zeros([432,], dtype=np.int32).tolist()
+            np.zeros([432, ], dtype=np.int32).tolist()
         )
     )
     setattr(
@@ -158,7 +158,7 @@ def create_opcua_variables(_cts, _parent_node):
         _cts.DAC_DC.add_variable(
             NodeId('CTS.DAC.DC.boards', 2),
             "boards",
-            np.zeros([27,], dtype=np.int32).tolist()
+            np.zeros([27, ], dtype=np.int32).tolist()
         )
     )
     setattr(
@@ -167,7 +167,7 @@ def create_opcua_variables(_cts, _parent_node):
         _cts.DACoffset_AC.add_variable(
             NodeId('CTS.DACoffset.AC.patches', 2),
             "patches",
-            np.zeros([432,], dtype=np.int32).tolist()
+            np.zeros([432, ], dtype=np.int32).tolist()
         )
     )
     setattr(
@@ -176,7 +176,7 @@ def create_opcua_variables(_cts, _parent_node):
         _cts.DACoffset_DC.add_variable(
             NodeId('CTS.DACoffset.DC.boards', 2),
             "boards",
-            np.zeros([27,], dtype=np.int32).tolist()
+            np.zeros([27, ], dtype=np.int32).tolist()
         )
     )
     setattr(
@@ -185,7 +185,7 @@ def create_opcua_variables(_cts, _parent_node):
         _cts.status_AC.add_variable(
             NodeId('CTS.status.AC.pixels', 2),
             "status",
-            np.zeros([1296,], dtype=bool).tolist()
+            np.zeros([1296, ], dtype=bool).tolist()
         )
     )
     setattr(
@@ -194,26 +194,28 @@ def create_opcua_variables(_cts, _parent_node):
         _cts.status_DC.add_variable(
             NodeId('CTS.status.DC.pixels', 2),
             "status",
-            np.zeros([1296,], dtype=bool).tolist()
+            np.zeros([1296, ], dtype=bool).tolist()
         )
     )
 
 
 def create_opcua_mapping(_cts):
     # mapping
-    setattr(_cts,
-            'mapping', _cts.main_folder.add_folder(NodeId('CTS.mapping', 2),
-                                                    "mapping"))
-    pixels_to_patches = np.zeros([1296,], dtype=np.int32)
+    setattr(
+        _cts,
+        'mapping',
+        _cts.main_folder.add_folder(NodeId('CTS.mapping', 2), "mapping")
+    )
+    pixels_to_patches = np.zeros([1296, ], dtype=np.int32)
     # 423 patches * 3 LEDs each
     patches_to_pixels = np.zeros([432, 3], dtype=np.int32)
-    pixels_to_halfBoards = np.zeros([1296,], dtype=np.int32)
+    pixels_to_halfBoards = np.zeros([1296, ], dtype=np.int32)
     # 54 half boards * 24 LEDs each
     halfBoards_to_pixels = np.zeros([54, 24], dtype=np.int32)
-    pixels_to_boards = np.zeros([1296,], dtype=np.int32)
+    pixels_to_boards = np.zeros([1296, ], dtype=np.int32)
     # 27 boards * 48 LEDs each
     boards_to_pixels = np.zeros([27, 48], dtype=np.int32)
-    patches_to_halfBoards = np.zeros([432,], dtype=np.int32)
+    patches_to_halfBoards = np.zeros([432, ], dtype=np.int32)
     # 54 half boards * 8 patches each
     halfBoards_to_patches = np.zeros([54, 8], dtype=np.int32)
     for led in _cts.LEDs:
@@ -329,9 +331,9 @@ def create_opcua_functions(_cts):
     patches_offset = arg_string("Patches's AC DAC offsets (JSON)",
                                 "432 x [DAC offset: int]")
     boards_level = arg_string("Boards's DC DAC levels (JSON)",
-                                  "27 x [DAC level: int]")
+                              "27 x [DAC level: int]")
     boards_offset = arg_string("Boards's DC DAC offsets (JSON)",
-                                   "27 x [DAC offset: int]")
+                               "27 x [DAC offset: int]")
     pixels_level = arg_string("Pixels's DAC levels (JSON)",
                               "1296 x [DAC level: int]")
     pixels_offset = arg_string("Pixels's DAC offsets (JSON)",
@@ -789,13 +791,13 @@ def set_all_DAC(parent, level_dc, level_ac):
     # CAUTION: channel 0 of AC set as well
     com.setDACLevel(ctsserver.cts.bus, level_dc, channel=0, module=None)
     ctsserver.cts.boards_DC_DAC.set_value(
-        (level_dc * np.ones([27,], dtype=int)).tolist()
+        (level_dc * np.ones([27, ], dtype=int)).tolist()
     )
     # Setting all modules, channel 8 to level_ac
     # channel 8 (meaning all channels) only valid fo ac, so only ac get set.
     com.setDACLevel(ctsserver.cts.bus, level_ac, channel=8, module=None)
     ctsserver.cts.patches_AC_DAC.set_value(
-        (level_ac * np.ones([432,], dtype=int)).tolist()
+        (level_ac * np.ones([432, ], dtype=int)).tolist()
     )
     return 'done setting DC and AC levels (boadcast)'
 
@@ -808,13 +810,13 @@ def set_all_offset(parent, offset_dc, offset_ac):
     # CAUTION: channel 0 of AC set as well
     com.setDACOffset(ctsserver.cts.bus, offset_dc, channel=0, module=None)
     ctsserver.cts.boards_DC_offset.set_value(
-        (offset_dc * np.ones([27,], dtype=int)).tolist()
+        (offset_dc * np.ones([27, ], dtype=int)).tolist()
     )
     # Setting all modules, channel 8 to offset_ac
     # channel 8 (meaning all channels) only valid fo ac, so only ac get set.
     com.setDACOffset(ctsserver.cts.bus, offset_ac, channel=8, module=None)
     ctsserver.cts.patches_AC_offset.set_value(
-        (offset_ac * np.ones([432,], dtype=int)).tolist()
+        (offset_ac * np.ones([432, ], dtype=int)).tolist()
     )
     return 'done setting DC and AC offsets (boadcast)'
 
@@ -875,7 +877,7 @@ def set_pixels_ac_DAC(parent, pixels_level):
     method_halfBoard = ctsserver.cts.set_halfBoard_AC_DAC
     for halfBoard in range(n_halfBoard):
         patches = halfBoards_to_patches[halfBoard]
-        halfBoard_patches_levels = np.zeros([len(patches),], dtype=float)
+        halfBoard_patches_levels = np.zeros([len(patches), ], dtype=float)
         for i, patch in enumerate(patches):
             pixels = patches_to_pixels[patch]
             assert len(pixels) == 3
@@ -927,14 +929,14 @@ def set_pixels_ac_offset(parent, pixels_offset):
     method_halfBoard = ctsserver.cts.set_halfBoard_AC_offset
     for halfBoard in range(n_halfBoard):
         patches = halfBoards_to_patches[halfBoard]
-        halfBoard_patches_offsets = np.zeros([len(patches),], dtype=float)
+        halfBoard_patches_offsets = np.zeros([len(patches), ], dtype=float)
         for i, patch in enumerate(patches):
             pixels = patches_to_pixels[patch]
             assert len(pixels) == 3
             for pixel in pixels:
                 halfBoard_patches_offsets[i] += pixels_offset[pixel] / 3
-        halfBoard_patches_offsets = np.array(np.round(halfBoard_patches_offsets),
-                                            dtype=int)
+        halfBoard_patches_offsets = np.array(np.round(
+            halfBoard_patches_offsets), dtype=int)
         if np.all(halfBoard_patches_offsets == halfBoard_patches_offsets[0]):
             base.call_method(method_halfBoard, halfBoard,
                              halfBoard_patches_offsets[0])
