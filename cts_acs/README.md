@@ -33,6 +33,11 @@ copy the line below into a new entry in the file $ACS_CDB/MACI/Components/Compon
 <_ Name="CTSArrayControlSystem"  Code="cta.ctsarraycontrolsystemsst.CTSArrayControlSystemImpl.CTSArrayControlSystemComponentHelper" Type="IDL:cta/ctsarraycontrolsystemsst/CTSArrayControlSystem:1.0" Container="ctsContainer" ImplLang="java"/>
 ```
 
+## update SST1M master
+ACS functions are available through the master once added to the subsystems.
+To update the CTS subsystem copy the cts_acs/MasterSST1M/cts.py file to the subsystems folder
+(/home/ctauser/software/control/master/MasterSST1M/src/sstmaster/subsystems on the pdp server).
+
 ## Use the container
 * Start `acscommandcenter`
 * Ensure `ctsContainer` is in the container list (add if it is not).
