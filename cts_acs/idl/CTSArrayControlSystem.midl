@@ -44,6 +44,7 @@ module ctsarraycontrolsystemsst {
     long set_pixels_DC_DAC(in string inPixelsLevel);
     long set_pixels_AC_offset(in string inPixelsOffset);
     long set_pixels_DC_offset(in string inPixelsOffset);
+    long set_all_status(in long inStatus)
     /**
     * CTS variables
     **/

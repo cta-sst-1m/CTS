@@ -296,6 +296,12 @@ public class CTSArrayControlSystemImpl extends CharacteristicComponentImpl imple
 		    "Methods_CTS_DACoffset", "set_all", new Object[] {inOffsetDC, inOffsetAC}
 		);
 	}
+	@Override
+    public int set_all_status(int inStatus) {
+		return execUAMethod(
+		    "Methods_CTS_status", "set_all", new Object[] {inStatus}
+		);
+	}
     // Functions with arrays
     @Override
     public int set_patches_AC_DAC(String inPatchesLevel) {

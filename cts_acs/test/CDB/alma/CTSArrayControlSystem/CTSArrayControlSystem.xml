@@ -33,6 +33,7 @@
     Methods_CTS_DACoffset_var="ns=2;s=CTS.DACoffset"
     Methods_CTS_DACoffset_AC_var="ns=2;s=CTS.DACoffset.AC"
     Methods_CTS_DACoffset_DC_var="ns=2;s=CTS.DACoffset.DC"
+    Methods_CTS_status_var="ns=2;s=CTS.status"
     Methods_CTS_status_AC_var="ns=2;s=CTS.status.AC"
     Methods_CTS_status_DC_var="ns=2;s=CTS.status.DC"
 >

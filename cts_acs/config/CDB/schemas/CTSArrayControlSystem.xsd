@@ -58,6 +58,7 @@
     <xs:attribute name="Methods_CTS_DACoffset_var" type="xs:string" use="optional"/>
     <xs:attribute name="Methods_CTS_DACoffset_AC_var" type="xs:string" use="optional"/>
     <xs:attribute name="Methods_CTS_DACoffset_DC_var" type="xs:string" use="optional"/>
+    <xs:attribute name="Methods_CTS_status_var" type="xs:string" use="optional"/>
     <xs:attribute name="Methods_CTS_status_AC_var" type="xs:string" use="optional"/>
     <xs:attribute name="Methods_CTS_status_DC_var" type="xs:string" use="optional"/>
   </xs:complexType>

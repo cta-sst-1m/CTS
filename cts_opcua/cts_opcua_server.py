@@ -322,6 +322,9 @@ def create_opcua_functions(_cts):
         "Pixels's status of an 1/2 board (int)",
         "0x000000 (24 leds off) to 0xffffff (24 leds on)"
     )
+    pixel_status = arg_bool(
+        "Pixel status for all DC and AC LEDs", "0: OFF, 1: ON"
+    )
     pixels_ac_status = arg_string("pixels's AC statuses (JSON)",
                                   "1296 x [Status: True(1) or False(0)]")
     pixels_dc_status = arg_string("pixels's DC statuses (JSON)",
@@ -556,6 +559,28 @@ def create_opcua_functions(_cts):
             NodeId('CTS.DACoffset.DC.set_pixels', 2),
             'set_pixels',
             set_pixels_dc_offset,
+            [pixels_offset],
+            [outarg]
+        )
+    )
+    setattr(
+        _cts,
+        'set_pixels_dc_offset',
+        _cts.DACoffset_DC.add_method(
+            NodeId('CTS.DACoffset.DC.set_pixels', 2),
+            'set_pixels',
+            set_pixels_dc_offset,
+            [pixels_offset],
+            [outarg]
+        )
+    )
+    setattr(
+        _cts,
+        'set_all_status',
+        _cts.DACoffset_DC.add_method(
+            NodeId('CTS.status.set_all_status', 2),
+            'set_all',
+            set_all_status,
             [pixels_offset],
             [outarg]
         )
@@ -965,6 +990,21 @@ def set_pixels_dc_offset(parent, pixels_offset):
     boards_offsets = np.array(np.round(boards_offsets), dtype=int).tolist()
     base.call_method(method, json.dumps(boards_offsets))
     return 'done setting individual DC DAC offset for all pixels'
+
+
+@uamethod
+def set_all_status(parent, status):
+    status = bool(status)
+    if status:
+        led_mask = 0xffffff
+    else:
+        led_mask = 0x000000
+    # Setting all modules
+    com.setLED(ctsserver.cts.bus, led_mask=led_mask, globalCmd=True)
+    statusses = (status * np.ones([1296, ], dtype=int)).tolist()
+    ctsserver.cts.pixels_DC_status.set_value(statusses)
+    ctsserver.cts.pixels_AC_status.set_value(statusses)
+    return 'done setting status to {} for DC and AC LEDs'.format(status)
 
 
 if __name__ == "__main__":
