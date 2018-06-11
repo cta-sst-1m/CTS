@@ -5,8 +5,8 @@ __pycache__/
 .idea/
 .project
 cts_acs/object/
-idl/CTSArrayControlSystem.idl
-lib/*
+cts_acs/idl/CTSArrayControlSystem.idl
+cts_acs/lib/*
 *.pyc
 *.log
 *.a
