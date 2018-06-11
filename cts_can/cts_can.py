@@ -451,25 +451,7 @@ def setDACLevel(
     if not module:
         # Set a single value everywhere
         if tmp_cmd == 8:
-            # First broadcast on channel 0 such that the module for DC gets set
-            res = command(
-                bus,
-                range(1, 109),
-                'SetDACLevel',
-                [0x0, level_MSB, level_LSB],
-                broadcast=True,
-                broadcastAnswer=True,
-                waitanswer=waitanswer,
-                verbose=verbose
-            )
-            if waitanswer:
-                for r in res:
-                    mod = toMod(r.arbitration_id)
-                    ch, board = mod2chboard(mod)
-                    if ch != 3 and r.data[1] != 0:
-                        print('ERROR setting DAC on channel', ch,
-                              'on board', board, 'Hw addr', ch)
-            # Then broadcast on channel 8 such that all the module for AC
+            # broadcasting on channel 8 means all the module for AC
             # gets set
             res = command(
                 bus, range(1, 109),
@@ -567,25 +549,7 @@ def setDACOffset(
     if not module:
         # Set a single value everywhere
         if tmp_cmd == 8:
-            # First broadcast on channel 0 such that the module for DC gets set
-            res = command(
-                bus,
-                range(1, 109),
-                'SetDACOffset',
-                [0x0, offset_MSB, offset_LSB],
-                broadcast=True,
-                broadcastAnswer=True,
-                waitanswer=waitanswer,
-                verbose=verbose
-            )
-            if waitanswer:
-                for r in res:
-                    mod = toMod(r.arbitration_id)
-                    ch, board = mod2chboard(mod)
-                    if ch != 3 and r.data[1] != 0:
-                        print('ERROR setting DAC on channel', ch,
-                              'on board', board, 'Hw addr', ch)
-            # Then broadcast on channel 8 such that all the module for AC
+            # Broadcast on channel 8 means all the module for AC
             # gets set
             res = command(
                 bus, range(1, 109),

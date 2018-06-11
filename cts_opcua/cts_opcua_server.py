@@ -674,7 +674,7 @@ def set_leds_AC_in_halfBoard_status(parent, halfBoard,
     led = ctsserver.cts.pixel_to_led['AC'][pixels[0]]
     m = ctsserver.cts.LEDs[led].can_status_module
     com.setLED(ctsserver.cts.bus,
-               module=m, led_mask=halfBoard_status, globalCmd=0)
+               module=m, led_mask=halfBoard_status, globalCmd=1)
     halfBoards_to_pixels = ctsserver.cts.halfBoards_to_pixels.get_value()
     pixels = halfBoards_to_pixels[halfBoard]
     pixels_AC_status = ctsserver.cts.pixels_AC_status.get_value()
