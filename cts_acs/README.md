@@ -76,7 +76,13 @@ The CTS can now be controled by ACS script or using an ACS client (`objexp` for 
     
     * inOffsetDC: DC DAC offset to set to all LEDs (int, between 0 and 1023)
     * inOffsetAC: AC DAC offset to set to all LEDs (int, between 0 and 1023)
-    
+
+* set_all_status(inStatus): function to switch on (when inStatus=1) or off (inStatus=0) all LEDs. Fast as it uses broadcast.
+
+    parameters:
+
+    * inStatus: status set to all LEDs (bool)
+
 * set_board_DC_DAC(inBoard, inLevel): function to set the DC DAC level for the indicated LED board.
 
     parameters:

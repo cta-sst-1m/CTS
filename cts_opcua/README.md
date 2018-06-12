@@ -117,6 +117,15 @@ As the [DAC](#dac-folder) folder, but showing the DAC offset levels instead of D
     Node containing the LED half-board indexes for each of the 432 patches.
    
 ## `status` folder
+ * `set_all_status(status)` :
+
+    addr="ns=2, s=CTS.status.AC.set_leds_in_halfBoard"
+
+    Function to set the status of all LEDs. Fast as it uses broadcast.
+
+    Parameters:
+
+    * status: type=boolean, if True all LEDs are switched on, if False all LEDs are switched off.
 ### `AC` folder
  * `status`: addr="ns=2, s=CTS.status.AC.status", type="list of 1296 bools", Node containing status (True: ON, False: OFF) 
     of AC LEDs for each camera pixel.
