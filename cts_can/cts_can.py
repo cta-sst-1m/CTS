@@ -422,7 +422,7 @@ def setDACLevel(
         module=None,
         channel=None,
         verbose=False,
-        waitanswer=True):
+        waitanswer=False):
     '''
     Change the DAC led level
 
@@ -520,7 +520,7 @@ def setDACOffset(
         module=None,
         channel=None,
         verbose=False,
-        waitanswer=True):
+        waitanswer=False):
     '''
     Change the DAC led offset
 

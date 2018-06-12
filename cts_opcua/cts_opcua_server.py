@@ -565,17 +565,6 @@ def create_opcua_functions(_cts):
     )
     setattr(
         _cts,
-        'set_pixels_dc_offset',
-        _cts.DACoffset_DC.add_method(
-            NodeId('CTS.DACoffset.DC.set_pixels', 2),
-            'set_pixels',
-            set_pixels_dc_offset,
-            [pixels_offset],
-            [outarg]
-        )
-    )
-    setattr(
-        _cts,
         'set_all_status',
         _cts.DACoffset_DC.add_method(
             NodeId('CTS.status.set_all_status', 2),
@@ -619,7 +608,7 @@ def set_patch_AC_DAC(parent, led_patch, level):
     # update and set
     levels[led_patch] = level
     ctsserver.cts.patches_AC_DAC.set_value(levels)
-    com.setDACLevel(ctsserver.cts.bus, level, module=m, channel=c)
+    com.setDACLevel(ctsserver.cts.bus, level, module=m, channel=c, waitanswer=False)
     return 'done setting lvl=' + str(level) + ' to patch ' + str(led_patch)
 
 
@@ -634,12 +623,12 @@ def set_patch_AC_offset(parent, led_patch, offset):
     # update and set
     offsets[led_patch] = offset
     ctsserver.cts.patches_AC_offset.set_value(offsets)
-    com.setDACOffset(ctsserver.cts.bus, offset, module=m, channel=c)
+    com.setDACOffset(ctsserver.cts.bus, offset, module=m, channel=c, waitanswer=False)
     return 'done setting offset=' + str(offset) + ' to patch ' + str(led_patch)
 
 
 @uamethod
-def set_board_DC_DAC(parent, board, level):
+def set_board_DC_DAC(parent, board, level, waitanswer=False):
     level = int(level)
     m = ctsserver.cts.LED_boards[board].LEDs[0].can_dac_module
     c = ctsserver.cts.LED_boards[board].LEDs[0].can_dac_channel
@@ -651,7 +640,7 @@ def set_board_DC_DAC(parent, board, level):
 
 
 @uamethod
-def set_board_DC_offset(parent, board, offset):
+def set_board_DC_offset(parent, board, offset, waitanswer=False):
     offset = int(offset)
     m = ctsserver.cts.LED_boards[board].LEDs[0].can_dac_module
     c = ctsserver.cts.LED_boards[board].LEDs[0].can_dac_channel
@@ -663,7 +652,7 @@ def set_board_DC_offset(parent, board, offset):
 
 
 @uamethod
-def set_halfBoard_AC_DAC(parent, halfBoard, level):
+def set_halfBoard_AC_DAC(parent, halfBoard, level, waitanswer=False):
     level = int(level)
     halfBoards_to_patches = ctsserver.cts.halfBoards_to_patches.get_value()
     patches = halfBoards_to_patches[halfBoard]
