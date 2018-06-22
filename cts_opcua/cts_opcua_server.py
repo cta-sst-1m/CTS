@@ -566,7 +566,7 @@ def create_opcua_functions(_cts):
     setattr(
         _cts,
         'set_all_status',
-        _cts.DACoffset_DC.add_method(
+        _cts.status.add_method(
             NodeId('CTS.status.set_all_status', 2),
             'set_all',
             set_all_status,
