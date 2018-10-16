@@ -570,7 +570,7 @@ def create_opcua_functions(_cts):
             NodeId('CTS.status.set_all_status', 2),
             'set_all',
             set_all_status,
-            [pixels_offset],
+            [pixel_status],
             [outarg]
         )
     )
