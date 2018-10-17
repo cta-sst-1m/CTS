@@ -838,6 +838,7 @@ def set_all_offset(parent, offset_dc, offset_ac):
 @uamethod
 def set_pixels_dc_status(parent, pixels_dc_status):
     pixels_dc_status = json.loads(pixels_dc_status)
+    current_pixels_dc_status = ctsserver.cts.pixels_DC_status.get_value()
     if len(pixels_dc_status) != 1296:
         return 'ERROR: halfBoards_status must be of shape (1296,)'
     halfBoards_to_pixels = ctsserver.cts.halfBoards_to_pixels.get_value()
@@ -847,18 +848,23 @@ def set_pixels_dc_status(parent, pixels_dc_status):
     for halfBoard in range(n_halfBoard):
         pixels = halfBoards_to_pixels[halfBoard]
         halfBoard_status = 0
+        halfBoard_current_status = 0
         for pixel in pixels:
             status = pixels_dc_status[pixel]
+            current_status = current_pixels_dc_status[pixel]
             led = ctsserver.cts.pixel_to_led['DC'][pixel]
             led_in_halfBoard = ctsserver.cts.LEDs[led].can_status_channel
             halfBoard_status |= (status << led_in_halfBoard)
-        base.call_method(method, halfBoard, halfBoard_status)
+            halfBoard_current_status |= (current_status << led_in_halfBoard)
+        if halfBoard_status != halfBoard_current_status:        
+            base.call_method(method, halfBoard, halfBoard_status)
     return 'done setting individual DC status for all half-boards'
 
 
 @uamethod
 def set_pixels_ac_status(parent, pixels_ac_status):
     pixels_ac_status = json.loads(pixels_ac_status)
+    current_pixels_ac_status = ctsserver.cts.pixels_AC_status.get_value()
     if len(pixels_ac_status) != 1296:
         return 'ERROR: status of AC pixels must be of shape (1296,)'
     halfBoards_to_pixels = ctsserver.cts.halfBoards_to_pixels.get_value()
@@ -868,12 +874,16 @@ def set_pixels_ac_status(parent, pixels_ac_status):
     for halfBoard in range(n_halfBoard):
         pixels = halfBoards_to_pixels[halfBoard]
         halfBoard_status = 0
+        halfBoard_current_status = 0
         for pixel in pixels:
             status = pixels_ac_status[pixel]
+            current_status = current_pixels_ac_status[pixel]
             led = ctsserver.cts.pixel_to_led['AC'][pixel]
             led_in_halfBoard = ctsserver.cts.LEDs[led].can_status_channel
             halfBoard_status |= (status << led_in_halfBoard)
-        base.call_method(method, halfBoard, halfBoard_status)
+            halfBoard_current_status |= (current_status << led_in_halfBoard)
+        if halfBoard_status != halfBoard_current_status:        
+            base.call_method(method, halfBoard, halfBoard_status)
     return 'done setting individual AC status for all pixels'
 
 
